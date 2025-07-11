@@ -46,11 +46,13 @@ const Courses = () => {
   const [selectedCourse, setSelectedCourse] = useState<any>(null);
   const [bookingDialogOpen, setBookingDialogOpen] = useState(false);
   const [courses, setCourses] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true); // ⬅️ ADD THIS
+
 
   /* ───────────────────────────────────────────────────
      Authentication and Profile Completion Guards
   ──────────────────────────────────────────────────── */
-  
+
   // Check if user is not logged in
   if (!currentUser) {
     return (
@@ -63,7 +65,7 @@ const Courses = () => {
             </div>
             <h3 className="text-2xl font-semibold text-gray-900 mb-3">Please Login</h3>
             <p className="text-gray-600">You need to be logged in to view and book courses.</p>
-            <Button 
+            <Button
               onClick={() => navigate("/login")}
               className="mt-4 bg-gradient-to-r from-blue-600 to-purple-600"
             >
@@ -87,7 +89,7 @@ const Courses = () => {
             </div>
             <h3 className="text-2xl font-semibold text-gray-900 mb-3">Complete Your Profile</h3>
             <p className="text-gray-600 mb-4">Please complete your student profile to browse and book courses.</p>
-            <Button 
+            <Button
               onClick={() => navigate("/student-profile")}
               className="bg-gradient-to-r from-blue-600 to-purple-600"
             >
@@ -111,11 +113,13 @@ const Courses = () => {
         else console.error("Failed to fetch courses:", data.message);
       } catch (error) {
         console.error("Error fetching courses:", error);
+      } finally {
+        setLoading(false); // ⬅️ ADD THIS LINE TO END LOADING STATE
       }
     };
-
     fetchCourses();
   }, []);
+
 
   /* ───────────────────────────────────────────────────
      Get unique subjects for filter buttons
@@ -204,7 +208,13 @@ const Courses = () => {
         </div>
 
         {/* Enhanced Empty‑state */}
-        {courses.length === 0 ? (
+
+        {loading ? (
+          <div className="text-center py-16">
+            <div className="animate-spin h-10 w-10 rounded-full border-4 border-blue-400 border-t-transparent mx-auto mb-4" />
+            <p className="text-gray-600">Loading courses...</p>
+          </div>
+        ) : courses.length === 0 ? (
           <div className="text-center py-16">
             <div className="w-24 h-24 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
               <BookOpen className="h-12 w-12 text-blue-600" />
@@ -362,7 +372,7 @@ const Courses = () => {
                       >
                         {(currentUser.role === 'student' || currentUser.role === 'parent') ? 'Book Session' : 'Students/Parents Only'}
                       </Button>
-                      
+
                       <Link to={`/tutor/${course.tutorId._id}`}>
                         <Button
                           variant="outline"
@@ -385,7 +395,7 @@ const Courses = () => {
                   No courses found
                 </h3>
                 <p className="text-gray-600">
-                  {selectedSubject !== "All" 
+                  {selectedSubject !== "All"
                     ? `No courses found for ${selectedSubject}. Try selecting a different subject or adjusting your search.`
                     : "Try adjusting your search criteria to find the perfect course."
                   }
