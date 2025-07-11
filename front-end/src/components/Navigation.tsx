@@ -52,11 +52,17 @@ const Navigation = () => {
           <div className="hidden md:flex items-center space-x-8">
             {(!currentUser || currentUser.role === 'student') && (
               <>
+                <Link to="/" className="text-white/90 hover:text-white transition-colors font-medium">
+                  Home
+                </Link>
                 <Link to="/courses" className="text-white/90 hover:text-white transition-colors font-medium">
                   Courses
                 </Link>
                 <Link to="/tutors" className="text-white/90 hover:text-white transition-colors font-medium">
                   Tutors
+                </Link>
+                <Link to="/resources" className="text-white/90 hover:text-white transition-colors font-medium">
+                  Resourses
                 </Link>
               </>
             )}

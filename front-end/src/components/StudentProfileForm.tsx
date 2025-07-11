@@ -11,13 +11,32 @@ import { useToast } from "@/hooks/use-toast";
 import { useApp } from "@/contexts/AppContext";
 import { useNavigate } from "react-router-dom";
 
+const uploadStudentImage = async (file: File, studentId: string): Promise<string | null> => {
+  try {
+    const formData = new FormData();
+    formData.append("photo", file);
+
+    const res = await fetch(`http://localhost:5000/api/uploads/student-photo/${studentId}`, {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!res.ok) throw new Error("Upload failed");
+    const data = await res.json();
+    return data.photoUrl;
+  } catch (err) {
+    console.error("Student photo upload error:", err);
+    return null;
+  }
+};
+
 const StudentProfileForm = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { currentUser, updateUser, getUserNotifications, markNotificationAsRead } = useApp();
   const [isEditing, setIsEditing] = useState(!currentUser?.profileCompleted);
   const [activeTab, setActiveTab] = useState(currentUser?.profileCompleted ? "dashboard" : "profile");
-  
+
   const [profileData, setProfileData] = useState({
     name: currentUser?.name || "",
     email: currentUser?.email || "",
@@ -40,7 +59,7 @@ const StudentProfileForm = () => {
     }));
   };
 
-  
+
   const handleSave = async () => {
     // Add validation for currentUser and currentUser._id
     if (!currentUser) {
@@ -96,12 +115,12 @@ const StudentProfileForm = () => {
     try {
       console.log("Making request with user _id:", currentUser._id);
       console.log("Request payload:", payload);
-      
+
       const res = await fetch(
         `/api/auth/student/${currentUser._id}/profile`,
         {
           method: "PUT",
-          headers: { 
+          headers: {
             "Content-Type": "application/json",
           },
           credentials: "include",
@@ -166,9 +185,9 @@ const StudentProfileForm = () => {
         message: err.message,
         stack: err.stack
       });
-      
+
       let errorMessage = "Failed to update profile";
-      
+
       // Handle different types of errors
       if (err.name === 'TypeError' && err.message.includes('fetch')) {
         errorMessage = "Network error. Please check your connection and try again.";
@@ -213,7 +232,7 @@ const StudentProfileForm = () => {
     const date = new Date(dateString);
     const now = new Date();
     const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
-    
+
     if (diffInHours < 1) return 'Just now';
     if (diffInHours < 24) return `${diffInHours}h ago`;
     return date.toLocaleDateString();
@@ -269,11 +288,24 @@ const StudentProfileForm = () => {
                       type="file"
                       accept="image/*"
                       className="hidden"
-                      onChange={(e) => {
+                      onChange={async (e) => {
                         const file = e.target.files?.[0];
-                        if (file) {
-                          const url = URL.createObjectURL(file);
-                          setProfileData(prev => ({ ...prev, photo: url }));
+                        if (!file || !currentUser?._id) return;
+
+                        // 1️⃣ Show local preview immediately
+                        const previewUrl = URL.createObjectURL(file);
+                        setProfileData((prev) => ({ ...prev, photo: previewUrl }));
+
+                        // 2️⃣ Upload to backend (Cloudinary)
+                        const permanentUrl = await uploadStudentImage(file, currentUser._id);
+                        if (permanentUrl) {
+                          setProfileData((prev) => ({ ...prev, photo: permanentUrl }));
+                        } else {
+                          toast({
+                            title: "Upload failed",
+                            description: "Could not save photo. Please try again.",
+                            variant: "destructive",
+                          });
                         }
                       }}
                     />
@@ -428,22 +460,22 @@ const StudentProfileForm = () => {
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-3 max-w-md bg-white/80 backdrop-blur-sm border border-blue-200">
-              <TabsTrigger 
-                value="dashboard" 
+              <TabsTrigger
+                value="dashboard"
                 className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white"
               >
                 <User className="h-4 w-4" />
                 Dashboard
               </TabsTrigger>
-              <TabsTrigger 
-                value="profile" 
+              <TabsTrigger
+                value="profile"
                 className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white"
               >
                 <User className="h-4 w-4" />
                 Profile
               </TabsTrigger>
-              <TabsTrigger 
-                value="notifications" 
+              <TabsTrigger
+                value="notifications"
                 className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white"
               >
                 <Bell className="h-4 w-4" />
@@ -511,11 +543,24 @@ const StudentProfileForm = () => {
                         type="file"
                         accept="image/*"
                         className="hidden"
-                        onChange={(e) => {
+                        onChange={async (e) => {
                           const file = e.target.files?.[0];
-                          if (file) {
-                            const url = URL.createObjectURL(file);
-                            setProfileData(prev => ({ ...prev, profilePhoto: url }));
+                          if (!file || !currentUser?._id || !isEditing) return; // ✅ only if editing
+
+                          // 1️⃣ Show local preview immediately
+                          const previewUrl = URL.createObjectURL(file);
+                          setProfileData((prev) => ({ ...prev, photo: previewUrl }));
+
+                          // 2️⃣ Upload to backend (Cloudinary)
+                          const permanentUrl = await uploadStudentImage(file, currentUser._id);
+                          if (permanentUrl) {
+                            setProfileData((prev) => ({ ...prev, photo: permanentUrl }));
+                          } else {
+                            toast({
+                              title: "Upload failed",
+                              description: "Could not save photo. Please try again.",
+                              variant: "destructive",
+                            });
                           }
                         }}
                       />
@@ -606,21 +651,21 @@ const StudentProfileForm = () => {
                     <CardContent className="space-y-4">
                       <div className="grid md:grid-cols-2 gap-4">
                         <div>
-                          <Label htmlFor="yearOfStudy">Year of Study *</Label>
+                          <Label htmlFor="yearOfStudent">Year of Study *</Label>
                           <Input
-                            id="yearOfStudy"
+                            id="yearOfStudent"
                             value={profileData.yearOfStudent}
-                            onChange={(e) => handleInputChange("yearOfStudy", e.target.value)}
+                            onChange={(e) => handleInputChange("yearOfStudent", e.target.value)}
                             disabled={!isEditing}
                             placeholder="e.g., 2nd Year, Final Year"
                           />
                         </div>
                         <div>
-                          <Label htmlFor="departmentName">Department Name *</Label>
+                          <Label htmlFor="department">Department Name *</Label>
                           <Input
-                            id="departmentName"
+                            id="department"
                             value={profileData.department}
-                            onChange={(e) => handleInputChange("departmentName", e.target.value)}
+                            onChange={(e) => handleInputChange("department", e.target.value)}
                             disabled={!isEditing}
                             placeholder="e.g., Computer Science"
                           />
@@ -647,11 +692,11 @@ const StudentProfileForm = () => {
                     <CardContent className="space-y-4">
                       <div className="grid md:grid-cols-2 gap-4">
                         <div>
-                          <Label htmlFor="place">Place/City *</Label>
+                          <Label htmlFor="city">Place/City *</Label>
                           <Input
-                            id="place"
+                            id="city"
                             value={profileData.city}
-                            onChange={(e) => handleInputChange("place", e.target.value)}
+                            onChange={(e) => handleInputChange("city", e.target.value)}
                             disabled={!isEditing}
                             placeholder="Enter your city"
                           />
@@ -700,11 +745,10 @@ const StudentProfileForm = () => {
                     ) : (
                       <div className="space-y-4">
                         {notifications.map((notification) => (
-                          <Card 
+                          <Card
                             key={notification.id}
-                            className={`cursor-pointer hover:bg-gray-50 transition-colors ${
-                              !notification.read ? 'border-blue-200 bg-blue-50' : 'border-gray-200'
-                            }`}
+                            className={`cursor-pointer hover:bg-gray-50 transition-colors ${!notification.read ? 'border-blue-200 bg-blue-50' : 'border-gray-200'
+                              }`}
                             onClick={() => handleNotificationClick(notification.id)}
                           >
                             <CardContent className="p-4">

@@ -21,6 +21,5 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);               // Handles /api/auth/...
 app.use("/api/enrollments", enrollmentRoutes);  // Handles /api/enrollments/...
 app.use("/api/uploads", uploadRoutes);
-app.use("/uploads", express.static("uploads"));
 export default app;
 

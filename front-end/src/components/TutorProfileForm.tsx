@@ -6,12 +6,12 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { User, Mail, Phone, Book, Award, Calendar, Link as LinkIcon, Save, Upload, Plus, AlertCircle, RefreshCw, FileText, ExternalLink, Trash2 } from "lucide-react";
+import { User, Mail, Phone, Book, Award, Calendar, Link as LinkIcon, Save, Upload, Plus, AlertCircle, RefreshCw, FileText, ExternalLink, Trash2,Trophy } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useApp } from "@/contexts/AppContext";
 import { useNavigate } from "react-router-dom";
 import CertificateUpload from "@/components/CertificateUpload";
-
+import AchievementUpload from "@/components/AchievementUpload";
 // Error handling types
 interface ApiError {
   message: string;
@@ -20,23 +20,25 @@ interface ApiError {
   details?: unknown;
 }
 
-const uploadImage = async (file: File): Promise<string | null> => {      // ⭐️ ADDED
-  const form = new FormData();
-  form.append("photo", file);
+const uploadImageToBackend = async (file: File, tutorId: string): Promise<string | null> => {
+  try {
+    const formData = new FormData();
+    formData.append("photo", file);
 
-  const res = await fetch("http://localhost:8080/api/uploads/photo", {   // ⭐️ ADDED
-    method: "POST",
-    body: form,
-  });
+    const res = await fetch(`http://localhost:5000/api/uploads/tutor-photo/${tutorId}`, {
+      method: "POST",
+      body: formData,
+    });
 
-  if (!res.ok) {
-    console.error("Photo upload failed");                                // ⭐️ ADDED
+    if (!res.ok) throw new Error("Upload failed");
+
+    const data = await res.json();
+    return data.photoUrl;
+  } catch (err) {
+    console.error("Upload error:", err);
     return null;
   }
-  const { url } = await res.json();                                      // ⭐️ ADDED
-  return url as string;                                                  // ⭐️ ADDED
 };
-
 const TutorProfileForm = () => {
   const { currentUser, updateUser, addCourse } = useApp(); 
   const [addedCourses, setAddedCourses] = useState<unknown[]>([]);
@@ -69,7 +71,8 @@ const TutorProfileForm = () => {
     },
     linkedinLink: currentUser?.linkedinLink || "",
     photo: currentUser?.photo || null,
-    certificates: currentUser?.certificates || [] // ⭐️ ADDED from 2nd code
+    certificates: currentUser?.certificates || [], // ⭐ ADDED from 2nd code
+    achievements: currentUser?.achievements || []
   });
 
   // Course structure matching backend expectations - FIXED FIELD NAMES
@@ -117,7 +120,7 @@ const TutorProfileForm = () => {
     }));
   };
 
-  // ⭐️ ADDED Certificate handlers from 2nd code
+  // ⭐ ADDED Certificate handlers from 2nd code
   const handleCertificateUpload = (certificate: { name: string; url: string; uploadedAt: string }) => {
     setProfileData(prev => ({
       ...prev,
@@ -127,6 +130,17 @@ const TutorProfileForm = () => {
     toast({
       title: "Certificate Uploaded",
       description: "Your certificate has been uploaded successfully.",
+    });
+  };
+  const handleAchievementUpload = (achievement: { name: string; url: string; uploadedAt: string; type: string }) => {
+    setProfileData(prev => ({
+      ...prev,
+      achievements: [...prev.achievements, achievement]
+    }));
+    
+    toast({
+      title: "Achievement Uploaded",
+      description: "Your achievement certificate has been uploaded successfully.",
     });
   };
 
@@ -139,6 +153,18 @@ const TutorProfileForm = () => {
     toast({
       title: "Certificate Removed",
       description: "Certificate has been removed from your profile.",
+    });
+  };
+  
+  const handleRemoveAchievement = (index: number) => {
+    setProfileData(prev => ({
+      ...prev,
+      achievements: prev.achievements.filter((_, i) => i !== index)
+    }));
+    
+    toast({
+      title: "Achievement Removed",
+      description: "Achievement has been removed from your profile.",
     });
   };
 
@@ -175,7 +201,7 @@ const TutorProfileForm = () => {
         }
       case 'subjects':
         return !value || !(value as string[]).length ? 'At least one subject is required' : null;
-      case 'certificates': // ⭐️ ADDED certificate validation
+      case 'certificates': // ⭐ ADDED certificate validation
         return !value || !(value as unknown[]).length ? 'At least one certificate is required' : null;
       default:
         return null;
@@ -184,7 +210,7 @@ const TutorProfileForm = () => {
 
   const validateForm = (): boolean => {
     const errors: Record<string, string> = {};
-    const fieldsToValidate = ['educationalQualification', 'yearsOfExperience', 'linkedinLink', 'bio', 'subjects', 'certificates']; // ⭐️ ADDED certificates
+    const fieldsToValidate = ['educationalQualification', 'yearsOfExperience', 'linkedinLink', 'bio', 'subjects', 'certificates']; // ⭐ ADDED certificates
 
     fieldsToValidate.forEach(field => {
       const error = validateField(field, profileData[field as keyof typeof profileData]);
@@ -204,7 +230,7 @@ const TutorProfileForm = () => {
       profileData.yearsOfExperience.trim() !== "" &&
       profileData.linkedinLink.trim() !== "" &&
       profileData.subjects.length > 0 &&
-      profileData.certificates.length > 0 // ⭐️ ADDED certificate requirement
+      profileData.certificates.length > 0 // ⭐ ADDED certificate requirement
       // Note: photo is NOT required for completion
     );
   };
@@ -271,7 +297,7 @@ const TutorProfileForm = () => {
       return !value || value.toString().trim() === "";
     });
 
-    // ⭐️ UPDATED validation to include certificates
+    // ⭐ UPDATED validation to include certificates
     if (missingFields.length > 0 || profileData.subjects.length === 0 || profileData.certificates.length === 0) {
       toast({
         title: "Profile Incomplete",
@@ -298,7 +324,7 @@ const TutorProfileForm = () => {
           bio: profileData.bio,
           availability: profileData.availability,
           subjects: profileData.subjects,
-          certificates: profileData.certificates, // ⭐️ ADDED certificates to payload
+          certificates: profileData.certificates, // ⭐ ADDED certificates to payload
           photo: profileData.photo,
         }),
       });
@@ -364,7 +390,7 @@ const TutorProfileForm = () => {
     }
   };
   const YOUTUBE_REGEX =
-  /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)[\w\-]{11}$/;
+  /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)[\w-]{11}$/;
 
   // Fixed: Use only _id property and correct field names for course
   const handleAddCourse = async () => {
@@ -591,20 +617,20 @@ const TutorProfileForm = () => {
                 type="file"
                 accept="image/*"
                 className="hidden"
-                onChange={async (e) => {                                             // 🔄 MOD
+                onChange={async (e) => {
                   const file = e.target.files?.[0];
-                  if (!file) return;
+                  if (!file || !currentUser?._id) return;
 
-                  /* 1.local preview immediately */
+                  // 1. Local preview
                   const preview = URL.createObjectURL(file);
-                  handleInputChange("photo", preview);                               // 🔄 MOD
+                  handleInputChange("photo", preview);
 
-                  /* 2.upload to backend */
-                  const permanentUrl = await uploadImage(file);                      // ⭐️ ADDED
+                  // 2. Upload to Cloudinary via backend
+                  const permanentUrl = await uploadImageToBackend(file, currentUser._id);
                   if (permanentUrl) {
-                    handleInputChange("photo", permanentUrl);                        // ⭐️ ADDED
+                    handleInputChange("photo", permanentUrl);
                   } else {
-                    toast({                                                          // ⭐️ ADDED
+                    toast({
                       title: "Upload failed",
                       description: "Could not save photo. Please try again.",
                       variant: "destructive",
@@ -629,7 +655,7 @@ const TutorProfileForm = () => {
               <div className="flex items-center space-x-3">
                 <Award className="h-4 w-4 text-gray-400" />
                 <span className="text-sm">
-                  {profileData.yearsOfExperience ? `${profileData.yearsOfExperience} experience` : "Experience not added"}
+                  {profileData.yearsOfExperience ? `${profileData.yearsOfExperience} experience `: "Experience not added"}
                 </span>
               </div>
               <div className="flex items-center space-x-3">
@@ -687,7 +713,7 @@ const TutorProfileForm = () => {
             </CardContent>
           </Card>
 
-          {/* ⭐️ ADDED Certificates Section from 2nd code */}
+          {/* ⭐ ADDED Certificates Section from 2nd code */}
           <Card className="mt-6">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
@@ -756,7 +782,74 @@ const TutorProfileForm = () => {
               )}
             </CardContent>
           </Card>
+          <Card className="mt-6">
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <Trophy className="h-5 w-5" />
+                <span>Achievement Certificates</span>
+              </CardTitle>
+              <CardDescription>
+                Upload NPTEL courses and other achievement certificates
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {profileData.achievements.length > 0 && (
+                <div className="space-y-3">
+                  {profileData.achievements.map((achievement, index) => (
+                    <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <Trophy className="h-4 w-4 text-yellow-600" />
+                        <div>
+                          <p className="text-sm font-medium">{achievement.name}</p>
+                          <Badge variant="secondary" className="text-xs mt-1">
+                            {achievement.type}
+                          </Badge>
+                          <p className="text-xs text-gray-500 mt-1">
+                            Uploaded on {new Date(achievement.uploadedAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => window.open(achievement.url, '_blank')}
+                        >
+                          <ExternalLink className="h-3 w-3" />
+                        </Button>
+                        {isEditing && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleRemoveAchievement(index)}
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              
+              {isEditing && (
+                <AchievementUpload onUpload={handleAchievementUpload} />
+              )}
+              
+              {profileData.achievements.length === 0 && (
+                <div className="text-center py-6 text-gray-500">
+                  <Trophy className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                  <p className="text-sm">No achievement certificates uploaded yet</p>
+                  {!isEditing && (
+                    <p className="text-xs mt-1">Enable editing to upload achievements</p>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
+        
 
         {/* Main Profile Content */}
         <div className="lg:col-span-2 space-y-6">
@@ -938,7 +1031,7 @@ const TutorProfileForm = () => {
                       min={0}
                       value={newCourse.pricePerSession}
                       onChange={(e) => setNewCourse(prev => ({ ...prev, pricePerSession: Number(e.target.value), }))}
-                      placeholder="0 = Free, 50 = ₹50 / session"
+                      placeholder="0 = Free, 50 = ₹50 / session"
                     />
                   </div>
                 </div>

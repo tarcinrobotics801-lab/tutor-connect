@@ -12,6 +12,7 @@ import Courses from "./pages/Courses";
 import Tutors from "./pages/Tutors";
 import TutorProfile from "./pages/TutorProfile";
 import TutorProfileView from "./pages/TutorProfileView";
+import Resources from "./pages/Resources";
 import NotFound from "./pages/NotFound";
 import StudentProfile from "./pages/StudentProfile";
 import ParentProfile from "./pages/ParentProfile";
@@ -35,6 +36,7 @@ const App = () => (
             <Route path="/tutors" element={<Tutors />} />
             <Route path="/tutor/:tutorId" element={<TutorProfileView />} />
             <Route path="/tutor-profile" element={<TutorProfile />}/>
+            <Route path="/resources" element={<Resources />} />
             <Route path="/parent-profile" element={<ParentProfile />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

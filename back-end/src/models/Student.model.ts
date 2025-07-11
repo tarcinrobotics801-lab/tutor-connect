@@ -10,7 +10,7 @@ export interface IStudent extends Document {
 
   /* profile */
   profileCompleted: boolean;
-  yearOfStudent?: number;
+  yearOfStudent?: string;
   department?: string;
   collegeName?: string;
   city?: string;
@@ -36,7 +36,7 @@ const studentSchema = new Schema<IStudent>(
     role: { type: String, default: "student" },
 
     profileCompleted: { type: Boolean, default: false },
-    yearOfStudent: Number,
+    yearOfStudent: String,
     department: String,
     collegeName: String,
     city: String,

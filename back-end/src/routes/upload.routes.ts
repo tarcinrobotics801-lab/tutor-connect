@@ -1,29 +1,78 @@
-import { Router, RequestHandler } from "express";
-import multer from "multer";
-import path from "path";
+import express from 'express';
+import multer from 'multer';
+import { storage } from '../config/cloudinary';
+import { Tutor } from '../models/Tutor.model';
+import { Student } from '../models/Student.model'; // ✅ Import Student model
 
-const router = Router();
 
-/* ─ Upload config ─ */
-const storage = multer.diskStorage({
-  destination: "uploads",
-  filename: (_req, file, cb) =>
-    cb(null, Date.now() + path.extname(file.originalname)),
-});
-const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
+const router = express.Router();
+const upload = multer({ storage });
 
-/* ─ Handler: returns void ─ */
-const uploadPhoto: RequestHandler = (req, res) => {
-  if (!req.file) {
-    res.status(400).json({ message: "No file" });
-    return;                       // ← just end, do not return res object
+// POST /api/uploads/tutor-photo/:id
+router.post('/tutor-photo/:id', upload.single('photo'), async (req, res) => {
+  const tutorId = req.params.id;
+
+  if (!req.file || !('path' in req.file)) {
+    res.status(400).json({ message: 'No file uploaded' });
+    return;
   }
 
-  const url = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
-  res.status(201).json({ url });  // ← no “return” in front of this
-};
+  const photoUrl = (req.file as any).path;
 
-/* ─ Route ─ */
-router.post("/photo", upload.single("photo"), uploadPhoto);
+  try {
+    const updatedTutor = await Tutor.findByIdAndUpdate(
+      tutorId,
+      { photo: photoUrl },
+      { new: true }
+    );
+
+    if (!updatedTutor) {
+      res.status(404).json({ message: 'Tutor not found' });
+      return;
+    }
+
+    res.status(200).json({
+      message: 'Photo uploaded successfully',
+      photoUrl,
+      tutor: updatedTutor
+    });
+  } catch (err) {
+    console.error('Upload error:', err);
+    res.status(500).json({ error: 'Upload failed', details: err });
+  }
+});
+
+router.post('/student-photo/:id', upload.single('photo'), async (req, res) => {
+  const studentId = req.params.id;
+
+  if (!req.file || !('path' in req.file)) {
+    res.status(400).json({ message: 'No file uploaded' });
+    return;
+  }
+
+  const photoUrl = (req.file as any).path;
+
+  try {
+    const updatedStudent = await Student.findByIdAndUpdate(
+      studentId,
+      { photo: photoUrl },
+      { new: true }
+    );
+
+    if (!updatedStudent) {
+      res.status(404).json({ message: 'Student not found' });
+      return;
+    }
+
+    res.status(200).json({
+      message: 'Photo uploaded successfully',
+      photoUrl,
+      student: updatedStudent
+    });
+  } catch (err) {
+    console.error('Student upload error:', err);
+    res.status(500).json({ error: 'Upload failed', details: err });
+  }
+});
 
 export default router;

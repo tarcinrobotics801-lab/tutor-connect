@@ -49,6 +49,7 @@ export interface User {
   photo?: string;
   courseNames?: string[];
   certificates?: Certificate[];
+  achievements: { name: string; url: string; uploadedAt: string; type: string }[];
   // Student‑specific ------------------------------------------
   yearOfStudent?: number;
   department?: string;
@@ -119,7 +120,18 @@ interface Notification {
   createdAt: string;
   read: boolean;
 }
-
+interface Resource {
+  id: string;
+  title: string;
+  description: string;
+  subject: string;
+  className: string;
+  driveUrl: string;
+  contents: string;
+  tutorId: string;
+  tutorName: string;
+  uploadedAt: string;
+}
 
 export interface Enrollment {
   _id: string;
@@ -151,6 +163,7 @@ interface AppContextType {
   timeSlots: TimeSlot[];
   bookingRequests: BookingRequest[];
   notifications: Notification[];
+  resources: Resource[];
   currentUser: User | null;
   loading: boolean;
   error: string | null;
@@ -194,6 +207,7 @@ interface AppContextType {
   rejectBookingRequest: (requestId: string) => void;
   getUserNotifications: (userId: string) => Notification[];
   markNotificationAsRead: (notificationId: string) => void;
+  addResource: (resource: Resource) => void;
   clearError: () => void;
 }
 
@@ -214,6 +228,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [courses, setCourses] = useState<Course[]>([]);
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [resources, setResources] = useState<Resource[]>([]);
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
   const [bookingRequests, setBookingRequests] = useState<BookingRequest[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -378,7 +393,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             : prev
         );
 
-        // Optional: also reflect the change in the global `users` array
+        // Optional: also reflect the change in the global users array
         setUsers((prev) =>
           prev.map((u) =>
             u._id === currentUser._id
@@ -649,6 +664,9 @@ const getTutorBookingRequests = (tutorId: string) => {
     const tutorIds = getCompletedTutors().map((t) => t._id);
     return courses.filter((c) => tutorIds.includes(c.tutorId));
   };
+  const addResource = (resource: Resource) => {
+    setResources([...resources, resource]);
+  };
 
   const canStudentRegister = (): boolean =>
     getCompletedTutors().length >= 5 && getActiveCourses().length >= 4;
@@ -671,6 +689,7 @@ const getTutorBookingRequests = (tutorId: string) => {
         enrollments,
         timeSlots,
       bookingRequests,
+      resources,
       notifications,
         currentUser,
         loading,
@@ -706,7 +725,8 @@ const getTutorBookingRequests = (tutorId: string) => {
       acceptBookingRequest,
       rejectBookingRequest,
       getUserNotifications,
-      markNotificationAsRead
+      markNotificationAsRead,
+      addResource
       }}
     >
       {children}

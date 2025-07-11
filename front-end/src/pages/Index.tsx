@@ -73,6 +73,7 @@ const Index = () => {
             <Link to="/" className="text-white hover:text-purple-300 transition-colors font-medium">Home</Link>
             <Link to="/courses" className="text-white hover:text-purple-300 transition-colors font-medium">Courses</Link>
             <Link to="/Tutors" className="text-white hover:text-purple-300 transition-colors font-medium">Find Tutors</Link>
+            <Link to="/resources" className="text-white hover:text-purple-300 transition-colors font-medium">Resources</Link>
           </nav>
           
           <div className="flex items-center space-x-4">

@@ -1,0 +1,227 @@
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import Navigation from "@/components/Navigation";
+import { useApp } from "@/contexts/AppContext";
+import { BookOpen, Upload, Search, User, Calendar, ExternalLink, Filter } from "lucide-react";
+import ResourceUpload from "@/components/ResourceUpload";
+
+const Resources = () => {
+  const { currentUser, resources } = useApp();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedSubject, setSelectedSubject] = useState("All");
+  const [selectedClass, setSelectedClass] = useState("All");
+  const [showUploadModal, setShowUploadModal] = useState(false);
+
+  // Get unique subjects and classes from resources
+  const subjects = ["All", ...new Set(resources.map(r => r.subject))];
+  const classes = ["All", ...new Set(resources.map(r => r.className))];
+
+  // Filter resources based on search and filters
+  const filteredResources = resources.filter(resource => {
+    const matchesSearch = resource.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         resource.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         resource.tutorName.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSubject = selectedSubject === "All" || resource.subject === selectedSubject;
+    const matchesClass = selectedClass === "All" || resource.className === selectedClass;
+    
+    return matchesSearch && matchesSubject && matchesClass;
+  });
+
+  const isTutor = currentUser?.role === 'tutor';
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-indigo-50">
+      <Navigation />
+      
+      <div className="container mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
+              <BookOpen className="h-8 w-8 text-purple-600" />
+              Learning Resources
+            </h1>
+            <p className="text-gray-600 mt-2">
+              {isTutor ? "Share your teaching materials with students" : "Access educational resources shared by expert tutors"}
+            </p>
+          </div>
+          
+          {isTutor && (
+            <Button 
+              onClick={() => setShowUploadModal(true)}
+              className="bg-purple-600 hover:bg-purple-700"
+            >
+              <Upload className="h-4 w-4 mr-2" />
+              Upload Resource
+            </Button>
+          )}
+        </div>
+
+        {/* Search and Filters */}
+        <div className="flex flex-col md:flex-row gap-4 mb-8">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <Input
+              placeholder="Search resources by title, description, or tutor name..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          
+          <div className="flex gap-2">
+            <select
+              value={selectedSubject}
+              onChange={(e) => setSelectedSubject(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-md bg-white"
+            >
+              {subjects.map(subject => (
+                <option key={subject} value={subject}>{subject}</option>
+              ))}
+            </select>
+            
+            <select
+              value={selectedClass}
+              onChange={(e) => setSelectedClass(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-md bg-white"
+            >
+              {classes.map(className => (
+                <option key={className} value={className}>{className}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Statistics */}
+        <div className="grid md:grid-cols-3 gap-6 mb-8">
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Total Resources</p>
+                  <p className="text-2xl font-bold text-purple-600">{resources.length}</p>
+                </div>
+                <BookOpen className="h-8 w-8 text-purple-300" />
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Subjects Covered</p>
+                  <p className="text-2xl font-bold text-green-600">{subjects.length - 1}</p>
+                </div>
+                <Filter className="h-8 w-8 text-green-300" />
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Contributing Tutors</p>
+                  <p className="text-2xl font-bold text-blue-600">
+                    {new Set(resources.map(r => r.tutorId)).size}
+                  </p>
+                </div>
+                <User className="h-8 w-8 text-blue-300" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Resources Grid */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredResources.length > 0 ? (
+            filteredResources.map((resource) => (
+              <Card key={resource.id} className="hover:shadow-lg transition-shadow duration-300">
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <CardTitle className="text-lg mb-2">{resource.title}</CardTitle>
+                      <div className="flex gap-2 mb-3">
+                        <Badge variant="secondary">{resource.subject}</Badge>
+                        <Badge variant="outline">{resource.className}</Badge>
+                      </div>
+                    </div>
+                  </div>
+                  <CardDescription className="text-sm">
+                    {resource.description}
+                  </CardDescription>
+                </CardHeader>
+                
+                <CardContent>
+                  <div className="space-y-3">
+                    <div className="flex items-center text-sm text-gray-600">
+                      <User className="h-4 w-4 mr-2" />
+                      <span>By {resource.tutorName}</span>
+                    </div>
+                    
+                    <div className="flex items-center text-sm text-gray-600">
+                      <Calendar className="h-4 w-4 mr-2" />
+                      <span>Uploaded {new Date(resource.uploadedAt).toLocaleDateString()}</span>
+                    </div>
+                    
+                    <div className="pt-2">
+                      <Button 
+                        onClick={() => window.open(resource.driveUrl, '_blank')}
+                        className="w-full bg-purple-600 hover:bg-purple-700"
+                        size="sm"
+                      >
+                        <ExternalLink className="h-4 w-4 mr-2" />
+                        Access Resource
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          ) : (
+            <div className="col-span-full text-center py-12">
+              <BookOpen className="h-16 w-16 mx-auto text-gray-300 mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No resources found</h3>
+              <p className="text-gray-600">
+                {searchTerm || selectedSubject !== "All" || selectedClass !== "All"
+                  ? "Try adjusting your search criteria"
+                  : "No resources have been uploaded yet"}
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Upload Modal */}
+        {showUploadModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-6">
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-xl font-bold">Upload Learning Resource</h2>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowUploadModal(false)}
+                  >
+                    ×
+                  </Button>
+                </div>
+                <ResourceUpload 
+                  onUpload={() => setShowUploadModal(false)}
+                  tutorId={currentUser?._id || ""}
+                  tutorName={currentUser?.name || ""}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default Resources;
