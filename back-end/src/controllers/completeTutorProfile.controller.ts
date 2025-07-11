@@ -21,7 +21,8 @@ export const completeTutorProfile = async (
       subjects,
       courses = [],
       photo,
-      certificates = [], // ✅ pulled from frontend
+      certificates = [],
+      achievements = [], // ✅ New
     } = req.body;
 
     const tutor = await Tutor.findById(userId);
@@ -74,7 +75,22 @@ export const completeTutorProfile = async (
       }
     }
 
-    // Validate courses
+    // ✅ Achievements validation
+    if (!Array.isArray(achievements)) {
+      res.status(400).json({ message: "Achievements must be an array" });
+      return;
+    }
+
+    for (const ach of achievements) {
+      if (!ach.name || !ach.url || !ach.uploadedAt || !ach.type) {
+        res.status(400).json({
+          message: "Each achievement must have name, url, uploadedAt, and type",
+        });
+        return;
+      }
+    }
+
+    // Courses validation
     if (Array.isArray(courses) && courses.length) {
       for (const course of courses) {
         if (
@@ -114,6 +130,7 @@ export const completeTutorProfile = async (
       .map((c: any) => c.courseName || c.name || c.title)
       .filter(Boolean);
 
+    // ✅ Final update
     const updatedTutor = await Tutor.findByIdAndUpdate(
       tutor._id,
       {
@@ -124,7 +141,8 @@ export const completeTutorProfile = async (
         availability,
         subjects,
         photo,
-        certificates, // ✅ store array of certificates
+        certificates,
+        achievements, // ✅ store in MongoDB
         profileCompleted: true,
         $addToSet: { courseNames: { $each: namesToAdd } },
       },
@@ -136,7 +154,6 @@ export const completeTutorProfile = async (
       return;
     }
 
-    // ✅ Fix field name here: return certificates instead of "certificateLink"
     res.status(200).json({
       message: "Profile updated successfully",
       user: {
@@ -154,7 +171,8 @@ export const completeTutorProfile = async (
         subjects: updatedTutor.subjects,
         courseNames: updatedTutor.courseNames,
         photo: updatedTutor.photo,
-        certificates: updatedTutor.certificates, // ✅ correct key
+        certificates: updatedTutor.certificates,
+        achievements: updatedTutor.achievements, // ✅ Include in response
         updatedAt: updatedTutor.updatedAt,
       },
     });

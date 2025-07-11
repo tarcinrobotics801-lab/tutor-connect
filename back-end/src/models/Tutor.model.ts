@@ -1,11 +1,21 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
+// Certificate interface
 export interface Certificate {
   name: string;
   url: string;
   uploadedAt: Date;
 }
 
+// Achievement interface
+export interface Achievement {
+  name: string;
+  url: string;
+  uploadedAt: Date;
+  type: string;
+}
+
+// Tutor interface
 export interface ITutor extends Document {
   name: string;
   email: string;
@@ -30,6 +40,7 @@ export interface ITutor extends Document {
   };
   courseNames?: string[];
   certificates?: Certificate[];
+  achievements?: Achievement[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -82,14 +93,23 @@ const tutorSchema = new Schema<ITutor>({
 
   courseNames: [{ type: String }],
 
-  // ✅ New field for certificate array
   certificates: [
     {
       name: { type: String, required: true },
       url: { type: String, required: true },
       uploadedAt: { type: Date, default: Date.now }
     }
+  ],
+
+  achievements: [
+    {
+      name: { type: String, required: true },
+      url: { type: String, required: true },
+      uploadedAt: { type: Date, default: Date.now },
+      type: { type: String, required: true }
+    }
   ]
+
 }, {
   timestamps: true
 });
