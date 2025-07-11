@@ -325,6 +325,7 @@ const TutorProfileForm = () => {
           availability: profileData.availability,
           subjects: profileData.subjects,
           certificates: profileData.certificates, // ⭐ ADDED certificates to payload
+          achievements: profileData.achievements, // NEW: achievements
           photo: profileData.photo,
         }),
       });
