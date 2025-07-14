@@ -5,7 +5,7 @@ import cors from "cors";
 import authRoutes from "./routes/auth.routes";
 import enrollmentRoutes from "./routes/enrollment.routes";
 import uploadRoutes from "./routes/upload.routes";
-
+import adminRoutes from './routes/admin.routes';
 const app = express();
 
 // Enable CORS for frontend (adjust origin if needed)
@@ -21,5 +21,5 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);               // Handles /api/auth/...
 app.use("/api/enrollments", enrollmentRoutes);  // Handles /api/enrollments/...
 app.use("/api/uploads", uploadRoutes);
+app.use('/api/admin', adminRoutes);
 export default app;
-
