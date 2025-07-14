@@ -27,7 +27,7 @@ export interface User {
   _id: string;
   name: string;
   email: string;
-  role: "student" | "tutor" | "parent";
+  role: "student" | "tutor" | "parent" |"admin";
   profileCompleted: boolean;
   phoneNumber?: string;
 
@@ -49,14 +49,14 @@ export interface User {
   photo?: string;
   courseNames?: string[];
   certificates?: Certificate[];
-  achievements: { name: string; url: string; uploadedAt: string; type: string }[];
+  achievements?: { name: string; url: string; uploadedAt: string; type: string }[];
   // Student‑specific ------------------------------------------
   yearOfStudent?: number;
   department?: string;
   collegeName?: string;
   city?: string;
   state?: string;
-  enrolledCourses: string[];
+  enrolledCourses?: string[];
   parentId?: string;
 
   // Timestamps -------------------------------------------------
@@ -208,6 +208,8 @@ interface AppContextType {
   getUserNotifications: (userId: string) => Notification[];
   markNotificationAsRead: (notificationId: string) => void;
   addResource: (resource: Resource) => void;
+  removeTutor: (tutorId: string) => void;
+  getAppStats: () => { totalTutors: number; totalCourses: number; totalStudents: number; totalParents: number }
   clearError: () => void;
 }
 
@@ -344,6 +346,38 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       setLoading(false);
     }
   };
+  const removeTutor = (tutorId: string) => {
+    console.log('Removing tutor:', tutorId);
+    
+    // Remove the tutor
+    setUsers(prev => prev.filter(user => user._id !== tutorId));
+    
+    // Remove all courses by this tutor
+    setCourses(prev => prev.filter(course => course.tutorId !== tutorId));
+    
+    // Remove time slots for tutor's courses
+    setTimeSlots(prev => prev.filter(slot => slot.tutorId !== tutorId));
+    
+    // Remove booking requests for tutor's courses
+    setBookingRequests(prev => prev.filter(request => request.tutorId !== tutorId));
+    
+    // Remove sessions for tutor's courses
+    setEnrollments(prev => prev.filter(session => session.tutorId !== tutorId));
+    
+    // Remove notifications related to this tutor
+    setNotifications(prev => prev.filter(notif => notif.userId !== tutorId));
+    
+    console.log('Tutor and related data removed successfully');
+  };
+
+  const getAppStats = () => {
+    return {
+      totalTutors: users.filter(user => user.role === 'tutor').length,
+      totalCourses: courses.length,
+      totalStudents: users.filter(user => user.role === 'student').length,
+      totalParents: users.filter(user => user.role === 'parent').length
+    };
+  };
 
   /* ------------------ course CRUD ------------------ */
   const addCourse = (course: Course): void => setCourses((p) => [...p, course]);
@@ -393,7 +427,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             : prev
         );
 
-        // Optional: also reflect the change in the global users array
+        // Optional: also reflect the change in the global `users` array
         setUsers((prev) =>
           prev.map((u) =>
             u._id === currentUser._id
@@ -631,6 +665,17 @@ const getTutorBookingRequests = (tutorId: string) => {
         setError(data.message || "Login failed");
         return null;
       }
+      if (email === 'admin@tarcin.in' && password === 'Tarcin@12345') {
+        const adminUser: User = {
+          _id: 'admin-1',
+          name: 'Admin',
+          email: 'admin@tarcin.in',
+          role: 'admin',
+          profileCompleted: true
+        };
+        setCurrentUser(adminUser);
+        return adminUser;
+      }
 
       const user: User = data.student || data.tutor || data.user;
       if (!user) {
@@ -726,7 +771,9 @@ const getTutorBookingRequests = (tutorId: string) => {
       rejectBookingRequest,
       getUserNotifications,
       markNotificationAsRead,
-      addResource
+      addResource,
+      removeTutor,
+      getAppStats
       }}
     >
       {children}

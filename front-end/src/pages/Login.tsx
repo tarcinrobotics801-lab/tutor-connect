@@ -30,7 +30,9 @@ const Login = () => {
         });
 
         // ✅ Redirect based on user role and profile status
-        if (user.role === "tutor") {
+        if (user.role === 'admin') {
+          navigate("/admin");}
+          else if (user.role === "tutor") {
           navigate("/tutor-profile");
         } else if (user.role === "student") {
           navigate("/student-profile"); // profileCompleted check is optional

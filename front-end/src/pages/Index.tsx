@@ -127,6 +127,22 @@ const Index = () => {
                       </Link>
                     </DropdownMenuItem>
                   )}
+                  {currentUser.role === 'parent' && (
+                    <DropdownMenuItem asChild>
+                      <Link to="/parent-profile" className="flex items-center">
+                        <User className="mr-2 h-4 w-4" />
+                        <span>Profile & Student Dashboard</span>
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
+                  {currentUser.role === 'admin' && (
+                    <DropdownMenuItem asChild>
+                      <Link to="/admin" className="flex items-center">
+                        <User className="mr-2 h-4 w-4" />
+                        <span>Dashboard</span>
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem 
                     className="text-red-600 focus:text-red-600 cursor-pointer"
@@ -326,7 +342,7 @@ const Index = () => {
             </div>
           </div>
           <div className="border-t border-white/10 mt-12 pt-8 text-center text-purple-200">
-            <p>&copy; 2024 Tutor Connect. All rights reserved.</p>
+            <p>&copy; 2025 Tutor Connect. All rights reserved.</p>
           </div>
         </div>
       </footer>
