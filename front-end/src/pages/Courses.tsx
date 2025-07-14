@@ -25,6 +25,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useApp } from "@/contexts/AppContext";
 import { useNavigate } from "react-router-dom";
+import CustomLoader from "@/components/CustomLoader";
 
 const getYouTubeEmbedUrl = (url: string): string => {
   if (!url) return "";
@@ -210,10 +211,7 @@ const Courses = () => {
         {/* Enhanced Empty‑state */}
 
         {loading ? (
-          <div className="text-center py-16">
-            <div className="animate-spin h-10 w-10 rounded-full border-4 border-blue-400 border-t-transparent mx-auto mb-4" />
-            <p className="text-gray-600">Loading courses...</p>
-          </div>
+          <CustomLoader />
         ) : courses.length === 0 ? (
           <div className="text-center py-16">
             <div className="w-24 h-24 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">

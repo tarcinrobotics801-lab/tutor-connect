@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 import { Tutor, ITutor } from "../models/Tutor.model";
 import { Student, IStudent } from "../models/Student.model";
 import { Parent, IParent } from "../models/Parent.model";
+import { Certificate } from "crypto";
 
 type UserDoc = ITutor | IStudent | IParent;
 
@@ -63,6 +64,8 @@ export const login = async (req: Request, res: Response): Promise<void> => {
             availability: tutor.availability,
             subjects: tutor.subjects,
             courseNames: tutor.courseNames,
+            certificates: tutor.certificates,
+            achievements: tutor.achievements, // ✅ Include achievements
           },
         });
         break;
