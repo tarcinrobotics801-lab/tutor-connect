@@ -38,7 +38,7 @@ import { useApp } from "@/contexts/AppContext";
 import { useToast } from "@/hooks/use-toast";
 
 const AdminDashboard = () => {
-  const { currentUser } = useApp();
+  const { currentUser, removeTutor } = useApp();
   const [tutors, setTutors] = useState([]);
   const [students, setStudents] = useState([]);
   const [parents, setParents] = useState([]);
@@ -127,6 +127,35 @@ const AdminDashboard = () => {
     course.tutorName.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // make the handler async so we can await
+  const handleRemoveTutor = async (tutorId: string, tutorName: string) => {
+    const confirmDelete = window.confirm(
+      `Are you sure you want to remove tutor "${tutorName}"? This will also remove all their courses.`
+    );
+    if (!confirmDelete) return;
+  
+    const success = await removeTutor(tutorId); // ✅ returns boolean now
+    if (success) {
+      setTutors((prev) => prev.filter((t) => t._id !== tutorId));
+      setCourses((prev) => prev.filter((c) => c.tutorId !== tutorId));
+      toast({
+        title: "Tutor Removed",
+        description: `${tutorName} and all their courses have been deleted.`,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Error",
+        description: "Failed to remove tutor. Try again later.",
+        variant: "destructive",
+      });
+    }
+  
+  
+};
+
+  
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-indigo-50">
       <Navigation />
@@ -200,190 +229,179 @@ const AdminDashboard = () => {
             <TabsTrigger value="parents">Parents</TabsTrigger>
           </TabsList>
 
+          <TabsContent value="tutors" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Tutors Management</CardTitle>
+                <CardDescription>Manage registered tutors and their profiles</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Subjects</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredTutors.map((tutor) => (
+                      <TableRow key={tutor._id}>
+                        <TableCell className="font-medium">{tutor.name}</TableCell>
+                        <TableCell>{tutor.email}</TableCell>
+                        <TableCell>
+                          <div className="flex flex-wrap gap-1">
+                            {(tutor.subjects || []).slice(0, 2).map((subject) => (
+                              <Badge key={subject} variant="secondary" className="text-xs">
+                                {subject}
+                              </Badge>
+                            ))}
+                            {tutor.subjects?.length > 2 && (
+                              <Badge variant="secondary" className="text-xs">
+                                +{tutor.subjects.length - 2}
+                              </Badge>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={tutor.profileCompleted ? "default" : "secondary"}>
+                            {tutor.profileCompleted ? "Complete" : "Incomplete"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => handleRemoveTutor(tutor._id, tutor.name)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
           
-<TabsContent value="tutors">
-  <Card>
-    <CardHeader>
-      <CardTitle>Tutors Management</CardTitle>
-      <CardDescription>Manage registered tutors and their profiles</CardDescription>
-    </CardHeader>
-    <CardContent>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead>Subjects</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {filteredTutors.map((tutor) => (
-            <TableRow key={tutor._id}>
-              <TableCell className="font-medium">{tutor.name}</TableCell>
-              <TableCell>{tutor.email}</TableCell>
-              <TableCell>
-                <div className="flex flex-wrap gap-1">
-                  {(tutor.subjects || []).slice(0, 2).map((subject) => (
-                    <Badge key={subject} variant="secondary" className="text-xs">
-                      {subject}
-                    </Badge>
-                  ))}
-                  {tutor.subjects?.length > 2 && (
-                    <Badge variant="secondary" className="text-xs">
-                      +{tutor.subjects.length - 2}
-                    </Badge>
-                  )}
-                </div>
-              </TableCell>
-              <TableCell>
-                <Badge variant={tutor.profileCompleted ? "default" : "secondary"}>
-                  {tutor.profileCompleted ? "Complete" : "Incomplete"}
-                </Badge>
-              </TableCell>
-              <TableCell>
-                <Button variant="destructive" size="sm">
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </CardContent>
-  </Card>
-</TabsContent>
-          
-<TabsContent value="courses">
-  <Card>
-    <CardHeader>
-      <CardTitle>Courses Management</CardTitle>
-      <CardDescription>View all courses available on the platform</CardDescription>
-    </CardHeader>
-    <CardContent>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Course Title</TableHead>
-            <TableHead>Tutor</TableHead>
-            <TableHead>Subject</TableHead>
-            <TableHead>Level</TableHead>
-            <TableHead>Price</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {filteredCourses.map((course) => (
-            <TableRow key={course._id}>
-              <TableCell className="font-medium">{course.courseName}</TableCell>
-              <TableCell>{course.tutorName}</TableCell>
-              <TableCell>{course.sub}</TableCell>
-              <TableCell>{course.level}</TableCell>
-              <TableCell>{course.pricePerSession}</TableCell>
-              <TableCell>
-                <Badge variant={course.pricePerSession === 0 ? "secondary" : "default"}>
-                  {course.pricePerSession === 0 ? "Free" : "Paid"}
-                </Badge>
-              </TableCell>
-              <TableCell>
-                <Button variant="destructive" size="sm">
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </CardContent>
-  </Card>
-</TabsContent>
+          <TabsContent value="courses" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Courses Management</CardTitle>
+                <CardDescription>View all courses available on the platform</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Course Title</TableHead>
+                      <TableHead>Tutor</TableHead>
+                      <TableHead>Subject</TableHead>
+                      <TableHead>Level</TableHead>
+                      <TableHead>Price</TableHead>
+                      <TableHead>Status</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredCourses.map((course) => (
+                      <TableRow key={course._id}>
+                        <TableCell className="font-medium">{course.courseName}</TableCell>
+                        <TableCell>{course.tutorName}</TableCell>
+                        <TableCell>
+                          <Badge variant="outline">{course.sub}</Badge>
+                        </TableCell>
+                        <TableCell>{course.level}</TableCell>
+                        <TableCell>{course.pricePerSession}</TableCell>
+                        <TableCell>
+                          <Badge variant={course.pricePerSession === 0 ? "secondary" : "default"}>
+                            {course.pricePerSession === 0 ? "Free" : "Paid"}
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-<TabsContent value="students">
-  <Card>
-    <CardHeader>
-      <CardTitle>Students Management</CardTitle>
-      <CardDescription>View registered students</CardDescription>
-    </CardHeader>
-    <CardContent>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead>College</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {filteredStudents.map((student) => (
-            <TableRow key={student._id}>
-              <TableCell className="font-medium">{student.name}</TableCell>
-              <TableCell>{student.email}</TableCell>
-              <TableCell>{student.collegeName || "Not specified"}</TableCell>
-              <TableCell>
-                <Badge variant={student.profileCompleted ? "default" : "secondary"}>
-                  {student.profileCompleted ? "Complete" : "Incomplete"}
-                </Badge>
-              </TableCell>
-              <TableCell>
-                <Button variant="destructive" size="sm">
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </CardContent>
-  </Card>
-</TabsContent>
+          <TabsContent value="students" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Students Management</CardTitle>
+                <CardDescription>View registered students</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>College</TableHead>
+                      <TableHead>Status</TableHead>
+                     
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredStudents.map((student) => (
+                      <TableRow key={student._id}>
+                        <TableCell className="font-medium">{student.name}</TableCell>
+                        <TableCell>{student.email}</TableCell>
+                        <TableCell>{student.collegeName || "Not specified"}</TableCell>
+                        <TableCell>
+                          <Badge variant={student.profileCompleted ? "default" : "secondary"}>
+                            {student.profileCompleted ? "Complete" : "Incomplete"}
+                          </Badge>
+                        </TableCell>
+                      
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-<TabsContent value="parents">
-  <Card>
-    <CardHeader>
-      <CardTitle>Parents Management</CardTitle>
-      <CardDescription>View registered parents</CardDescription>
-    </CardHeader>
-    <CardContent>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead>Occupation</TableHead>
-            <TableHead>Children</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {filteredParents.map((parent) => (
-            <TableRow key={parent._id}>
-              <TableCell className="font-medium">{parent.name}</TableCell>
-              <TableCell>{parent.email}</TableCell>
-              <TableCell>{parent.occupation || "Not specified"}</TableCell>
-              <TableCell>{parent.children?.length || 0}</TableCell>
-              <TableCell>
-                <Badge variant={parent.profileCompleted ? "default" : "secondary"}>
-                  {parent.profileCompleted ? "Complete" : "Incomplete"}
-                </Badge>
-              </TableCell>
-              <TableCell>
-                <Button variant="destructive" size="sm">
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </CardContent>
-  </Card>
-</TabsContent>
-
+          <TabsContent value="parents" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Parents Management</CardTitle>
+                <CardDescription>View registered parents</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Occupation</TableHead>
+                      <TableHead>Children</TableHead>
+                      <TableHead>Status</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredParents.map((parent) => (
+                      <TableRow key={parent._id}>
+                        <TableCell className="font-medium">{parent.name}</TableCell>
+                        <TableCell>{parent.email}</TableCell>
+                        <TableCell>{parent.occupation || "Not specified"}</TableCell>
+                        <TableCell>{parent.children?.length || 0}</TableCell>
+                        <TableCell>
+                          <Badge variant={parent.profileCompleted ? "default" : "secondary"}>
+                            {parent.profileCompleted ? "Complete" : "Incomplete"}
+                          </Badge>
+                        </TableCell>
+                        
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
         </Tabs>
       </div>
     </div>

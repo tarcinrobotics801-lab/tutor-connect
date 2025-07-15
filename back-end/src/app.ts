@@ -6,6 +6,8 @@ import authRoutes from "./routes/auth.routes";
 import enrollmentRoutes from "./routes/enrollment.routes";
 import uploadRoutes from "./routes/upload.routes";
 import adminRoutes from './routes/admin.routes';
+import timeSlotRoutes from "./routes/timeslot.routes";
+import bookingRoutes from "./routes/booking.routes";
 const app = express();
 
 // Enable CORS for frontend (adjust origin if needed)
@@ -22,4 +24,6 @@ app.use("/api/auth", authRoutes);               // Handles /api/auth/...
 app.use("/api/enrollments", enrollmentRoutes);  // Handles /api/enrollments/...
 app.use("/api/uploads", uploadRoutes);
 app.use('/api/admin', adminRoutes);
+app.use("/api/timeslots", timeSlotRoutes);
+app.use("/api/bookings", bookingRoutes);
 export default app;

@@ -36,7 +36,7 @@ const TutorProfileView = () => {
 
     fetchTutor();
   }, [tutorId]);
-  
+
   if (loading) {
     return <CustomLoader />; // ✅ Use CustomLoader component
   }
@@ -164,19 +164,23 @@ const TutorProfileView = () => {
                   <span>Availability</span>
                 </CardTitle>
               </CardHeader>
+
               <CardContent>
                 <div className="grid md:grid-cols-2 gap-3">
                   {days.map((day) => (
                     <div key={day} className="flex justify-between items-center p-3 rounded-lg bg-gray-50">
                       <span className="capitalize font-medium text-gray-900">{day}</span>
                       <span className="text-sm text-gray-600">
-                        {tutor.availability?.[day as keyof typeof tutor.availability] || 'Not Available'}
+                        {tutor.availability?.[day as keyof typeof tutor.availability]?.available
+                          ? tutor.availability?.[day as keyof typeof tutor.availability]?.timeSlots.join(", ") || "Available"
+                          : "Not Available"}
                       </span>
                     </div>
                   ))}
                 </div>
               </CardContent>
             </Card>
+
           </div>
         </div>
       </div>

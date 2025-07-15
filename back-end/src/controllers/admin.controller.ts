@@ -66,3 +66,19 @@ export const getAllCourses = async (_: Request, res: Response) => {
     res.status(500).json({ message: "Failed to fetch courses" });
   }
 };
+export const deleteTutorAndCourses = async (req: Request, res: Response) => {
+  const { tutorId } = req.params;
+
+  try {
+    // Delete all courses linked to the tutor
+    await Course.deleteMany({ tutorId });
+
+    // Delete the tutor
+    await Tutor.findByIdAndDelete(tutorId);
+
+    res.status(200).json({ message: "Tutor and their courses deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting tutor and courses:", error);
+    res.status(500).json({ message: "Failed to delete tutor and courses" });
+  }
+};
