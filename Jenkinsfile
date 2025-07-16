@@ -1,11 +1,17 @@
 pipeline {
   agent any
+
   environment {
     COMPOSE_PROJECT_NAME = "tutorconnect"
+    REMOTE_USER = "tarcin"
+    REMOTE_HOST = "192.168.0.21"
+    REMOTE_DIR  = "/opt/tutorconnect"
   }
+
   triggers {
     githubPush()
   }
+
   stages {
     stage('Checkout Code') {
       steps {
@@ -14,16 +20,34 @@ pipeline {
             url: 'https://github.com/tarcinrobotics/tutor-connect.git'
       }
     }
-    stage('Build & Deploy') {
+
+    stage('Build Images (Local CI only)') {
       steps {
-        script {
-          sh 'docker-compose down -v --remove-orphans || true'
-          sh 'docker-compose build'
-          sh 'docker-compose up -d'
+        sh 'docker-compose build'
+      }
+    }
+
+    stage('Deploy to Proxmox LXC') {
+      steps {
+        sshagent(['lxc_ssh_key']) {
+          sh '''
+            echo "[INFO] Copying files to ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_DIR}"
+            ssh ${REMOTE_USER}@${REMOTE_HOST} "mkdir -p ${REMOTE_DIR}"
+            scp -r docker-compose.yml back-end front-end ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_DIR}/
+
+            echo "[INFO] Deploying via docker-compose on remote"
+            ssh ${REMOTE_USER}@${REMOTE_HOST} << EOF
+              cd ${REMOTE_DIR}
+              docker-compose down -v --remove-orphans || true
+              docker-compose build
+              docker-compose up -d
+            EOF
+          '''
         }
       }
     }
   }
+
   post {
     failure {
       mail to: 'devops@tarcinacademy.in',
