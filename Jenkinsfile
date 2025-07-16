@@ -6,9 +6,11 @@ pipeline {
     REMOTE_HOST = "192.168.0.21"
     REMOTE_DIR  = "/opt/tutorconnect"
   }
+
   triggers {
     githubPush()
   }
+
   stages {
     stage('Checkout Code') {
       steps {
@@ -17,27 +19,30 @@ pipeline {
             url: 'https://github.com/tarcinrobotics/tutor-connect.git'
       }
     }
+
     stage('Build Images (Local CI only)') {
       steps {
         sh 'docker-compose build'
       }
     }
+
     stage('Deploy to Proxmox LXC') {
       steps {
         sshagent(['lxc_ssh_key']) {
           sh '''
             echo "[INFO] Creating remote directory on ${REMOTE_HOST}..."
             ssh ${REMOTE_USER}@${REMOTE_HOST} "mkdir -p ${REMOTE_DIR}"
+
             echo "[INFO] Copying files to ${REMOTE_HOST}..."
-            scp -r docker-compose.yml back-end front-end ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_DIR}/ || true
+            scp -r docker-compose.yml back-end front-end ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_DIR}/
+
             echo "[INFO] Running remote docker-compose commands..."
-            ssh ${REMOTE_USER}@${REMOTE_HOST} << 'EOF'
+            ssh ${REMOTE_USER}@${REMOTE_HOST} << EOF
               set -e
               cd ${REMOTE_DIR}
-              echo "[INFO] Current directory: $(pwd)"
-              echo "[INFO] Docker version: $(docker --version)"
-              echo "[INFO] Docker Compose version: $(docker-compose --version || docker compose version)"
-              # Optional fallback to docker compose if v2 is used
+              echo "[INFO] Current directory: \$(pwd)"
+              echo "[INFO] Docker version: \$(docker --version)"
+              echo "[INFO] Docker Compose version: \$(docker-compose --version || docker compose version)"
               if command -v docker-compose &> /dev/null; then
                 docker-compose down -v --remove-orphans || true
                 docker-compose build
@@ -53,6 +58,7 @@ pipeline {
       }
     }
   }
+
   post {
     failure {
       mail to: 'devops@tarcinacademy.in',
