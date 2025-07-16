@@ -265,11 +265,11 @@ const Courses = () => {
             </div>
 
             {/* Enhanced Courses grid */}
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 auto-rows-[1fr]">
               {filteredCourses.map((course) => (
                 <Card
                   key={course._id}
-                  className="hover:shadow-xl transition-all duration-300 border-blue-100 bg-white/80 backdrop-blur-sm"
+                  className="flex flex-col justify-between h-full hover:shadow-xl transition-all duration-300 border-blue-100 bg-white/80 backdrop-blur-sm"
                 >
                   <CardHeader>
                     <div className="flex justify-between items-start mb-2">
@@ -283,12 +283,12 @@ const Courses = () => {
                     <CardTitle className="text-xl text-gray-900 line-clamp-2">
                       {course.courseName}
                     </CardTitle>
-                    <CardDescription className="text-gray-600 line-clamp-3">
+                    <CardDescription className="text-gray-600 line-clamp-3 min-h-[60px]">
                       {course.description}
                     </CardDescription>
                   </CardHeader>
 
-                  <CardContent className="space-y-4">
+                  <CardContent className="flex flex-col gap-4 mt-auto">
                     {/* Enhanced Tutor Info */}
                     <div className="flex items-center space-x-3">
                       <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center">

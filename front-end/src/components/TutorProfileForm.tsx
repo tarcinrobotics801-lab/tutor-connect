@@ -114,7 +114,7 @@ const TutorProfileForm = () => {
     if (error) setError(null);
   };
 
-  
+
 
   // ⭐ ADDED Certificate handlers from 2nd code
   const handleCertificateUpload = (certificate: { name: string; url: string; uploadedAt: string }) => {
@@ -177,7 +177,7 @@ const TutorProfileForm = () => {
         }
         const linkStr = value.trim();
         // Strict LinkedIn URL regex
-        const LINKEDIN_REGEX = /^https?:\/\/(www\.)?linkedin\.com\/.*$/i;
+        const LINKEDIN_REGEX = /^https?:\/\/(www\.)?linkedin\.com\/in\/[a-zA-Z0-9-_.]+\/?(\?.*)?$/i;
         if (!LINKEDIN_REGEX.test(linkStr)) {
           return 'Please enter a valid LinkedIn profile URL (e.g., https://linkedin.com/in/yourname)';
         }
@@ -187,16 +187,33 @@ const TutorProfileForm = () => {
         if (typeof value !== "string" || !value.trim()) {
           return 'Bio is required';
         }
-
         const wordCount = value.trim().split(/\s+/).length;
         if (wordCount < 50) {
           return 'Bio must be at least 50 words long';
         }
-
         return null;
       }
       case 'subjects':
         return !value || !(value as string[]).length ? 'At least one subject is required' : null;
+      case "availability": {
+        const avail = value as typeof profileData.availability;
+
+        console.log("🔍 Availability validation input:", avail);
+
+        if (!avail || typeof avail !== "object") {
+          return "Availability is required.";
+        }
+        const hasValidDay = Object.values(avail).some(
+          (day) =>
+            day?.available === true &&
+            Array.isArray(day.timeSlots) &&
+            day.timeSlots.length > 0
+        );
+        if (!hasValidDay) {
+          return "You must be available at least one day with time slots.";
+        }
+        return null;
+      }
       case 'certificates': // ⭐ ADDED certificate validation
         return !value || !(value as unknown[]).length ? 'At least one certificate is required' : null;
       default:
@@ -206,7 +223,7 @@ const TutorProfileForm = () => {
 
   const validateForm = (): boolean => {
     const errors: Record<string, string> = {};
-    const fieldsToValidate = ['educationalQualification', 'yearsOfExperience', 'linkedinLink', 'bio', 'subjects', 'certificates']; // ⭐ ADDED certificates
+    const fieldsToValidate = ['educationalQualification', 'yearsOfExperience', 'linkedinLink', 'bio', 'subjects', 'certificates', 'availability']; // ⭐ ADDED certificates
 
     fieldsToValidate.forEach(field => {
       const error = validateField(field, profileData[field as keyof typeof profileData]);
@@ -285,7 +302,7 @@ const TutorProfileForm = () => {
       'educationalQualification',
       'yearsOfExperience',
       'linkedinLink',
-      'bio'
+      'bio',
     ];
 
     const missingFields = requiredFields.filter(field => {
@@ -504,13 +521,13 @@ const TutorProfileForm = () => {
   };
   const ErrorAlert = ({ error, onRetry }: { error: ApiError; onRetry?: () => void }) => (
     <div className={`p-4 rounded-lg mb-4 ${error.type === 'network' ? 'bg-orange-50 border border-orange-200' :
-        error.type === 'validation' ? 'bg-yellow-50 border border-yellow-200' :
-          'bg-red-50 border border-red-200'
+      error.type === 'validation' ? 'bg-yellow-50 border border-yellow-200' :
+        'bg-red-50 border border-red-200'
       }`}>
       <div className="flex items-start">
         <AlertCircle className={`w-5 h-5 mt-0.5 mr-3 ${error.type === 'network' ? 'text-orange-500' :
-            error.type === 'validation' ? 'text-yellow-500' :
-              'text-red-500'
+          error.type === 'validation' ? 'text-yellow-500' :
+            'text-red-500'
           }`} />
         <div className="flex-1">
           <p className="font-medium text-gray-900">{error.message}</p>
@@ -656,7 +673,7 @@ const TutorProfileForm = () => {
               <div className="flex items-center space-x-3">
                 <LinkIcon className="h-4 w-4 text-gray-400" />
                 <span className="text-sm text-blue-600 truncate">
-                  {profileData.linkedinLink || "Meeting link not added"}
+                  {profileData.linkedinLink || "LinkedIn link not added"}
                 </span>
               </div>
             </CardContent>
@@ -890,16 +907,16 @@ const TutorProfileForm = () => {
               </div>
 
               <div>
-                <Label htmlFor="meetingLink">
-                  Meeting Link <span className="text-red-500">*</span>
+                <Label htmlFor="linkedin">
+                  LinkedIn Link <span className="text-red-500">*</span>
                 </Label>
                 <Input
 
-                  id="meetingLink"
+                  id="linkedin"
                   value={profileData.linkedinLink}
                   onChange={(e) => handleInputChange("linkedinLink", e.target.value)}
                   disabled={!isEditing}
-                  placeholder="https://zoom.us/j/your-meeting-room or Google Meet link"
+                  placeholder="https://www.linkedin.com/in/your-profile"
                   className={fieldErrors.linkedinLink ? 'border-red-500' : ''}
                 />
                 {fieldErrors.linkedinLink && (
@@ -1000,7 +1017,12 @@ const TutorProfileForm = () => {
                     />
                   </div>
                 ))}
+                {fieldErrors.availability && (
+                  <p className="text-red-500 text-sm mt-2">{fieldErrors.availability}</p>
+                )}
               </div>
+
+
             </CardContent>
           </Card>
 

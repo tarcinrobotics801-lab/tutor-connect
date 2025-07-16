@@ -87,17 +87,20 @@ const BookingRequestDialog = ({ open, onOpenChange, course }: BookingRequestDial
     }
 
     createBookingRequest({
-
-      studentId: currentUser._id,
-      studentName: currentUser.name,
+      userId: currentUser._id,     
+      userName: currentUser.name,      // ✅ student or parent ID
+      requestedBy: currentUser.role === "student" || currentUser.role === "parent"
+        ? currentUser.role
+        : "student",     // ✅ "student" or "parent"
       courseId: course._id,
       courseName: course.courseName,
       tutorId: course.tutorId,
-      tutorName: course.tutorName,
+      tutorName: course.tutorId?.name || "Tutor",
       slotId: selectedSlot,
       slotDay: slot.day,
       slotTime: slot.time,
     });
+
 
     toast({
       title: "Booking Request Sent!",

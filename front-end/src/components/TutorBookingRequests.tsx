@@ -84,7 +84,7 @@ const TutorBookingRequests = () => {
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2">
                     <User className="h-5 w-5 text-purple-600" />
-                    {request.studentName}
+                    {request.userName}
                   </CardTitle>
                   <Badge className="bg-yellow-100 text-yellow-700">
                     Pending
@@ -123,7 +123,7 @@ const TutorBookingRequests = () => {
                       <DialogHeader>
                         <DialogTitle>Accept Booking Request</DialogTitle>
                         <DialogDescription>
-                          Please provide a meeting link for the session with {request.studentName}
+                          Please provide a meeting link for the session with {request.userName}
                         </DialogDescription>
                       </DialogHeader>
                       <div className="space-y-4">

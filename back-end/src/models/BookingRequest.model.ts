@@ -1,8 +1,13 @@
 import mongoose from "mongoose";
 
 const bookingRequestSchema = new mongoose.Schema({
-  studentId: { type: String, required: true },
-  studentName: { type: String, required: true },
+  userId: { type: mongoose.Schema.Types.ObjectId, required: true, ref: "User" }, // student or parent
+  userName: { type: String, required: true },
+  requestedBy: {
+    type: String,
+    enum: ["student", "parent"],
+    default: "student"
+  },
   courseId: { type: String, required: true },
   courseName: { type: String, required: true },
   tutorId: { type: mongoose.Schema.Types.Mixed, required: true }, // can be string or object

@@ -15,7 +15,7 @@ interface ResourceUploadProps {
 }
 
 const ResourceUpload = ({ onUpload, tutorId, tutorName }: ResourceUploadProps) => {
-  const { addResource } = useApp();
+  
   const { toast } = useToast();
   const [isUploading, setIsUploading] = useState(false);
   
@@ -68,22 +68,26 @@ const ResourceUpload = ({ onUpload, tutorId, tutorName }: ResourceUploadProps) =
 
     try {
       // Simulate upload delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      const resource = {
-        id: Date.now().toString(),
-        title,
-        description,
-        subject,
-        className,
-        driveUrl,
-        contents: resourceData.contents,
-        tutorId,
-        tutorName,
-        uploadedAt: new Date().toISOString()
-      };
-
-      addResource(resource);
+      const response = await fetch("http://localhost:5000/api/resources", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title,
+          description,
+          subject,
+          className,
+          driveUrl,
+          contents: resourceData.contents,
+          tutorId,
+          tutorName,
+          uploadedAt: new Date().toISOString()
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error("Failed to upload resource");
+      }
+      
 
       toast({
         title: "Resource Uploaded",

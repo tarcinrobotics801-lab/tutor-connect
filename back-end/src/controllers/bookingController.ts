@@ -1,11 +1,13 @@
 import { Request, Response } from "express";
 import { BookingRequest } from "../models/BookingRequest.model";
+import { TimeSlot } from "../models/TimeSlot.model";
 
 export const createBookingRequest = async (req: Request, res: Response) => {
   try {
     const {
-      studentId,
-      studentName,
+      userId,     
+      userName,     // ✅ required for both student/parent
+      requestedBy,     // ✅ 'student' or 'parent'
       courseId,
       courseName,
       tutorId,
@@ -14,11 +16,16 @@ export const createBookingRequest = async (req: Request, res: Response) => {
       slotDay,
       slotTime,
     } = req.body;
-    
+
+    if (!userId || !requestedBy) {
+      res.status(400).json({ message: "userId and requestedBy are required" });
+      return;
+    }
 
     const newRequest = new BookingRequest({
-      studentId,
-      studentName,
+      userId,
+      userName,
+      requestedBy,
       courseId,
       courseName,
       tutorId,
@@ -27,8 +34,9 @@ export const createBookingRequest = async (req: Request, res: Response) => {
       slotDay,
       slotTime,
       requestedAt: new Date(),
-      status: "pending"
+      status: "pending",
     });
+
 
     const saved = await newRequest.save();
     res.status(201).json({ booking: saved });
@@ -43,22 +51,62 @@ export const acceptBookingRequest = async (req: Request, res: Response): Promise
   try {
     const { requestId, meetingLink } = req.body;
 
+    if (!requestId || !meetingLink) {
+      res.status(400).json({ error: "requestId and meetingLink are required" });
+      return;
+    }
+
+    // 🔍 Fetch the booking request
     const request = await BookingRequest.findById(requestId);
     if (!request) {
       res.status(404).json({ error: "Booking request not found" });
       return;
     }
 
+    // ✅ Update booking request
     request.status = "accepted";
     request.meetingLink = meetingLink;
     request.acceptedAt = new Date();
-
     await request.save();
 
-    res.status(200).json({ message: "Booking request accepted", booking: request });
+    // ⏫ Fetch and update time slot
+    const slot = await TimeSlot.findById(request.slotId);
+    if (!slot) {
+      res.status(404).json({ error: "Associated time slot not found" });
+      return;
+    }
+
+    // ✅ Prevent overbooking
+    if (slot.currentMembers >= slot.maxMembers) {
+      res.status(400).json({ error: "Cannot accept booking, slot is already full" });
+      return;
+    }
+
+    
+
+    // ✅ Check required user fields
+    if (!request.userId || !request.requestedBy) {
+      res.status(400).json({ error: "userId and requestedBy are required in the booking request" });
+      return;
+    }
+
+    // ➕ Add student/parent to enrolledUsers
+    slot.enrolledUsers.push({
+      userId: request.userId,
+      role: request.requestedBy, // "student" or "parent"
+    });
+
+    slot.currentMembers += 1;
+    await slot.save();
+
+    res.status(200).json({
+      message: "Booking request accepted and slot updated",
+      booking: request,
+      slot,
+    });
   } catch (err) {
-    console.error("Accept booking error:", err);
-    res.status(500).json({ error: "Failed to accept booking" });
+    console.error("❌ Accept booking error:", err);
+    res.status(500).json({ error: "Failed to accept booking request" });
   }
 };
 
@@ -82,4 +130,3 @@ export const rejectBookingRequest = async (req: Request, res: Response): Promise
     res.status(500).json({ error: "Failed to reject booking" });
   }
 };
-

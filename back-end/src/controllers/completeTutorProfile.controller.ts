@@ -46,7 +46,7 @@ export const completeTutorProfile = async (
       return;
     }
 
-    const LINKEDIN_REGEX = /^https?:\/\/(www\.)?linkedin\.com\/.*$/i;
+    const LINKEDIN_REGEX = /^https?:\/\/(www\.)?linkedin\.com\/in\/[a-zA-Z0-9-_.]+\/?(\?.*)?$/i;
     if (!linkedinLink || !LINKEDIN_REGEX.test(String(linkedinLink).trim())) {
       res.status(400).json({
         message:
@@ -57,6 +57,20 @@ export const completeTutorProfile = async (
 
     if (bio.trim().split(/\s+/).length < 50) {
       res.status(400).json({ message: "Bio must be at least 50 words" });
+      return;
+    }
+    // ✅ Availability validation
+    if (!availability || typeof availability !== "object") {
+      res.status(400).json({ message: "Availability is required." });
+      return;
+    }
+    const hasAtLeastOneSlot = Object.values(availability).some((day: any) =>
+      day.available && Array.isArray(day.timeSlots) && day.timeSlots.length > 0
+    );
+    if (!hasAtLeastOneSlot) {
+      res.status(400).json({
+        message: "You must be available at least one day with time slots.",
+      });
       return;
     }
 

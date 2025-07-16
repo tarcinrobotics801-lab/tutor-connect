@@ -94,8 +94,11 @@ export interface TimeSlot {
 
 export interface BookingRequest {
   _id: string;
-  studentId: string;
-  studentName: string;
+
+  userId: string;    
+  userName: string;                      // ✅ ID of student or parent
+  requestedBy: 'student' | 'parent';   // ✅ Who made the request
+
   courseId: string;
   courseName: string;
 
@@ -543,7 +546,7 @@ const createBookingRequest = async (
       userId: tutorId,
       type: "booking_request",
       title: "New Booking Request",
-      message: `${request.studentName} has requested to book ${request.courseName} for ${request.slotDay} at ${request.slotTime}`,
+      message: `${request.userName} has requested to book ${request.courseName} for ${request.slotDay} at ${request.slotTime}`,
       bookingRequestId: newRequest._id,
       createdAt: new Date().toISOString(),
       read: false,
@@ -573,7 +576,7 @@ const getTutorBookingRequests = (tutorId: string) => {
       tutorId: request.tutorId,
       tutorId_id: typeof request.tutorId === 'object' ? request.tutorId._id : request.tutorId,
       tutorName: typeof request.tutorId === 'object' ? request.tutorId.name : 'N/A',
-      studentName: request.studentName,
+      userName: request.userName,
       courseName: request.courseName
     });
   });
@@ -601,17 +604,27 @@ const acceptBookingRequest = async (requestId: string, meetingLink: string) => {
     });
 
     const data = await res.json();
+
     if (!res.ok) throw new Error(data.message || "Accept failed");
 
+    // 🔄 Update booking request in state
     setBookingRequests(prev =>
       prev.map(request =>
         request._id === requestId ? data.booking : request
       )
     );
 
+    // 👤 Dynamic user ID (student or parent)
+    const recipientUserId =
+      data.booking.userId || data.booking.studentId;
+
+    const recipientName =
+      data.booking.userName || data.booking.studentName || "User";
+
+    // 🔔 Create notification
     const notification: Notification = {
       id: `notif-${Date.now()}`,
-      userId: data.booking.studentId,
+      userId: recipientUserId,
       type: "booking_accepted",
       title: "Booking Accepted!",
       message: `Your booking for ${data.booking.courseName} has been accepted.`,
@@ -621,11 +634,13 @@ const acceptBookingRequest = async (requestId: string, meetingLink: string) => {
     };
 
     setNotifications(prev => [...prev, notification]);
+
   } catch (err) {
     const error = err instanceof Error ? err : new Error("Unknown error occurred");
-    console.error("Accept booking failed:", error.message);
+    console.error("❌ Accept booking failed:", error.message);
   }
 };
+
 
 
   const rejectBookingRequest = async (requestId: string) => {

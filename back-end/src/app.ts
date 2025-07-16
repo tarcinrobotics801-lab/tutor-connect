@@ -8,6 +8,7 @@ import uploadRoutes from "./routes/upload.routes";
 import adminRoutes from './routes/admin.routes';
 import timeSlotRoutes from "./routes/timeslot.routes";
 import bookingRoutes from "./routes/booking.routes";
+import resourceRoutes from "./routes/resource.routes";
 const app = express();
 
 // Enable CORS for frontend (adjust origin if needed)
@@ -26,4 +27,6 @@ app.use("/api/uploads", uploadRoutes);
 app.use('/api/admin', adminRoutes);
 app.use("/api/timeslots", timeSlotRoutes);
 app.use("/api/bookings", bookingRoutes);
+app.use("/api/resources", resourceRoutes);
+
 export default app;
