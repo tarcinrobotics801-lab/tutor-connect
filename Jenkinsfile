@@ -11,7 +11,7 @@ pipeline {
       steps {
         git branch: 'prod',
             credentialsId: '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',
-            url: 'git@github.com:tarcinrobotics/tutorconnect.git'
+            url: 'git@github.com:tarcinrobotics/tutor-connect.git'
       }
     }
     stage('Build & Deploy') {
