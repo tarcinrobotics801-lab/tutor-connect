@@ -31,18 +31,17 @@ pipeline {
         sshagent(['lxc_ssh_key']) {
           sh '''
             echo "[INFO] Creating remote directory on ${REMOTE_HOST}..."
-            ssh ${REMOTE_USER}@${REMOTE_HOST} "mkdir -p ${REMOTE_DIR}"
+            ssh -o StrictHostKeyChecking=no ${REMOTE_USER}@${REMOTE_HOST} "mkdir -p ${REMOTE_DIR}"
 
             echo "[INFO] Copying files to ${REMOTE_HOST}..."
             scp -r docker-compose.yml back-end front-end ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_DIR}/
 
             echo "[INFO] Running remote docker-compose commands..."
-            ssh ${REMOTE_USER}@${REMOTE_HOST} << EOF
+            ssh -o StrictHostKeyChecking=no ${REMOTE_USER}@${REMOTE_HOST} "
               set -e
               cd ${REMOTE_DIR}
-              echo "[INFO] Current directory: \$(pwd)"
-              echo "[INFO] Docker version: \$(docker --version)"
-              echo "[INFO] Docker Compose version: \$(docker-compose --version || docker compose version)"
+              echo '[INFO] Current directory: $(pwd)'
+              echo '[INFO] Docker version: $(docker --version)'
               if command -v docker-compose &> /dev/null; then
                 docker-compose down -v --remove-orphans || true
                 docker-compose build
@@ -52,13 +51,14 @@ pipeline {
                 docker compose build
                 docker compose up -d
               fi
-            EOF
+            "
           '''
         }
       }
     }
   }
 
+  // ✅ Post actions must be **outside** the stages block
   post {
     failure {
       mail to: 'devops@tarcinacademy.in',
