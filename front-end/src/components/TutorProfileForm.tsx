@@ -25,7 +25,7 @@ const uploadImageToBackend = async (file: File, tutorId: string): Promise<string
     const formData = new FormData();
     formData.append("photo", file);
 
-    const res = await fetch(`http://localhost:5000/api/uploads/tutor-photo/${tutorId}`, {
+    const res = await fetch(`/api/uploads/tutor-photo/${tutorId}`, {
       method: "POST",
       body: formData,
     });

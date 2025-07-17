@@ -16,6 +16,49 @@ const isPasswordValid = (password: string) => {
   return regex.test(password);
 };
 
+const isEmailValid = (email: string) => {
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  return emailRegex.test(email);
+};
+
+const isGmailValid = (email: string) => {
+  const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+  return gmailRegex.test(email);
+};
+
+const isPhoneNumberValid = (phoneNumber: string) => {
+  // Remove all non-digit characters for validation
+  const cleanPhone = phoneNumber.replace(/\D/g, '');
+  
+  // Check for Indian phone number format
+  // Can be 10 digits (without country code) or 12 digits (with 91 country code)
+  const indianPhoneRegex = /^(\+91|91)?[6-9]\d{9}$/;
+  
+  return indianPhoneRegex.test(phoneNumber.replace(/\s/g, ''));
+};
+
+const formatPhoneNumber = (phoneNumber: string) => {
+  // Remove all non-digit characters except +
+  const cleaned = phoneNumber.replace(/[^\d+]/g, '');
+  
+  // If it starts with +91, keep it as is
+  if (cleaned.startsWith('+91')) {
+    return cleaned;
+  }
+  
+  // If it starts with 91 and has 12 digits total, add +
+  if (cleaned.startsWith('91') && cleaned.length === 12) {
+    return '+' + cleaned;
+  }
+  
+  // If it's 10 digits and starts with 6-9, add +91
+  if (cleaned.length === 10 && /^[6-9]/.test(cleaned)) {
+    return '+91' + cleaned;
+  }
+  
+  return cleaned;
+};
+
 const Signup = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -37,7 +80,14 @@ const Signup = () => {
   const showStudentRestriction = role === "student" && !canStudentRegister;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    let value = e.target.value;
+    
+    // Format phone number as user types
+    if (e.target.name === 'phoneNumber') {
+      value = formatPhoneNumber(value);
+    }
+    
+    setFormData({ ...formData, [e.target.name]: value });
   };
 
   const validateForm = () => {
@@ -51,8 +101,36 @@ const Signup = () => {
       return false;
     }
 
+    if (!isEmailValid(formData.email)) {
+      toast({ 
+        title: "Email Error", 
+        description: "Please enter a valid email address", 
+        variant: "destructive" 
+      });
+      return false;
+    }
+
+    // Optional: Uncomment if you want to enforce Gmail specifically
+    // if (!isGmailValid(formData.email)) {
+    //   toast({ 
+    //     title: "Email Error", 
+    //     description: "Please use a Gmail address", 
+    //     variant: "destructive" 
+    //   });
+    //   return false;
+    // }
+
     if (!formData.phoneNumber.trim()) {
       toast({ title: "Error", description: "Phone number is required", variant: "destructive" });
+      return false;
+    }
+
+    if (!isPhoneNumberValid(formData.phoneNumber)) {
+      toast({
+        title: "Phone Number Error",
+        description: "Please enter a valid Indian phone number (10 digits starting with 6-9)",
+        variant: "destructive"
+      });
       return false;
     }
 
@@ -202,30 +280,79 @@ const Signup = () => {
                   <form onSubmit={handleSignup} className="space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor={`${tabRole}-name`}>Full Name *</Label>
-                      <Input id={`${tabRole}-name`} name="name" placeholder="Full Name" value={formData.name} onChange={handleInputChange} required disabled={isLoading || (tabRole === "student" && !canStudentRegister)} />
+                      <Input 
+                        id={`${tabRole}-name`} 
+                        name="name" 
+                        placeholder="Full Name" 
+                        value={formData.name} 
+                        onChange={handleInputChange} 
+                        required 
+                        disabled={isLoading || (tabRole === "student" && !canStudentRegister)} 
+                      />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor={`${tabRole}-email`}>Email *</Label>
-                      <Input id={`${tabRole}-email`} name="email" type="email" placeholder="you@example.com" value={formData.email} onChange={handleInputChange} required disabled={isLoading || (tabRole === "student" && !canStudentRegister)} />
+                      <Input 
+                        id={`${tabRole}-email`} 
+                        name="email" 
+                        type="email" 
+                        placeholder="you@example.com" 
+                        value={formData.email} 
+                        onChange={handleInputChange} 
+                        required 
+                        disabled={isLoading || (tabRole === "student" && !canStudentRegister)} 
+                      />
+                      <p className="text-xs text-gray-500">
+                        Please enter a valid email address
+                      </p>
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor={`${tabRole}-phone`}>Phone Number *</Label>
-                      <Input id={`${tabRole}-phone`} name="phoneNumber" placeholder="+91 1234567890" value={formData.phoneNumber} onChange={handleInputChange} required disabled={isLoading || (tabRole === "student" && !canStudentRegister)} />
-                      {tabRole === "student" && (
-                        <p className="text-xs text-gray-500">
-                          Password must be at least 8 characters, include uppercase, lowercase, digit, and special character.
-                        </p>
-                      )}
+                      <Input 
+                        id={`${tabRole}-phone`} 
+                        name="phoneNumber" 
+                        placeholder="+91 1234567890" 
+                        value={formData.phoneNumber} 
+                        onChange={handleInputChange} 
+                        required 
+                        disabled={isLoading || (tabRole === "student" && !canStudentRegister)} 
+                      />
+                      <p className="text-xs text-gray-500">
+                        Enter Indian phone number (10 digits starting with 6-9)
+                      </p>
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor={`${tabRole}-password`}>Password *</Label>
-                      <Input id={`${tabRole}-password`} name="password" type="password" value={formData.password} onChange={handleInputChange} required disabled={isLoading || (tabRole === "student" && !canStudentRegister)} />
+                      <Input 
+                        id={`${tabRole}-password`} 
+                        name="password" 
+                        type="password" 
+                        value={formData.password} 
+                        onChange={handleInputChange} 
+                        required 
+                        disabled={isLoading || (tabRole === "student" && !canStudentRegister)} 
+                      />
+                      <p className="text-xs text-gray-500">
+                        Password must be at least 8 characters, include uppercase, lowercase, digit, and special character.
+                      </p>
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor={`${tabRole}-confirm`}>Confirm Password *</Label>
-                      <Input id={`${tabRole}-confirm`} name="confirmPassword" type="password" value={formData.confirmPassword} onChange={handleInputChange} required disabled={isLoading || (tabRole === "student" && !canStudentRegister)} />
+                      <Input 
+                        id={`${tabRole}-confirm`} 
+                        name="confirmPassword" 
+                        type="password" 
+                        value={formData.confirmPassword} 
+                        onChange={handleInputChange} 
+                        required 
+                        disabled={isLoading || (tabRole === "student" && !canStudentRegister)} 
+                      />
                     </div>
-                    <Button type="submit" className={`w-full ${tabRole === "tutor" ? "bg-teal-600 hover:bg-teal-700" : tabRole === "parent" ? "bg-purple-600 hover:bg-purple-700" : "bg-blue-600 hover:bg-blue-700"}`} disabled={isLoading || (tabRole === "student" && !canStudentRegister)}>
+                    <Button 
+                      type="submit" 
+                      className={`w-full ${tabRole === "tutor" ? "bg-teal-600 hover:bg-teal-700" : tabRole === "parent" ? "bg-purple-600 hover:bg-purple-700" : "bg-blue-600 hover:bg-blue-700"}`} 
+                      disabled={isLoading || (tabRole === "student" && !canStudentRegister)}
+                    >
                       {isLoading ? "Creating Account..." : `Create ${tabRole.charAt(0).toUpperCase() + tabRole.slice(1)} Account`}
                     </Button>
                   </form>

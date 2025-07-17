@@ -68,7 +68,7 @@ const ResourceUpload = ({ onUpload, tutorId, tutorName }: ResourceUploadProps) =
 
     try {
       // Simulate upload delay
-      const response = await fetch("http://localhost:5000/api/resources", {
+      const response = await fetch("/api/resources", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
