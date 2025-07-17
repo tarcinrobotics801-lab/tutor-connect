@@ -4,7 +4,7 @@ pipeline {
     COMPOSE_PROJECT_NAME = "tutorconnect"
     REMOTE_USER = "${env.REMOTE_USER}"
     REMOTE_HOST = "${env.REMOTE_HOST}"
-    REMOTE_DIR  = "${env.REMOTE_DIR}"
+    REMOTE_DIR  = "${env.REMOTE_DIR_TC}"
   }
 
   triggers {
