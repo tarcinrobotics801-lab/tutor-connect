@@ -2,9 +2,9 @@ pipeline {
   agent any
   environment {
     COMPOSE_PROJECT_NAME = "tutorconnect"
-    REMOTE_USER = "tarcin"
-    REMOTE_HOST = "192.168.0.21"
-    REMOTE_DIR  = "/opt/tutorconnect"
+    REMOTE_USER = "${env.REMOTE_USER}"
+    REMOTE_HOST = "${env.REMOTE_HOST}"
+    REMOTE_DIR  = "${env.REMOTE_DIR}"
   }
 
   triggers {
@@ -15,7 +15,7 @@ pipeline {
     stage('Checkout Code') {
       steps {
         git branch: 'prod',
-            credentialsId: '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',
+            credentialsId: 'github-pat',
             url: 'https://github.com/tarcinrobotics/tutor-connect.git'
       }
     }
@@ -28,7 +28,7 @@ pipeline {
 
     stage('Deploy to Proxmox LXC') {
       steps {
-        sshagent(['lxc_ssh_key']) {
+        sshagent(['jenkins-ssh']) {
           sh '''
             echo "[INFO] Creating remote directory on ${REMOTE_HOST}..."
             ssh -o StrictHostKeyChecking=no ${REMOTE_USER}@${REMOTE_HOST} "mkdir -p ${REMOTE_DIR}"
