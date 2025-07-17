@@ -22,7 +22,7 @@ pipeline {
 
     stage('Build Images (Local CI only)') {
       steps {
-        sh 'docker-compose build'
+        sh 'docker compose build'
       }
     }
 
