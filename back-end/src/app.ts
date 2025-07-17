@@ -13,7 +13,7 @@ const app = express();
 
 // Enable CORS for frontend (adjust origin if needed)
 app.use(cors({
-  origin: "http://localhost:8080",  // your frontend origin
+  origin: ["http://localhost:8080","https://tutorconnect.tarcin.in"],  // your frontend origin
   credentials: true
 }));
 
