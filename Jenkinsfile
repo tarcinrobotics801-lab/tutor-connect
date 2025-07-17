@@ -1,5 +1,5 @@
 pipeline {
-  agent any
+  agent { label 'ci-only' }
   environment {
     COMPOSE_PROJECT_NAME = "tutorconnect"
     REMOTE_USER = "${env.REMOTE_USER}"
