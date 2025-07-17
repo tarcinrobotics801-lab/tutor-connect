@@ -7,6 +7,7 @@ import Navigation from "@/components/Navigation";
 import { useApp } from "@/contexts/AppContext";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
+import CustomLoader from "@/components/CustomLoader";
 
 const TutorProfileView = () => {
   const { tutorId } = useParams();
@@ -14,17 +15,31 @@ const TutorProfileView = () => {
   const { currentUser } = useApp();
   const { toast } = useToast();
   const [tutor, setTutor] = useState<any>(null);
+  const [loading, setLoading] = useState(true); // ⬅️ ADD THIS
+
 
   useEffect(() => {
     if (!tutorId) return;
 
-    fetch(`/api/auth/tutor/${tutorId}`)
-      .then(res => res.json())
-      .then(data => {
+    const fetchTutor = async () => {
+      setLoading(true); // ✅ start loading
+      try {
+        const res = await fetch(`/api/auth/tutor/${tutorId}`);
+        const data = await res.json();
         setTutor(data.tutor);
-      })
-      .catch(err => console.error("Fetch error:", err));
+      } catch (err) {
+        console.error("Fetch error:", err);
+      } finally {
+        setLoading(false); // ✅ only run this after fetch completes
+      }
+    };
+
+    fetchTutor();
   }, [tutorId]);
+
+  if (loading) {
+    return <CustomLoader />; // ✅ Use CustomLoader component
+  }
 
   if (!tutor) {
     return (
@@ -91,25 +106,25 @@ const TutorProfileView = () => {
                   <span>{tutor.yearsOfExperience} experience</span>
                 </div>
 
-                
-                  {tutor.linkedinLink && (
-                    <div className="flex items-center space-x-3">
-                      <LinkIcon className="h-4 w-4 text-gray-400" />
-                      <a
-                        href={
-                          tutor.linkedinLink.startsWith("http")
-                            ? tutor.linkedinLink
-                            : `https://${tutor.linkedinLink}`
-                        }
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm text-blue-600 underline break-all"
-                      >
-                        {tutor.linkedinLink}
-                      </a>
-                    </div>
-                  )}
-                
+
+                {tutor.linkedinLink && (
+                  <div className="flex items-center space-x-3">
+                    <LinkIcon className="h-4 w-4 text-gray-400" />
+                    <a
+                      href={
+                        tutor.linkedinLink.startsWith("http")
+                          ? tutor.linkedinLink
+                          : `https://${tutor.linkedinLink}`
+                      }
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-blue-600 underline break-all"
+                    >
+                      {tutor.linkedinLink}
+                    </a>
+                  </div>
+                )}
+
 
                 <div>
                   <p className="text-sm font-medium text-gray-900 mb-2">Subjects:</p>
@@ -149,19 +164,23 @@ const TutorProfileView = () => {
                   <span>Availability</span>
                 </CardTitle>
               </CardHeader>
+
               <CardContent>
                 <div className="grid md:grid-cols-2 gap-3">
                   {days.map((day) => (
                     <div key={day} className="flex justify-between items-center p-3 rounded-lg bg-gray-50">
                       <span className="capitalize font-medium text-gray-900">{day}</span>
                       <span className="text-sm text-gray-600">
-                        {tutor.availability?.[day as keyof typeof tutor.availability] || 'Not Available'}
+                        {tutor.availability?.[day as keyof typeof tutor.availability]?.available
+                          ? tutor.availability?.[day as keyof typeof tutor.availability]?.timeSlots.join(", ") || "Available"
+                          : "Not Available"}
                       </span>
                     </div>
                   ))}
                 </div>
               </CardContent>
             </Card>
+
           </div>
         </div>
       </div>

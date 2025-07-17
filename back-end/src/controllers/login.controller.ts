@@ -15,6 +15,24 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
     console.log("Login attempt for email:", email);
 
+    // ✅ Admin login check (before DB queries)
+    if (email === "admin@tarcin.in" && password === "Tarcin@12345") {
+      const adminUser = {
+        _id: "admin-1",
+        name: "Admin",
+        email: "admin@tarcin.in",
+        role: "admin",
+        profileCompleted: true
+      };
+
+      res.status(200).json({
+        message: "Admin login successful",
+        user: adminUser
+      });
+      return;
+    }
+
+    // ✅ Continue with DB lookup for tutor, student, parent
     let user: UserDoc | null = await Tutor.findOne({ email });
     let userType: "tutor" | "student" | "parent" | null = user ? "tutor" : null;
 
@@ -63,6 +81,8 @@ export const login = async (req: Request, res: Response): Promise<void> => {
             availability: tutor.availability,
             subjects: tutor.subjects,
             courseNames: tutor.courseNames,
+            certificates:tutor.certificates,
+            achievements:tutor.achievements
           },
         });
         break;
@@ -94,7 +114,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         res.status(200).json({
           message: "Login successful",
           user: {
-            _id: parent._id, // ✅ _id exists even if not typed manually
+            _id: parent._id,
             name: parent.name,
             email: parent.email,
             role: parent.role,

@@ -25,6 +25,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useApp } from "@/contexts/AppContext";
 import { useNavigate } from "react-router-dom";
+import CustomLoader from "@/components/CustomLoader";
 
 const getYouTubeEmbedUrl = (url: string): string => {
   if (!url) return "";
@@ -210,10 +211,7 @@ const Courses = () => {
         {/* Enhanced Empty‑state */}
 
         {loading ? (
-          <div className="text-center py-16">
-            <div className="animate-spin h-10 w-10 rounded-full border-4 border-blue-400 border-t-transparent mx-auto mb-4" />
-            <p className="text-gray-600">Loading courses...</p>
-          </div>
+          <CustomLoader />
         ) : courses.length === 0 ? (
           <div className="text-center py-16">
             <div className="w-24 h-24 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -267,11 +265,11 @@ const Courses = () => {
             </div>
 
             {/* Enhanced Courses grid */}
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 auto-rows-[1fr]">
               {filteredCourses.map((course) => (
                 <Card
                   key={course._id}
-                  className="hover:shadow-xl transition-all duration-300 border-blue-100 bg-white/80 backdrop-blur-sm"
+                  className="flex flex-col justify-between h-full hover:shadow-xl transition-all duration-300 border-blue-100 bg-white/80 backdrop-blur-sm"
                 >
                   <CardHeader>
                     <div className="flex justify-between items-start mb-2">
@@ -285,12 +283,12 @@ const Courses = () => {
                     <CardTitle className="text-xl text-gray-900 line-clamp-2">
                       {course.courseName}
                     </CardTitle>
-                    <CardDescription className="text-gray-600 line-clamp-3">
+                    <CardDescription className="text-gray-600 line-clamp-3 min-h-[60px]">
                       {course.description}
                     </CardDescription>
                   </CardHeader>
 
-                  <CardContent className="space-y-4">
+                  <CardContent className="flex flex-col gap-4 mt-auto">
                     {/* Enhanced Tutor Info */}
                     <div className="flex items-center space-x-3">
                       <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center">
@@ -318,7 +316,7 @@ const Courses = () => {
                           <Clock className="h-3 w-3" />
                           Session Time:
                         </span>
-                        <span className="font-semibold text-green-600">2:00PM - 3:00PM</span>
+                        <span className="font-semibold text-green-600">{course.sessionTime}</span>
                       </div>
                     </div>
 

@@ -1,11 +1,18 @@
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Clock, User, Calendar } from "lucide-react";
 import { useApp } from "@/contexts/AppContext";
 import { useToast } from "@/hooks/use-toast";
+
 
 interface BookingRequestDialogProps {
   open: boolean;
@@ -22,24 +29,31 @@ const BookingRequestDialog = ({ open, onOpenChange, course }: BookingRequestDial
 
   useEffect(() => {
     if (open && course) {
-      console.log('Dialog opened for course:', course);
+      console.log("Dialog opened for course:", course);
       setLoading(true);
-      
-      // Create time slots if they don't exist
-      createTimeSlots(course.id, course.tutorId);
-      
-      // Small delay to ensure slots are created
-      setTimeout(() => {
-        const slots = getCourseTimeSlots(course.id);
-        console.log('Retrieved time slots:', slots);
-        setTimeSlots(slots);
+
+      const initialize = async () => {
+        await createTimeSlots(course._id, course.tutorId._id); // 👈 Fix here
+        console.log("Time slots created for course:", course._id, "by tutor:", course.tutorId._id);
+
+        const slots = await getCourseTimeSlots(course._id);
+        console.log("Retrieved time slots:", slots);
+        setTimeSlots(
+          slots.map((s) => ({
+            ...s,
+            id: s._id,
+            currentMembers: s.currentMembers ?? 0, // ✅ default to 0 if undefined
+          }))
+        );
+
         setLoading(false);
-      }, 100);
+      };
+
+      initialize();
     }
-  }, [open, course]);
+  }, [open, course, createTimeSlots, getCourseTimeSlots]);
 
   const handleSlotSelect = (slotId: string) => {
-    console.log('Selected slot:', slotId);
     setSelectedSlot(slotId);
   };
 
@@ -48,17 +62,17 @@ const BookingRequestDialog = ({ open, onOpenChange, course }: BookingRequestDial
       toast({
         title: "Error",
         description: "Please select a time slot",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
 
-    const slot = timeSlots.find(s => s.id === selectedSlot);
+    const slot = timeSlots.find((s) => s.id === selectedSlot);
     if (!slot) {
       toast({
         title: "Error",
         description: "Selected slot not found",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
@@ -67,28 +81,31 @@ const BookingRequestDialog = ({ open, onOpenChange, course }: BookingRequestDial
       toast({
         title: "Slot Full",
         description: "This time slot is already full. Please select another slot.",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
 
-    console.log('Submitting booking request for slot:', slot);
-
     createBookingRequest({
-      studentId: currentUser._id,
-      studentName: currentUser.name,
+      userId: currentUser._id,     
+      userName: currentUser.name,      // ✅ student or parent ID
+      requestedBy: currentUser.role === "student" || currentUser.role === "parent"
+        ? currentUser.role
+        : "student",     // ✅ "student" or "parent"
       courseId: course._id,
       courseName: course.courseName,
       tutorId: course.tutorId,
-      tutorName: course.tutorName,
+      tutorName: course.tutorId?.name || "Tutor",
       slotId: selectedSlot,
       slotDay: slot.day,
-      slotTime: slot.time
+      slotTime: slot.time,
     });
+
 
     toast({
       title: "Booking Request Sent!",
-      description: "Your booking request has been sent to the tutor. You'll receive a notification once it's reviewed.",
+      description:
+        "Your booking request has been sent to the tutor. You'll receive a notification once it's reviewed.",
     });
 
     onOpenChange(false);
@@ -103,7 +120,9 @@ const BookingRequestDialog = ({ open, onOpenChange, course }: BookingRequestDial
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-2xl text-purple-900">Book Session - {course.title}</DialogTitle>
+          <DialogTitle className="text-2xl text-purple-900">
+            Book Session - {course.title}
+          </DialogTitle>
           <DialogDescription>
             Select an available time slot for your session with {course.tutorName}
           </DialogDescription>
@@ -115,7 +134,7 @@ const BookingRequestDialog = ({ open, onOpenChange, course }: BookingRequestDial
               <Calendar className="h-5 w-5 text-purple-600" />
               Available Time Slots
             </h3>
-            
+
             {loading ? (
               <div className="text-center py-8">
                 <p className="text-gray-600">Loading available time slots...</p>
@@ -123,20 +142,21 @@ const BookingRequestDialog = ({ open, onOpenChange, course }: BookingRequestDial
             ) : timeSlots.length === 0 ? (
               <div className="text-center py-8">
                 <p className="text-gray-600">No time slots available for this course.</p>
-                <p className="text-sm text-gray-500 mt-2">The tutor may not have set their availability yet.</p>
+                <p className="text-sm text-gray-500 mt-2">
+                  The tutor may not have set their availability yet.
+                </p>
               </div>
             ) : (
               <div className="grid gap-3">
                 {timeSlots.map((slot) => (
-                  <Card 
-                    key={slot.id} 
-                    className={`cursor-pointer transition-all border-2 ${
-                      selectedSlot === slot.id 
-                        ? 'border-purple-500 bg-purple-50' 
+                  <Card
+                    key={slot.id}
+                    className={`cursor-pointer transition-all border-2 ${selectedSlot === slot.id
+                        ? "border-purple-500 bg-purple-50"
                         : isSlotAvailable(slot)
-                        ? 'border-gray-200 hover:border-purple-300'
-                        : 'border-red-200 bg-red-50 cursor-not-allowed'
-                    }`}
+                          ? "border-gray-200 hover:border-purple-300"
+                          : "border-red-200 bg-red-50 cursor-not-allowed"
+                      }`}
                     onClick={() => isSlotAvailable(slot) && handleSlotSelect(slot.id)}
                   >
                     <CardContent className="p-4">
@@ -149,7 +169,6 @@ const BookingRequestDialog = ({ open, onOpenChange, course }: BookingRequestDial
                               {slot.time}
                             </div>
                           </div>
-                          
                           <div className="flex items-center gap-2">
                             <User className="h-4 w-4 text-gray-500" />
                             <span className="text-sm text-gray-600">
@@ -157,18 +176,14 @@ const BookingRequestDialog = ({ open, onOpenChange, course }: BookingRequestDial
                             </span>
                           </div>
                         </div>
-
                         <div className="flex items-center gap-2">
                           {isSlotAvailable(slot) ? (
                             <Badge variant="secondary" className="bg-green-100 text-green-700">
                               Available
                             </Badge>
                           ) : (
-                            <Badge variant="destructive">
-                              Full
-                            </Badge>
+                            <Badge variant="destructive">Full</Badge>
                           )}
-                          
                           {selectedSlot === slot.id && (
                             <div className="w-3 h-3 bg-purple-500 rounded-full" />
                           )}
@@ -182,13 +197,10 @@ const BookingRequestDialog = ({ open, onOpenChange, course }: BookingRequestDial
           </div>
 
           <div className="flex justify-end gap-3 pt-4 border-t">
-            <Button 
-              variant="outline" 
-              onClick={() => onOpenChange(false)}
-            >
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button 
+            <Button
               onClick={handleBookingSubmit}
               disabled={!selectedSlot || loading}
               className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"

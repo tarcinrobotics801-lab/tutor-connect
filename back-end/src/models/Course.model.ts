@@ -7,6 +7,7 @@ export interface ICourse extends Document {
   level: string;
   pricePerSession: number;         // 0 means “Free”
   description: string;
+  sessionTime: String,
   tag: string[];
   demoLink: string;                // NEW – YouTube demo video
   tutorId: mongoose.Types.ObjectId;
@@ -24,6 +25,7 @@ const courseSchema = new Schema<ICourse>(
     level:            { type: String, required: true },
     pricePerSession:  { type: Number, required: true, min: 0 },
     description:      { type: String, required: true },
+    sessionTime:      { type: String, required: true },
     tag:              { type: [String], default: [] },
     demoLink: {
       type: String,

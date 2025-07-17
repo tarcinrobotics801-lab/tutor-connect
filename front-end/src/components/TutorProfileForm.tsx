@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { User, Mail, Phone, Book, Award, Calendar, Link as LinkIcon, Save, Upload, Plus, AlertCircle, RefreshCw, FileText, ExternalLink, Trash2,Trophy } from "lucide-react";
+import { User, Mail, Phone, Book, Award, Calendar, Link as LinkIcon, Save, Upload, Plus, AlertCircle, RefreshCw, FileText, ExternalLink, Trash2, Trophy } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useApp } from "@/contexts/AppContext";
 import { useNavigate } from "react-router-dom";
@@ -25,7 +25,7 @@ const uploadImageToBackend = async (file: File, tutorId: string): Promise<string
     const formData = new FormData();
     formData.append("photo", file);
 
-    const res = await fetch(`/api/uploads/tutor-photo/${tutorId}`, {
+    const res = await fetch(`http://localhost:5000/api/uploads/tutor-photo/${tutorId}`, {
       method: "POST",
       body: formData,
     });
@@ -40,7 +40,7 @@ const uploadImageToBackend = async (file: File, tutorId: string): Promise<string
   }
 };
 const TutorProfileForm = () => {
-  const { currentUser, updateUser, addCourse } = useApp(); 
+  const { currentUser, updateUser, addCourse } = useApp();
   const [addedCourses, setAddedCourses] = useState<unknown[]>([]);
   const [isEditing, setIsEditing] = useState(!currentUser?.profileCompleted);
   const { toast } = useToast();
@@ -61,14 +61,15 @@ const TutorProfileForm = () => {
     yearsOfExperience: currentUser?.yearsOfExperience || "",
     subjects: currentUser?.subjects || [],
     availability: currentUser?.availability || {
-      monday: "",
-      tuesday: "",
-      wednesday: "",
-      thursday: "",
-      friday: "",
-      saturday: "",
-      sunday: ""
+      monday: { available: false, timeSlots: [] },
+      tuesday: { available: false, timeSlots: [] },
+      wednesday: { available: false, timeSlots: [] },
+      thursday: { available: false, timeSlots: [] },
+      friday: { available: false, timeSlots: [] },
+      saturday: { available: false, timeSlots: [] },
+      sunday: { available: false, timeSlots: [] },
     },
+
     linkedinLink: currentUser?.linkedinLink || "",
     photo: currentUser?.photo || null,
     certificates: currentUser?.certificates || [], // ⭐ ADDED from 2nd code
@@ -82,7 +83,8 @@ const TutorProfileForm = () => {
     sub: "",
     level: "",
     pricePerSession: 0, // Changed from 'price' to 'pricePerSession'
-    tag: [] as string[] ,// Changed from 'tags' to 'tag'
+    sessionTime: "",
+    tag: [] as string[],// Changed from 'tags' to 'tag'
     demoLink: "",           // NEW
   });
 
@@ -93,10 +95,10 @@ const TutorProfileForm = () => {
   useState(() => {
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
-    
+
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
-    
+
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
@@ -113,12 +115,7 @@ const TutorProfileForm = () => {
     if (error) setError(null);
   };
 
-  const handleAvailabilityChange = (day: string, time: string) => {
-    setProfileData(prev => ({
-      ...prev,
-      availability: { ...prev.availability, [day]: time },
-    }));
-  };
+
 
   // ⭐ ADDED Certificate handlers from 2nd code
   const handleCertificateUpload = (certificate: { name: string; url: string; uploadedAt: string }) => {
@@ -126,7 +123,7 @@ const TutorProfileForm = () => {
       ...prev,
       certificates: [...prev.certificates, certificate]
     }));
-    
+
     toast({
       title: "Certificate Uploaded",
       description: "Your certificate has been uploaded successfully.",
@@ -137,7 +134,7 @@ const TutorProfileForm = () => {
       ...prev,
       achievements: [...prev.achievements, achievement]
     }));
-    
+
     toast({
       title: "Achievement Uploaded",
       description: "Your achievement certificate has been uploaded successfully.",
@@ -149,19 +146,19 @@ const TutorProfileForm = () => {
       ...prev,
       certificates: prev.certificates.filter((_, i) => i !== index)
     }));
-    
+
     toast({
       title: "Certificate Removed",
       description: "Certificate has been removed from your profile.",
     });
   };
-  
+
   const handleRemoveAchievement = (index: number) => {
     setProfileData(prev => ({
       ...prev,
       achievements: prev.achievements.filter((_, i) => i !== index)
     }));
-    
+
     toast({
       title: "Achievement Removed",
       description: "Achievement has been removed from your profile.",
@@ -175,32 +172,49 @@ const TutorProfileForm = () => {
         return !value || !(value as string).trim() ? 'Educational qualification is required' : null;
       case 'yearsOfExperience':
         return !value || !(value as string).trim() ? 'Years of experience is required' : null;
-        case 'linkedinLink': {
-          if (typeof value !== "string" || !value.trim()) {
-            return 'LinkedIn link is required';
-          }
-          const linkStr = value.trim();
-          // Strict LinkedIn URL regex
-          const LINKEDIN_REGEX = /^https?:\/\/(www\.)?linkedin\.com\/.*$/i;
-          if (!LINKEDIN_REGEX.test(linkStr)) {
-            return 'Please enter a valid LinkedIn profile URL (e.g., https://linkedin.com/in/yourname)';
-          }
-          return null;
+      case 'linkedinLink': {
+        if (typeof value !== "string" || !value.trim()) {
+          return 'LinkedIn link is required';
         }
-        case 'bio': {
-          if (typeof value !== "string" || !value.trim()) {
-            return 'Bio is required';
-          }
-  
-          const wordCount = value.trim().split(/\s+/).length;
-          if (wordCount < 50) {
-            return 'Bio must be at least 50 words long';
-          }
-  
-          return null;
+        const linkStr = value.trim();
+        // Strict LinkedIn URL regex
+        const LINKEDIN_REGEX = /^https?:\/\/(www\.)?linkedin\.com\/in\/[a-zA-Z0-9-_.]+\/?(\?.*)?$/i;
+        if (!LINKEDIN_REGEX.test(linkStr)) {
+          return 'Please enter a valid LinkedIn profile URL (e.g., https://linkedin.com/in/yourname)';
         }
+        return null;
+      }
+      case 'bio': {
+        if (typeof value !== "string" || !value.trim()) {
+          return 'Bio is required';
+        }
+        const wordCount = value.trim().split(/\s+/).length;
+        if (wordCount < 50) {
+          return 'Bio must be at least 50 words long';
+        }
+        return null;
+      }
       case 'subjects':
         return !value || !(value as string[]).length ? 'At least one subject is required' : null;
+      case "availability": {
+        const avail = value as typeof profileData.availability;
+
+        console.log("🔍 Availability validation input:", avail);
+
+        if (!avail || typeof avail !== "object") {
+          return "Availability is required.";
+        }
+        const hasValidDay = Object.values(avail).some(
+          (day) =>
+            day?.available === true &&
+            Array.isArray(day.timeSlots) &&
+            day.timeSlots.length > 0
+        );
+        if (!hasValidDay) {
+          return "You must be available at least one day with time slots.";
+        }
+        return null;
+      }
       case 'certificates': // ⭐ ADDED certificate validation
         return !value || !(value as unknown[]).length ? 'At least one certificate is required' : null;
       default:
@@ -210,7 +224,7 @@ const TutorProfileForm = () => {
 
   const validateForm = (): boolean => {
     const errors: Record<string, string> = {};
-    const fieldsToValidate = ['educationalQualification', 'yearsOfExperience', 'linkedinLink', 'bio', 'subjects', 'certificates']; // ⭐ ADDED certificates
+    const fieldsToValidate = ['educationalQualification', 'yearsOfExperience', 'linkedinLink', 'bio', 'subjects', 'certificates', 'availability']; // ⭐ ADDED certificates
 
     fieldsToValidate.forEach(field => {
       const error = validateField(field, profileData[field as keyof typeof profileData]);
@@ -239,34 +253,34 @@ const TutorProfileForm = () => {
     if (!navigator.onLine) {
       return { message: 'No internet connection. Please check your network.', type: 'network' };
     }
-    
+
     const err = error as { response?: { status?: number; data?: unknown }; message?: string };
-    
+
     if (err.response?.status === 400) {
-      return { 
-        message: 'Invalid data provided. Please check your inputs.', 
+      return {
+        message: 'Invalid data provided. Please check your inputs.',
         type: 'validation',
         code: '400',
-        details: err.response.data 
+        details: err.response.data
       };
     }
-    
+
     if (err.response?.status === 401) {
       return { message: 'Session expired. Please log in again.', type: 'server', code: '401' };
     }
-    
+
     if (err.response?.status && err.response.status >= 500) {
-      return { 
-        message: 'Server error. Please try again later.', 
+      return {
+        message: 'Server error. Please try again later.',
         type: 'server',
-        code: err.response.status.toString() 
+        code: err.response.status.toString()
       };
     }
-    
-    return { 
-      message: err.message || 'An unexpected error occurred. Please try again.', 
+
+    return {
+      message: err.message || 'An unexpected error occurred. Please try again.',
       type: 'unknown',
-      details: error 
+      details: error
     };
   };
 
@@ -279,7 +293,7 @@ const TutorProfileForm = () => {
 
     // Use only _id property
     const userId = currentUser._id;
-    
+
     if (!userId) {
       setError({ message: 'User ID not found. Please log in again.', type: 'validation' });
       return;
@@ -289,7 +303,7 @@ const TutorProfileForm = () => {
       'educationalQualification',
       'yearsOfExperience',
       'linkedinLink',
-      'bio'
+      'bio',
     ];
 
     const missingFields = requiredFields.filter(field => {
@@ -391,7 +405,7 @@ const TutorProfileForm = () => {
     }
   };
   const YOUTUBE_REGEX =
-  /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)[\w-]{11}$/;
+    /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)[\w-]{11}$/;
 
   // Fixed: Use only _id property and correct field names for course
   const handleAddCourse = async () => {
@@ -461,6 +475,7 @@ const TutorProfileForm = () => {
       sub: newCourse.sub,
       level: newCourse.level,
       pricePerSession: newCourse.pricePerSession,
+      sessionTime: newCourse.sessionTime,
       tag: newCourse.tag,
       demoLink: newCourse.demoLink,
       tutorId: userId,
@@ -490,6 +505,7 @@ const TutorProfileForm = () => {
         sub: "",
         level: "",
         pricePerSession: 0,
+        sessionTime: "",
         tag: [],
         demoLink: ""
       });
@@ -507,17 +523,15 @@ const TutorProfileForm = () => {
     }
   };
   const ErrorAlert = ({ error, onRetry }: { error: ApiError; onRetry?: () => void }) => (
-    <div className={`p-4 rounded-lg mb-4 ${
-      error.type === 'network' ? 'bg-orange-50 border border-orange-200' :
+    <div className={`p-4 rounded-lg mb-4 ${error.type === 'network' ? 'bg-orange-50 border border-orange-200' :
       error.type === 'validation' ? 'bg-yellow-50 border border-yellow-200' :
-      'bg-red-50 border border-red-200'
-    }`}>
+        'bg-red-50 border border-red-200'
+      }`}>
       <div className="flex items-start">
-        <AlertCircle className={`w-5 h-5 mt-0.5 mr-3 ${
-          error.type === 'network' ? 'text-orange-500' :
+        <AlertCircle className={`w-5 h-5 mt-0.5 mr-3 ${error.type === 'network' ? 'text-orange-500' :
           error.type === 'validation' ? 'text-yellow-500' :
-          'text-red-500'
-        }`} />
+            'text-red-500'
+          }`} />
         <div className="flex-1">
           <p className="font-medium text-gray-900">{error.message}</p>
           {error.code && <p className="text-sm text-gray-600 mt-1">Error code: {error.code}</p>}
@@ -565,7 +579,7 @@ const TutorProfileForm = () => {
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Profile Settings</h1>
           <p className="text-gray-600 mt-2">
-            {currentUser?.profileCompleted 
+            {currentUser?.profileCompleted
               ? "Your profile is complete and visible to students."
               : "Complete your profile to start receiving bookings. All fields except photo are required."
             }
@@ -656,13 +670,13 @@ const TutorProfileForm = () => {
               <div className="flex items-center space-x-3">
                 <Award className="h-4 w-4 text-gray-400" />
                 <span className="text-sm">
-                  {profileData.yearsOfExperience ? `${profileData.yearsOfExperience} experience `: "Experience not added"}
+                  {profileData.yearsOfExperience ? `${profileData.yearsOfExperience} experience ` : "Experience not added"}
                 </span>
               </div>
               <div className="flex items-center space-x-3">
                 <LinkIcon className="h-4 w-4 text-gray-400" />
                 <span className="text-sm text-blue-600 truncate">
-                  {profileData.linkedinLink || "Meeting link not added"}
+                  {profileData.linkedinLink || "LinkedIn link not added"}
                 </span>
               </div>
             </CardContent>
@@ -763,11 +777,11 @@ const TutorProfileForm = () => {
                   ))}
                 </div>
               )}
-              
+
               {isEditing && (
                 <CertificateUpload onUpload={handleCertificateUpload} />
               )}
-              
+
               {profileData.certificates.length === 0 && (
                 <div className="text-center py-6 text-gray-500">
                   <FileText className="h-12 w-12 mx-auto mb-3 text-gray-300" />
@@ -777,7 +791,7 @@ const TutorProfileForm = () => {
                   )}
                 </div>
               )}
-              
+
               {fieldErrors.certificates && (
                 <p className="text-red-500 text-sm mt-2">{fieldErrors.certificates}</p>
               )}
@@ -833,11 +847,11 @@ const TutorProfileForm = () => {
                   ))}
                 </div>
               )}
-              
+
               {isEditing && (
                 <AchievementUpload onUpload={handleAchievementUpload} />
               )}
-              
+
               {profileData.achievements.length === 0 && (
                 <div className="text-center py-6 text-gray-500">
                   <Trophy className="h-12 w-12 mx-auto mb-3 text-gray-300" />
@@ -850,7 +864,7 @@ const TutorProfileForm = () => {
             </CardContent>
           </Card>
         </div>
-        
+
 
         {/* Main Profile Content */}
         <div className="lg:col-span-2 space-y-6">
@@ -877,7 +891,7 @@ const TutorProfileForm = () => {
                   <p className="text-red-500 text-sm mt-1">{fieldErrors.educationalQualification}</p>
                 )}
               </div>
-              
+
               <div>
                 <Label htmlFor="experience">
                   Years of Experience <span className="text-red-500">*</span>
@@ -894,18 +908,18 @@ const TutorProfileForm = () => {
                   <p className="text-red-500 text-sm mt-1">{fieldErrors.yearsOfExperience}</p>
                 )}
               </div>
-              
+
               <div>
-                <Label htmlFor="meetingLink">
-                  Meeting Link <span className="text-red-500">*</span>
+                <Label htmlFor="linkedin">
+                  LinkedIn Link <span className="text-red-500">*</span>
                 </Label>
                 <Input
 
-                  id="meetingLink"
+                  id="linkedin"
                   value={profileData.linkedinLink}
                   onChange={(e) => handleInputChange("linkedinLink", e.target.value)}
                   disabled={!isEditing}
-                  placeholder="https://zoom.us/j/your-meeting-room or Google Meet link"
+                  placeholder="https://www.linkedin.com/in/your-profile"
                   className={fieldErrors.linkedinLink ? 'border-red-500' : ''}
                 />
                 {fieldErrors.linkedinLink && (
@@ -943,7 +957,6 @@ const TutorProfileForm = () => {
             </CardContent>
           </Card>
 
-          {/* Availability */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
@@ -952,24 +965,70 @@ const TutorProfileForm = () => {
               </CardTitle>
               <CardDescription>Set your weekly schedule for student bookings</CardDescription>
             </CardHeader>
+
             <CardContent>
-              <div className="space-y-3">
-                {days.map((day) => (
-                  <div key={day} className="grid grid-cols-3 gap-4 items-center">
+              <div className="space-y-4">
+                {Object.entries(profileData.availability).map(([day, data]) => (
+                  <div key={day} className="grid grid-cols-4 gap-4 items-center">
+                    {/* Day label */}
                     <Label className="capitalize font-medium">{day}</Label>
-                    <div className="col-span-2">
-                      <Input
-                        value={profileData.availability[day as keyof typeof profileData.availability]}
-                        onChange={(e) => handleAvailabilityChange(day, e.target.value)}
+
+                    {/* Available checkbox */}
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        checked={data.available}
                         disabled={!isEditing}
-                        placeholder="e.g., 9:00 AM - 5:00 PM or Unavailable"
+                        onChange={(e) => {
+                          setProfileData((prev) => ({
+                            ...prev,
+                            availability: {
+                              ...prev.availability,
+                              [day]: {
+                                ...prev.availability[day],
+                                available: e.target.checked,
+                              },
+                            },
+                          }));
+                        }}
                       />
+                      <span className="text-sm">Available</span>
                     </div>
+
+                    {/* Time slots input */}
+                    <input
+                      type="text"
+                      disabled={!isEditing}
+                      placeholder="e.g., 10:00 AM, 2:00 PM"
+                      value={data.timeSlots.join(", ")}
+                      onChange={(e) => {
+                        setProfileData((prev) => ({
+                          ...prev,
+                          availability: {
+                            ...prev.availability,
+                            [day]: {
+                              ...prev.availability[day],
+                              timeSlots: e.target.value
+                                .split(",")
+                                .map((s) => s.trim())
+                                .filter((s) => s.length > 0),
+                            },
+                          },
+                        }));
+                      }}
+                      className="col-span-2 border rounded px-2 py-1 text-sm"
+                    />
                   </div>
                 ))}
+                {fieldErrors.availability && (
+                  <p className="text-red-500 text-sm mt-2">{fieldErrors.availability}</p>
+                )}
               </div>
+
+
             </CardContent>
           </Card>
+
 
           {/* Add Course Section */}
           {isProfileComplete() && (
@@ -1009,7 +1068,7 @@ const TutorProfileForm = () => {
                     </Select>
                   </div>
                 </div>
-                
+
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="course-level">Level</Label>
@@ -1035,6 +1094,16 @@ const TutorProfileForm = () => {
                       placeholder="0 = Free, 50 = ₹50 / session"
                     />
                   </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="session-time">Session Time</Label>
+                  <Input
+                    id="session-time"
+                    value={newCourse.sessionTime}
+                    onChange={(e) => setNewCourse(prev => ({ ...prev, sessionTime: e.target.value }))}
+                    placeholder="e.g., Monday 3:00 PM - 4:00 PM"
+                  />
                 </div>
 
                 <div>
@@ -1089,7 +1158,7 @@ const TutorProfileForm = () => {
                       }
                       placeholder="https://youtu.be/VIDEO_ID"
                     />
-      </div>
+                  </div>
                 </div>
 
                 <Button onClick={handleAddCourse} className="w-full">

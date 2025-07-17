@@ -6,11 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Navigation from "@/components/Navigation";
 import { User, Search, Star, BookOpen } from "lucide-react";
+import CustomLoader from "@/components/CustomLoader";
 
 const Tutors = () => {
   const [tutors, setTutors] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSubject, setSelectedSubject] = useState("All");
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -22,6 +24,7 @@ const Tutors = () => {
         if (response.ok) {
           setTutors(data.tutors);
         }
+        setLoading(false);
       } catch (error) {
         console.error("Error fetching tutors:", error);
       }
@@ -46,10 +49,10 @@ const Tutors = () => {
     const matchesSearch = tutor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       tutor.subjects?.some(subject => subject.toLowerCase().includes(searchTerm.toLowerCase())) ||
       tutor.educationalQualification?.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesSubject = selectedSubject === "All" || 
+
+    const matchesSubject = selectedSubject === "All" ||
       tutor.subjects?.some(subject => subject === selectedSubject);
-    
+
     return matchesSearch && matchesSubject;
   });
 
@@ -63,12 +66,14 @@ const Tutors = () => {
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
-            Find Your Perfect tutor
+            Find Your Perfect Tutor
           </h1>
           <p className="text-gray-600">Connect with experienced educators ready to help you succeed.</p>
         </div>
 
-        {tutors.length === 0 ? (
+        {loading ? (
+          <CustomLoader />
+        ) : tutors.length === 0 ? (
           <div className="text-center py-16">
             <div className="w-24 h-24 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
               <User className="h-12 w-12 text-blue-600" />
@@ -96,7 +101,7 @@ const Tutors = () => {
                     className="pl-10 border-blue-200 focus:border-blue-400"
                   />
                 </div>
-                
+
                 {/* Subject Filter Buttons */}
                 <div className="flex flex-wrap gap-2">
                   {allSubjects.map((subject) => (
@@ -158,9 +163,9 @@ const Tutors = () => {
                       <p className="text-sm font-medium text-gray-900 mb-2">Subjects:</p>
                       <div className="flex flex-wrap gap-1 justify-center">
                         {tutor.subjects?.map((subject) => (
-                          <Badge 
-                            key={subject} 
-                            variant="secondary" 
+                          <Badge
+                            key={subject}
+                            variant="secondary"
                             className="bg-blue-100 text-blue-700 hover:bg-blue-200"
                           >
                             {subject}
@@ -174,7 +179,7 @@ const Tutors = () => {
                     </div>
 
                     <div className="pt-2">
-                      <Button 
+                      <Button
                         onClick={() => handleViewProfile(tutor._id)}
                         className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
                       >
@@ -191,7 +196,7 @@ const Tutors = () => {
                 <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-gray-900 mb-2">No tutors found</h3>
                 <p className="text-gray-600">
-                  {selectedSubject !== "All" 
+                  {selectedSubject !== "All"
                     ? `No tutors found for ${selectedSubject}. Try selecting a different subject or adjusting your search.`
                     : "Try adjusting your search criteria."
                   }

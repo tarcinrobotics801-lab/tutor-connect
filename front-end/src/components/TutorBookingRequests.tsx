@@ -79,12 +79,12 @@ const TutorBookingRequests = () => {
       ) : (
         <div className="grid gap-4">
           {pendingRequests.map((request) => (
-            <Card key={request.id} className="border-purple-200">
+            <Card key={request._id} className="border-purple-200">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2">
                     <User className="h-5 w-5 text-purple-600" />
-                    {request.studentName}
+                    {request.userName}
                   </CardTitle>
                   <Badge className="bg-yellow-100 text-yellow-700">
                     Pending
@@ -110,8 +110,8 @@ const TutorBookingRequests = () => {
 
                 <div className="flex gap-3">
                   <Dialog 
-                    open={openDialogs[request.id] || false} 
-                    onOpenChange={(open) => setDialogOpen(request.id, open)}
+                    open={openDialogs[request._id] || false} 
+                    onOpenChange={(open) => setDialogOpen(request._id, open)}
                   >
                     <DialogTrigger asChild>
                       <Button className="bg-green-600 hover:bg-green-700 text-white">
@@ -123,7 +123,7 @@ const TutorBookingRequests = () => {
                       <DialogHeader>
                         <DialogTitle>Accept Booking Request</DialogTitle>
                         <DialogDescription>
-                          Please provide a meeting link for the session with {request.studentName}
+                          Please provide a meeting link for the session with {request.userName}
                         </DialogDescription>
                       </DialogHeader>
                       <div className="space-y-4">
@@ -134,8 +134,8 @@ const TutorBookingRequests = () => {
                             <Input
                               id="meetingLink"
                               placeholder="https://meet.google.com/xxx-xxxx-xxx"
-                              value={meetingLinks[request.id] || ''}
-                              onChange={(e) => handleMeetingLinkChange(request.id, e.target.value)}
+                              value={meetingLinks[request._id] || ''}
+                              onChange={(e) => handleMeetingLinkChange(request._id, e.target.value)}
                               className="pl-10"
                             />
                           </div>
@@ -143,12 +143,12 @@ const TutorBookingRequests = () => {
                         <div className="flex justify-end gap-3">
                           <Button 
                             variant="outline" 
-                            onClick={() => setDialogOpen(request.id, false)}
+                            onClick={() => setDialogOpen(request._id, false)}
                           >
                             Cancel
                           </Button>
                           <Button 
-                            onClick={() => handleAcceptRequest(request.id)}
+                            onClick={() => handleAcceptRequest(request._id)}
                             className="bg-green-600 hover:bg-green-700"
                           >
                             Accept & Send Link
@@ -160,7 +160,7 @@ const TutorBookingRequests = () => {
 
                   <Button 
                     variant="destructive"
-                    onClick={() => handleRejectRequest(request.id)}
+                    onClick={() => handleRejectRequest(request._id)}
                   >
                     <X className="h-4 w-4 mr-2" />
                     Reject

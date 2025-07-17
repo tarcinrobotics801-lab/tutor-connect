@@ -37,17 +37,10 @@ const TutorDashboard = () => {
   const tutorPhoto = currentUser.photo || null;
 
   // Helper function to check if a day is actually available
-  const isActuallyAvailable = (availabilityText) => {
-    if (!availabilityText || availabilityText.trim() === "") {
-      return false;
-    }
-    
-    const text = availabilityText.toLowerCase().trim();
-    // Check if the text indicates unavailability
-    const unavailableKeywords = ['unavailable', 'not available', 'no', 'none', 'closed', 'off'];
-    
-    return !unavailableKeywords.some(keyword => text.includes(keyword));
+  const isActuallyAvailable = (dayData: any) => {
+    return dayData?.available && Array.isArray(dayData.timeSlots) && dayData.timeSlots.length > 0;
   };
+
 
   // Create subject distribution data for chart
   const subjectChartData = tutorSubjects.map((subject, index) => ({
@@ -59,28 +52,28 @@ const TutorDashboard = () => {
   // Create experience level data - since experience is string, parse it
   const experienceYears = parseInt(tutorExperience) || 0;
   const experienceLevel = experienceYears >= 5 ? 'Expert' : experienceYears >= 2 ? 'Intermediate' : 'Beginner';
-  
+
   // Create course levels based on subjects (mock data based on experience)
   const courseLevelData = tutorSubjects.length > 0 ? [
-    { 
-      name: 'Beginner', 
-      value: experienceYears >= 1 ? Math.ceil(tutorSubjects.length * 0.4) : tutorSubjects.length, 
-      color: '#10B981' 
+    {
+      name: 'Beginner',
+      value: experienceYears >= 1 ? Math.ceil(tutorSubjects.length * 0.4) : tutorSubjects.length,
+      color: '#10B981'
     },
-    { 
-      name: 'Intermediate', 
-      value: experienceYears >= 2 ? Math.ceil(tutorSubjects.length * 0.4) : 0, 
-      color: '#3B82F6' 
+    {
+      name: 'Intermediate',
+      value: experienceYears >= 2 ? Math.ceil(tutorSubjects.length * 0.4) : 0,
+      color: '#3B82F6'
     },
-    { 
-      name: 'Advanced', 
-      value: experienceYears >= 5 ? Math.ceil(tutorSubjects.length * 0.2) : 0, 
-      color: '#F59E0B' 
+    {
+      name: 'Advanced',
+      value: experienceYears >= 5 ? Math.ceil(tutorSubjects.length * 0.2) : 0,
+      color: '#F59E0B'
     }
   ].filter(item => item.value > 0) : [];
 
   // Calculate availability (count only actually available days)
-  const availabilityEntries = Object.keys(tutorAvailability).filter(day => 
+  const availabilityEntries = Object.keys(tutorAvailability).filter(day =>
     isActuallyAvailable(tutorAvailability[day])
   ).length;
 
@@ -184,7 +177,7 @@ const TutorDashboard = () => {
                 </div>
               )}
             </div>
-            
+
             {tutorBio && (
               <div>
                 <label className="text-sm font-medium text-gray-700">Bio</label>
@@ -195,8 +188,8 @@ const TutorDashboard = () => {
             {tutorLinkedIn && (
               <div>
                 <label className="text-sm font-medium text-gray-700">LinkedIn Profile</label>
-                <a href={tutorLinkedIn} target="_blank" rel="noopener noreferrer" 
-                   className="text-blue-600 hover:text-blue-800 flex items-center mt-1">
+                <a href={tutorLinkedIn} target="_blank" rel="noopener noreferrer"
+                  className="text-blue-600 hover:text-blue-800 flex items-center mt-1">
                   <TrendingUp className="h-4 w-4 mr-2" />
                   View LinkedIn Profile
                 </a>
@@ -300,44 +293,32 @@ const TutorDashboard = () => {
             <CardDescription>Your teaching schedule preferences</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-7 gap-2">
-              {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day) => {
-                const dayKey = day.toLowerCase();
-                const availability = tutorAvailability[dayKey];
-                const hasEntry = availability && availability.trim() !== "";
-                const isAvailable = isActuallyAvailable(availability);
-                
-                return (
-                  <div key={day} className={`p-3 rounded-lg text-center border ${
-                    hasEntry 
-                      ? isAvailable 
-                        ? 'bg-green-100 border-green-200' 
-                        : 'bg-red-100 border-red-200'
-                      : 'bg-gray-100 border-gray-200'
+            <div className="grid grid-cols-7 gap-2">{['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day) => {
+              const dayKey = day.toLowerCase();
+              const dayData = tutorAvailability[dayKey]; // Ex: { available: true, timeSlots: [...] }
+              const isAvailable = isActuallyAvailable(dayData);
+              const timeSlots = dayData?.timeSlots || [];
+
+              return (
+                <div key={day} className={`p-3 rounded-lg text-center border ${isAvailable
+                    ? 'bg-green-100 border-green-200'
+                    : 'bg-red-100 border-red-200'
                   }`}>
-                    <div className="font-medium text-sm">{day.slice(0, 3)}</div>
-                    {hasEntry && (
-                      <div className="text-xs text-gray-600 mt-1">
-                        {availability}
-                      </div>
-                    )}
-                    <div className={`text-xs mt-1 ${
-                      hasEntry 
-                        ? isAvailable 
-                          ? 'text-green-600' 
-                          : 'text-red-600'
-                        : 'text-gray-400'
-                    }`}>
-                      {hasEntry 
-                        ? isAvailable 
-                          ? 'Available' 
-                          : 'Unavailable'
-                        : 'Not Set'
-                      }
+                  <div className="font-medium text-sm">{day.slice(0, 3)}</div>
+
+                  {timeSlots.length > 0 && (
+                    <div className="text-xs text-gray-600 mt-1">
+                      {timeSlots.join(", ")}
                     </div>
+                  )}
+
+                  <div className={`text-xs mt-1 ${isAvailable ? 'text-green-600' : 'text-red-600'}`}>
+                    {isAvailable ? 'Available' : 'Unavailable'}
                   </div>
-                );
-              })}
+                </div>
+              );
+            })}
+
             </div>
           </CardContent>
         </Card>
@@ -354,9 +335,9 @@ const TutorDashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="flex justify-center">
-              <img 
-                src={tutorPhoto} 
-                alt="Profile" 
+              <img
+                src={tutorPhoto}
+                alt="Profile"
                 className="w-32 h-32 rounded-full object-cover border-4 border-gray-200"
               />
             </div>

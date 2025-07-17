@@ -27,7 +27,7 @@ export interface User {
   _id: string;
   name: string;
   email: string;
-  role: "student" | "tutor" | "parent";
+  role: "student" | "tutor" | "parent" |"admin";
   profileCompleted: boolean;
   phoneNumber?: string;
 
@@ -49,14 +49,14 @@ export interface User {
   photo?: string;
   courseNames?: string[];
   certificates?: Certificate[];
-  achievements: { name: string; url: string; uploadedAt: string; type: string }[];
+  achievements?: { name: string; url: string; uploadedAt: string; type: string }[];
   // Student‑specific ------------------------------------------
   yearOfStudent?: number;
   department?: string;
   collegeName?: string;
   city?: string;
   state?: string;
-  enrolledCourses: string[];
+  enrolledCourses?: string[];
   parentId?: string;
 
   // Timestamps -------------------------------------------------
@@ -75,14 +75,15 @@ export interface Course {
   level: string;
   pricePerSession: number;
   description: string;
+  sessionTime: string;
   tag: string[];
   tutorId: string;
   tutorName?: string;
   createdAt: string;
   updatedAt: string;
 }
-interface TimeSlot {
-  id: string;
+export interface TimeSlot {
+  _id: string;
   courseId: string;
   tutorId: string;
   day: string;
@@ -92,19 +93,26 @@ interface TimeSlot {
   enrolledUsers: string[];
 }
 
-interface BookingRequest {
-  id: string;
-  studentId: string;
-  studentName: string;
+export interface BookingRequest {
+  _id: string;
+
+  userId: string;    
+  userName: string;                      // ✅ ID of student or parent
+  requestedBy: 'student' | 'parent';   // ✅ Who made the request
+
   courseId: string;
   courseName: string;
-  tutorId: string | { _id: string; name: string }; // ✅ Accept both formats
+
+  tutorId: string | { _id: string; name: string };
   tutorName: string;
+
   slotId: string;
   slotDay: string;
   slotTime: string;
+
   requestedAt: string;
   status: 'pending' | 'accepted' | 'rejected';
+
   meetingLink?: string;
   acceptedAt?: string;
 }
@@ -200,14 +208,16 @@ interface AppContextType {
   getStudentEnrollments: (studentId: string) => Enrollment[];
   getTutorEnrollments: (tutorId: string) => Enrollment[];
   createTimeSlots: (courseId: string, tutorId: string) => void;
-  getCourseTimeSlots: (courseId: string) => TimeSlot[];
-  createBookingRequest: (request: Omit<BookingRequest, 'id' | 'requestedAt' | 'status'>) => void;
+  getCourseTimeSlots: (courseId: string) => Promise<TimeSlot[]>;
+  createBookingRequest: (request: Omit<BookingRequest, '_id' | 'requestedAt' | 'status'>) => void;
   getTutorBookingRequests: (tutorId: string) => BookingRequest[];
   acceptBookingRequest: (requestId: string, meetingLink: string) => void;
   rejectBookingRequest: (requestId: string) => void;
   getUserNotifications: (userId: string) => Notification[];
   markNotificationAsRead: (notificationId: string) => void;
   addResource: (resource: Resource) => void;
+  removeTutor: (tutorId: string) => Promise<boolean>;
+  getAppStats: () => { totalTutors: number; totalCourses: number; totalStudents: number; totalParents: number }
   clearError: () => void;
 }
 
@@ -344,6 +354,43 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       setLoading(false);
     }
   };
+  const removeTutor = async (tutorId: string): Promise<boolean> => {
+    try {
+      const res = await fetch(`/api/admin/tutors/${tutorId}`, {
+        method: "DELETE",
+      });
+  
+      if (!res.ok) throw new Error("Failed to delete tutor");
+  
+      // ✅ Backend deletion successful — do local state cleanup
+      setTimeSlots((prev) => prev.filter((slot) => slot.tutorId !== tutorId));
+      setBookingRequests((prev) =>
+        prev.filter((request) =>
+          typeof request.tutorId === "string"
+            ? request.tutorId !== tutorId
+            : request.tutorId._id !== tutorId
+        )
+      );
+      setEnrollments((prev) => prev.filter((session) => session.tutorId !== tutorId));
+      setNotifications((prev) => prev.filter((notif) => notif.userId !== tutorId));
+      setUsers((prev) => prev.filter((u) => u._id !== tutorId));
+      setCourses((prev) => prev.filter((c) => c.tutorId !== tutorId));
+  
+      return true;
+    } catch (err) {
+      console.error("Error deleting tutor:", err);
+      return false;
+    }
+  };
+
+  const getAppStats = () => {
+    return {
+      totalTutors: users.filter(user => user.role === 'tutor').length,
+      totalCourses: courses.length,
+      totalStudents: users.filter(user => user.role === 'student').length,
+      totalParents: users.filter(user => user.role === 'parent').length
+    };
+  };
 
   /* ------------------ course CRUD ------------------ */
   const addCourse = (course: Course): void => setCourses((p) => [...p, course]);
@@ -393,7 +440,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             : prev
         );
 
-        // Optional: also reflect the change in the global users array
+        // Optional: also reflect the change in the global `users` array
         setUsers((prev) =>
           prev.map((u) =>
             u._id === currentUser._id
@@ -425,86 +472,97 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     ];
   };
 
-  const createTimeSlots = (courseId: string, tutorId: string) => {
-    console.log('Creating default time slots for course:', courseId, 'tutor:', tutorId);
-    
-    // Check if slots already exist for this course
-    const existingSlots = timeSlots.filter(slot => slot.courseId === courseId);
-    if (existingSlots.length > 0) {
-      console.log('Time slots already exist for this course');
-      return;
-    }
-
-    const newSlots: TimeSlot[] = [];
-    const defaultSlots = getDefaultTimeSlots();
-    const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-    
-    // Create slots for each day of the week with default time slots
-    daysOfWeek.forEach((day) => {
-      defaultSlots.forEach((slot, index) => {
-        const slotId = `${courseId}-${day}-${index}-${Date.now()}`;
-        newSlots.push({
-          id: slotId,
-          courseId,
-          tutorId,
-          day: day.charAt(0).toUpperCase() + day.slice(1), // Capitalize first letter
-          time: slot.time,
-          maxMembers: 10,
-          currentMembers: 0,
-          enrolledUsers: []
-        });
-      });
+  const createTimeSlots = async (courseId: string, tutorId: string): Promise<void> => {
+  try {
+    const res = await fetch("/api/timeslots/create", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ courseId, tutorId }),
     });
 
-    console.log('Created default slots:', newSlots);
-    setTimeSlots(prev => [...prev, ...newSlots]);
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.message || "Failed to create time slots");
+    }
+  } catch (err) {
+    console.error("createTimeSlots error:", err);
+    throw err;
+  }
+};
+
+
+  const getCourseTimeSlots = async (courseId: string): Promise<TimeSlot[]> => {
+  try {
+    const res = await fetch(`/api/timeslots/${courseId}`);
+    if (!res.ok) {
+      throw new Error("Failed to fetch time slots");
+    }
+    const data = await res.json();
+    return data;
+  } catch (err) {
+    console.error("getCourseTimeSlots error:", err);
+    throw err;
+  }
+};
+
+// Add these console logs in your AppContext createBookingRequest function
+const createBookingRequest = async (
+  request: Omit<BookingRequest, '_id' | 'requestedAt' | 'status'>
+) => {
+  console.log('🔄 Creating booking request:', request);
+
+  const tutorId =
+    typeof request.tutorId === 'object' ? request.tutorId._id : request.tutorId;
+
+  // ✅ Fallback if tutorName is missing (avoid backend validation error)
+  const safeRequest = {
+    ...request,
+    tutorName: request.tutorName || "Tutor", // <-- fallback if undefined
   };
 
-  const getCourseTimeSlots = (courseId: string) => {
-    return timeSlots.filter(slot => slot.courseId === courseId);
-  };
-// Add these console logs in your AppContext createBookingRequest function
-const createBookingRequest = (request: Omit<BookingRequest, 'id' | 'requestedAt' | 'status'>) => {
-  console.log('🔄 Creating booking request:', request);
-  
-  const newRequest: BookingRequest = {
-    ...request,
-    id: Date.now().toString(),
-    requestedAt: new Date().toISOString(),
-    status: 'pending'
-  };
-  console.log('✅ New booking request created:', newRequest);
-  
-  setBookingRequests(prev => {
-    const updated = [...prev, newRequest];
-    console.log('📋 All booking requests after update:', updated);
-    return updated;
-  });
-  const tutorId = typeof request.tutorId === 'object' 
-    ? request.tutorId._id 
-    : request.tutorId;
-  
-  // Create notification for tutor
-  const notification: Notification = {
-    id: `notif-${Date.now()}`,
-    userId: tutorId, // ✅ Use the extracted tutorId
-    type: 'booking_request',
-    title: 'New Booking Request',
-    message: `${request.studentName} has requested to book ${request.courseName} for ${request.slotDay} at ${request.slotTime}`,
-    bookingRequestId: newRequest.id,
-    createdAt: new Date().toISOString(),
-    read: false
-  };
-  
-  console.log('🔔 Creating notification for tutor:', notification);
-  
-  setNotifications(prev => {
-    const updated = [...prev, notification];
-    console.log('📬 All notifications after update:', updated);
-    return updated;
-  });
-  
-  console.log('✅ Booking request created and notification sent');
+  try {
+    const res = await fetch("/api/bookings", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify(safeRequest),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) throw new Error(data.message || "Booking creation failed");
+
+    const newRequest: BookingRequest = data.booking;
+
+    // Update state with booking request
+    setBookingRequests(prev => {
+      const updated = [...prev, newRequest];
+      console.log("📋 Booking requests after backend save:", updated);
+      return updated;
+    });
+
+    // Create notification
+    const notification: Notification = {
+      id: `notif-${Date.now()}`,
+      userId: tutorId,
+      type: "booking_request",
+      title: "New Booking Request",
+      message: `${request.userName} has requested to book ${request.courseName} for ${request.slotDay} at ${request.slotTime}`,
+      bookingRequestId: newRequest._id,
+      createdAt: new Date().toISOString(),
+      read: false,
+    };
+
+    setNotifications(prev => {
+      const updated = [...prev, notification];
+      console.log("📬 Notifications after booking:", updated);
+      return updated;
+    });
+
+    console.log("✅ Booking request created & notification sent");
+  } catch (err: any) {
+    console.error("❌ Failed to create booking request:", err.message || err);
+  }
 };
 
 // Also add this to getTutorBookingRequests
@@ -513,92 +571,114 @@ const createBookingRequest = (request: Omit<BookingRequest, 'id' | 'requestedAt'
 const getTutorBookingRequests = (tutorId: string) => {
   console.log('🔍 Looking for tutor ID:', tutorId);
   console.log('🔍 All booking requests with their tutorIds:');
-  
+
   bookingRequests.forEach((request, index) => {
     console.log(`Request ${index}:`, {
       tutorId: request.tutorId,
       tutorId_id: typeof request.tutorId === 'object' ? request.tutorId._id : request.tutorId,
       tutorName: typeof request.tutorId === 'object' ? request.tutorId.name : 'N/A',
-      studentName: request.studentName,
+      userName: request.userName,
       courseName: request.courseName
     });
   });
-  
+
   const requests = bookingRequests.filter(request => {
     const requestTutorId = typeof request.tutorId === 'object' 
       ? request.tutorId._id 
       : request.tutorId;
-    
+
     console.log(`Comparing: ${requestTutorId} === ${tutorId} = ${requestTutorId === tutorId}`);
     return requestTutorId === tutorId;
   });
-  
+
   console.log(`📋 Found ${requests.length} requests for tutor ${tutorId}`);
   return requests;
 };
 
-  const acceptBookingRequest = (requestId: string, meetingLink: string) => {
-    console.log('Accepting booking request:', requestId, 'with meeting link:', meetingLink);
-    
-    setBookingRequests(prev => prev.map(request => 
-      request.id === requestId 
-        ? { ...request, status: 'accepted' as const, meetingLink, acceptedAt: new Date().toISOString() }
-        : request
-    ));
 
-    const request = bookingRequests.find(r => r.id === requestId);
-    if (request) {
-      // Update slot
-      setTimeSlots(prev => prev.map(slot => 
-        slot.id === request.slotId 
-          ? { 
-              ...slot, 
-              currentMembers: slot.currentMembers + 1,
-              enrolledUsers: [...slot.enrolledUsers, request.studentId]
-            }
-          : slot
-      ));
+const acceptBookingRequest = async (requestId: string, meetingLink: string) => {
+  try {
+    const res = await fetch("/api/bookings/accept", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ requestId, meetingLink }),
+    });
 
-      // Create notification for student/parent
-      const notification: Notification = {
-        id: `notif-${Date.now()}`,
-        userId: request.studentId,
-        type: 'booking_accepted',
-        title: 'Booking Accepted!',
-        message: `Your booking for ${request.courseName} has been accepted. Meeting link: ${meetingLink}`,
-        bookingRequestId: requestId,
-        createdAt: new Date().toISOString(),
-        read: false
-      };
-      
-      setNotifications(prev => [...prev, notification]);
-    }
-  };
+    const data = await res.json();
 
-  const rejectBookingRequest = (requestId: string) => {
-    setBookingRequests(prev => prev.map(request => 
-      request.id === requestId 
-        ? { ...request, status: 'rejected' as const }
-        : request
-    ));
+    if (!res.ok) throw new Error(data.message || "Accept failed");
 
-    const request = bookingRequests.find(r => r.id === requestId);
-    if (request) {
-      // Create notification for student/parent
-      const notification: Notification = {
-        id: `notif-${Date.now()}`,
-        userId: request.studentId,
-        type: 'booking_rejected',
-        title: 'Booking Rejected',
-        message: `Your booking request for ${request.courseName} has been rejected.`,
-        bookingRequestId: requestId,
-        createdAt: new Date().toISOString(),
-        read: false
-      };
-      
-      setNotifications(prev => [...prev, notification]);
-    }
-  };
+    // 🔄 Update booking request in state
+    setBookingRequests(prev =>
+      prev.map(request =>
+        request._id === requestId ? data.booking : request
+      )
+    );
+
+    // 👤 Dynamic user ID (student or parent)
+    const recipientUserId =
+      data.booking.userId || data.booking.studentId;
+
+    const recipientName =
+      data.booking.userName || data.booking.studentName || "User";
+
+    // 🔔 Create notification
+    const notification: Notification = {
+      id: `notif-${Date.now()}`,
+      userId: recipientUserId,
+      type: "booking_accepted",
+      title: "Booking Accepted!",
+      message: `Your booking for ${data.booking.courseName} has been accepted.`,
+      bookingRequestId: requestId,
+      createdAt: new Date().toISOString(),
+      read: false,
+    };
+
+    setNotifications(prev => [...prev, notification]);
+
+  } catch (err) {
+    const error = err instanceof Error ? err : new Error("Unknown error occurred");
+    console.error("❌ Accept booking failed:", error.message);
+  }
+};
+
+
+
+  const rejectBookingRequest = async (requestId: string) => {
+  try {
+    const res = await fetch("/api/bookings/reject", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ requestId }),
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Reject failed");
+
+    setBookingRequests(prev =>
+      prev.map(request =>
+        request._id === requestId ? data.booking : request
+      )
+    );
+
+    const notification: Notification = {
+      id: `notif-${Date.now()}`,
+      userId: data.booking.studentId,
+      type: "booking_rejected",
+      title: "Booking Rejected",
+      message: `Your booking request for ${data.booking.courseName} was rejected.`,
+      bookingRequestId: requestId,
+      createdAt: new Date().toISOString(),
+      read: false,
+    };
+
+    setNotifications(prev => [...prev, notification]);
+  } catch (err) {
+    const error = err instanceof Error ? err : new Error("Unknown error occurred");
+    console.error("Reject booking failed:", error.message);
+  }
+};
+
 
   const getUserNotifications = (userId: string) => {
     return notifications.filter(notif => notif.userId === userId).sort((a, b) => 
@@ -611,9 +691,6 @@ const getTutorBookingRequests = (tutorId: string) => {
       notif.id === notificationId ? { ...notif, read: true } : notif
     ));
   };
-
-
-
   /* ---------------- auth helpers ------------------ */
   const loginUser = async (email: string, password: string): Promise<User | null> => {
     try {
@@ -630,6 +707,17 @@ const getTutorBookingRequests = (tutorId: string) => {
       if (!res.ok) {
         setError(data.message || "Login failed");
         return null;
+      }
+      if (email === 'admin@tarcin.in' && password === 'Tarcin@12345') {
+        const adminUser: User = {
+          _id: 'admin-1',
+          name: 'Admin',
+          email: 'admin@tarcin.in',
+          role: 'admin',
+          profileCompleted: true
+        };
+        setCurrentUser(adminUser);
+        return adminUser;
       }
 
       const user: User = data.student || data.tutor || data.user;
@@ -726,7 +814,9 @@ const getTutorBookingRequests = (tutorId: string) => {
       rejectBookingRequest,
       getUserNotifications,
       markNotificationAsRead,
-      addResource
+      addResource,
+      removeTutor,
+      getAppStats
       }}
     >
       {children}

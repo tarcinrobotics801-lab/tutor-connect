@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { BookOpen, Users, Calendar, Award, GraduationCap, Search, User, Settings, LogOut } from "lucide-react";
+import { BookOpen, Users, Calendar, Award, GraduationCap, Search, User, Settings, LogOut, UserCheck, BookOpenCheck, Target, Zap, TrendingUp,Heart,Clock,Shield, Star } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import {
@@ -19,6 +19,7 @@ const Index = () => {
   const { currentUser, setCurrentUser } = useApp();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [hoveredCard, setHoveredCard] = useState<string | null>(null);
   
   const handleLogout = () => {
     setCurrentUser(null);
@@ -40,12 +41,17 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-800 to-indigo-900 relative overflow-hidden">
-      {/* Floating background elements */}
+      {/* Enhanced floating background elements */}
       <div className="absolute inset-0">
-        <div className="absolute top-20 left-20 w-32 h-32 bg-purple-400/20 rounded-full blur-xl animate-pulse"></div>
-        <div className="absolute top-40 right-32 w-24 h-24 bg-violet-400/20 rounded-full blur-lg animate-pulse delay-1000"></div>
-        <div className="absolute bottom-32 left-1/4 w-40 h-40 bg-purple-300/20 rounded-full blur-2xl animate-pulse delay-2000"></div>
-        <div className="absolute bottom-20 right-20 w-28 h-28 bg-indigo-400/20 rounded-full blur-xl animate-pulse delay-500"></div>
+        <div className="absolute top-20 left-20 w-40 h-40 bg-purple-500/30 rounded-full blur-3xl animate-pulse animation-delay-0"></div>
+        <div className="absolute top-40 right-32 w-32 h-32 bg-blue-500/25 rounded-full blur-2xl animate-pulse animation-delay-1000"></div>
+        <div className="absolute bottom-32 left-1/4 w-48 h-48 bg-indigo-500/20 rounded-full blur-3xl animate-pulse animation-delay-2000"></div>
+        <div className="absolute bottom-20 right-20 w-36 h-36 bg-violet-500/25 rounded-full blur-2xl animate-pulse animation-delay-500"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-purple-400/15 rounded-full blur-3xl animate-pulse animation-delay-3000"></div>
+        
+        {/* Additional floating orbs */}
+        <div className="absolute top-1/4 right-1/4 w-24 h-24 bg-blue-400/20 rounded-full blur-2xl animate-bounce animation-delay-1500"></div>
+        <div className="absolute bottom-1/4 left-1/3 w-20 h-20 bg-purple-400/25 rounded-full blur-xl animate-bounce animation-delay-2500"></div>
       </div>
 
       {/* Promotional Banner */}
@@ -124,6 +130,22 @@ const Index = () => {
                       <Link to="/student-profile" className="flex items-center">
                         <User className="mr-2 h-4 w-4" />
                         <span>Profile & Dashboard</span>
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
+                  {currentUser.role === 'parent' && (
+                    <DropdownMenuItem asChild>
+                      <Link to="/parent-profile" className="flex items-center">
+                        <User className="mr-2 h-4 w-4" />
+                        <span>Profile & Student Dashboard</span>
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
+                  {currentUser.role === 'admin' && (
+                    <DropdownMenuItem asChild>
+                      <Link to="/admin" className="flex items-center">
+                        <User className="mr-2 h-4 w-4" />
+                        <span>Dashboard</span>
                       </Link>
                     </DropdownMenuItem>
                   )}
@@ -215,6 +237,149 @@ const Index = () => {
         </div>
       </div>
 
+      {/* Interactive Sections for Tutors and Students */}
+<section className="container mx-auto px-4 py-20 relative z-10">
+  <h2 className="text-5xl font-bold text-center text-white mb-4">
+    Choose Your Path
+  </h2>
+  <p className="text-xl text-center text-purple-200 mb-16">
+    Whether you're here to learn or teach, we have the perfect solution for you
+  </p>
+  
+  <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-8 max-w-7xl mx-auto">
+    {/* For Students */}
+    <Card 
+      className={`bg-white/90 backdrop-blur-xl border-2 border-blue-200/50 hover:border-blue-300/80 transition-all duration-700 hover:shadow-2xl hover:shadow-blue-500/30 transform hover:scale-105 hover:-translate-y-2 cursor-pointer group ${hoveredCard === 'students' ? 'scale-105 -translate-y-2 shadow-2xl shadow-blue-500/30' : ''}`}
+      onMouseEnter={() => setHoveredCard('students')}
+      onMouseLeave={() => setHoveredCard(null)}
+    >
+      <CardHeader className="text-center pb-6">
+        <div className="mx-auto mb-4 p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl w-fit shadow-lg group-hover:shadow-2xl group-hover:shadow-blue-500/40 transition-all duration-500 group-hover:rotate-6">
+          <BookOpenCheck className="h-12 w-12 text-white group-hover:scale-110 transition-transform duration-300" />
+        </div>
+        <CardTitle className="text-2xl text-gray-800 mb-3 font-bold group-hover:text-blue-700 transition-colors duration-300">For Students</CardTitle>
+        <CardDescription className="text-gray-600 text-sm font-medium group-hover:text-gray-700 transition-colors duration-300">
+          Unlock your potential with personalized learning experiences
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="space-y-3">
+          <div className="flex items-center space-x-3 text-gray-700 hover:text-blue-600 transition-all duration-300 hover:translate-x-2 group/item">
+            <Target className="h-5 w-5 text-blue-500 group-hover/item:scale-110 transition-transform duration-300" />
+            <span className="text-sm font-semibold">Personalized Learning Paths</span>
+          </div>
+          <div className="flex items-center space-x-3 text-gray-700 hover:text-blue-600 transition-all duration-300 hover:translate-x-2 group/item">
+            <Users className="h-5 w-5 text-blue-500 group-hover/item:scale-110 transition-transform duration-300" />
+            <span className="text-sm font-semibold">Expert Tutors Worldwide</span>
+          </div>
+          <div className="flex items-center space-x-3 text-gray-700 hover:text-blue-600 transition-all duration-300 hover:translate-x-2 group/item">
+            <Zap className="h-5 w-5 text-blue-500 group-hover/item:scale-110 transition-transform duration-300" />
+            <span className="text-sm font-semibold">Interactive Learning Tools</span>
+          </div>
+          <div className="flex items-center space-x-3 text-gray-700 hover:text-blue-600 transition-all duration-300 hover:translate-x-2 group/item">
+            <Award className="h-5 w-5 text-blue-500 group-hover/item:scale-110 transition-transform duration-300" />
+            <span className="text-sm font-semibold">Certified Achievements</span>
+          </div>
+        </div>
+        <div className="pt-4">
+          <Link to="/signup" className="block">
+            <Button className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-2.5 text-base font-semibold rounded-lg shadow-lg hover:shadow-2xl hover:shadow-blue-500/30 transition-all duration-500 hover:scale-105">
+              Start Learning Today
+            </Button>
+          </Link>
+        </div>
+      </CardContent>
+    </Card>
+
+    {/* For Tutors */}
+    <Card 
+      className={`bg-white/90 backdrop-blur-xl border-2 border-purple-200/50 hover:border-purple-300/80 transition-all duration-700 hover:shadow-2xl hover:shadow-purple-500/30 transform hover:scale-105 hover:-translate-y-2 cursor-pointer group ${hoveredCard === 'tutors' ? 'scale-105 -translate-y-2 shadow-2xl shadow-purple-500/30' : ''}`}
+      onMouseEnter={() => setHoveredCard('tutors')}
+      onMouseLeave={() => setHoveredCard(null)}
+    >
+      <CardHeader className="text-center pb-6">
+        <div className="mx-auto mb-4 p-3 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl w-fit shadow-lg group-hover:shadow-2xl group-hover:shadow-purple-500/40 transition-all duration-500 group-hover:rotate-6">
+          <UserCheck className="h-12 w-12 text-white group-hover:scale-110 transition-transform duration-300" />
+        </div>
+        <CardTitle className="text-2xl text-gray-800 mb-3 font-bold group-hover:text-purple-700 transition-colors duration-300">For Tutors</CardTitle>
+        <CardDescription className="text-gray-600 text-sm font-medium group-hover:text-gray-700 transition-colors duration-300">
+          Share your expertise and build a thriving teaching career
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="space-y-3">
+          <div className="flex items-center space-x-3 text-gray-700 hover:text-purple-600 transition-all duration-300 hover:translate-x-2 group/item">
+            <TrendingUp className="h-5 w-5 text-purple-500 group-hover/item:scale-110 transition-transform duration-300" />
+            <span className="text-sm font-semibold">Grow Your Income</span>
+          </div>
+          <div className="flex items-center space-x-3 text-gray-700 hover:text-purple-600 transition-all duration-300 hover:translate-x-2 group/item">
+            <Calendar className="h-5 w-5 text-purple-500 group-hover/item:scale-110 transition-transform duration-300" />
+            <span className="text-sm font-semibold">Flexible Schedule</span>
+          </div>
+          <div className="flex items-center space-x-3 text-gray-700 hover:text-purple-600 transition-all duration-300 hover:translate-x-2 group/item">
+            <BookOpen className="h-5 w-5 text-purple-500 group-hover/item:scale-110 transition-transform duration-300" />
+            <span className="text-sm font-semibold">Create Custom Courses</span>
+          </div>
+          <div className="flex items-center space-x-3 text-gray-700 hover:text-purple-600 transition-all duration-300 hover:translate-x-2 group/item">
+            <Star className="h-5 w-5 text-purple-500 group-hover/item:scale-110 transition-transform duration-300" />
+            <span className="text-sm font-semibold">Build Your Reputation</span>
+          </div>
+        </div>
+        <div className="pt-4">
+          <Link to="/signup" className="block">
+            <Button className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white py-2.5 text-base font-semibold rounded-lg shadow-lg hover:shadow-2xl hover:shadow-purple-500/30 transition-all duration-500 hover:scale-105">
+              Become a Tutor
+            </Button>
+          </Link>
+        </div>
+      </CardContent>
+    </Card>
+    
+    {/* For Parents */}
+    <Card 
+      className={`bg-white/90 backdrop-blur-xl border-2 border-green-200/50 hover:border-green-300/80 transition-all duration-700 hover:shadow-2xl hover:shadow-green-500/30 transform hover:scale-105 hover:-translate-y-2 cursor-pointer group ${hoveredCard === 'parents' ? 'scale-105 -translate-y-2 shadow-2xl shadow-green-500/30' : ''}`}
+      onMouseEnter={() => setHoveredCard('parents')}
+      onMouseLeave={() => setHoveredCard(null)}
+    >
+      <CardHeader className="text-center pb-6">
+        <div className="mx-auto mb-4 p-3 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl w-fit shadow-lg group-hover:shadow-2xl group-hover:shadow-green-500/40 transition-all duration-500 group-hover:rotate-6">
+          <Heart className="h-12 w-12 text-white group-hover:scale-110 transition-transform duration-300" />
+        </div>
+        <CardTitle className="text-2xl text-gray-800 mb-3 font-bold group-hover:text-green-700 transition-colors duration-300">For Parents</CardTitle>
+        <CardDescription className="text-gray-600 text-sm font-medium group-hover:text-gray-700 transition-colors duration-300">
+          Support your child's educational journey with confidence
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="space-y-3">
+          <div className="flex items-center space-x-3 text-gray-700 hover:text-green-600 transition-all duration-300 hover:translate-x-2 group/item">
+            <TrendingUp className="h-5 w-5 text-green-500 group-hover/item:scale-110 transition-transform duration-300" />
+            <span className="text-sm font-semibold">Track Learning Progress</span>
+          </div>
+          <div className="flex items-center space-x-3 text-gray-700 hover:text-green-600 transition-all duration-300 hover:translate-x-2 group/item">
+            <Shield className="h-5 w-5 text-green-500 group-hover/item:scale-110 transition-transform duration-300" />
+            <span className="text-sm font-semibold">Verified Tutor Profiles</span>
+          </div>
+          <div className="flex items-center space-x-3 text-gray-700 hover:text-green-600 transition-all duration-300 hover:translate-x-2 group/item">
+            <Clock className="h-5 w-5 text-green-500 group-hover/item:scale-110 transition-transform duration-300" />
+            <span className="text-sm font-semibold">Flexible Scheduling</span>
+          </div>
+          <div className="flex items-center space-x-3 text-gray-700 hover:text-green-600 transition-all duration-300 hover:translate-x-2 group/item">
+            <Star className="h-5 w-5 text-green-500 group-hover/item:scale-110 transition-transform duration-300" />
+            <span className="text-sm font-semibold">Safety & Security</span>
+          </div>
+        </div>
+        <div className="pt-4">
+          <Link to="/signup" className="block">
+            <Button className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white py-2.5 text-base font-semibold rounded-lg shadow-lg hover:shadow-2xl hover:shadow-green-500/30 transition-all duration-500 hover:scale-105">
+              Get Started
+            </Button>
+          </Link>
+        </div>
+      </CardContent>
+    </Card>
+  </div>
+</section>
       {/* Features Section */}
       <section className="container mx-auto px-4 py-20 relative z-10">
         <h2 className="text-4xl font-bold text-center text-white mb-16">
@@ -232,7 +397,6 @@ const Index = () => {
               </CardDescription>
             </CardContent>
           </Card>
-
           <Card className="bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/20 transition-all duration-300 hover:shadow-2xl hover:shadow-violet-500/20">
             <CardHeader className="text-center">
               <Calendar className="h-12 w-12 text-violet-300 mx-auto mb-4" />
@@ -244,7 +408,6 @@ const Index = () => {
               </CardDescription>
             </CardContent>
           </Card>
-
           <Card className="bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/20 transition-all duration-300 hover:shadow-2xl hover:shadow-green-500/20">
             <CardHeader className="text-center">
               <BookOpen className="h-12 w-12 text-green-300 mx-auto mb-4" />
@@ -272,7 +435,6 @@ const Index = () => {
       </section>
 
       {/* Stats Section */}
-      
       <section className="py-20 text-blue-900 text-center">
         <div className="container mx-auto px-6 max-w-3xl text-center">
           <h2 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
@@ -282,9 +444,8 @@ const Index = () => {
           </h2>
           <div className="w-20 h-1 mx-auto bg-white rounded-full mb-6"></div>
 
-
           <p className="text-lg md:text-xl text-white/80 font-light">
-            That’s what you get with <span className="font-semibold">Connect Education</span>.
+            That's what you get with <span className="font-semibold">Connect Education</span>.
           </p>
         </div>
       </section>
@@ -326,7 +487,7 @@ const Index = () => {
             </div>
           </div>
           <div className="border-t border-white/10 mt-12 pt-8 text-center text-purple-200">
-            <p>&copy; 2024 Tutor Connect. All rights reserved.</p>
+            <p>&copy; 2025 Tutor Connect. All rights reserved.</p>
           </div>
         </div>
       </footer>
