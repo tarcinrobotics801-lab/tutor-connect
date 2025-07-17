@@ -34,18 +34,18 @@ pipeline {
             ssh -o StrictHostKeyChecking=no ${REMOTE_USER}@${REMOTE_HOST} "mkdir -p ${REMOTE_DIR}"
 
             echo "[INFO] Copying files to ${REMOTE_HOST}..."
-            scp -r docker-compose.yml back-end front-end ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_DIR}/
+            scp -r docker compose.yml back-end front-end ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_DIR}/
 
-            echo "[INFO] Running remote docker-compose commands..."
+            echo "[INFO] Running remote docker compose commands..."
             ssh -o StrictHostKeyChecking=no ${REMOTE_USER}@${REMOTE_HOST} "
               set -e
               cd ${REMOTE_DIR}
               echo '[INFO] Current directory: $(pwd)'
               echo '[INFO] Docker version: $(docker --version)'
-              if command -v docker-compose &> /dev/null; then
-                docker-compose down -v --remove-orphans || true
-                docker-compose build
-                docker-compose up -d
+              if command -v docker compose &> /dev/null; then
+                docker compose down -v --remove-orphans || true
+                docker compose build
+                docker compose up -d
               else
                 docker compose down -v --remove-orphans || true
                 docker compose build
