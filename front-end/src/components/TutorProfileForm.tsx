@@ -25,7 +25,7 @@ const uploadImageToBackend = async (file: File, tutorId: string): Promise<string
     const formData = new FormData();
     formData.append("photo", file);
 
-    const res = await fetch(`/api/uploads/tutor-photo/${tutorId}`, {
+    const res = await fetch(`http://localhost:5000/api/uploads/tutor-photo/${tutorId}`, {
       method: "POST",
       body: formData,
     });
@@ -83,6 +83,7 @@ const TutorProfileForm = () => {
     sub: "",
     level: "",
     pricePerSession: 0, // Changed from 'price' to 'pricePerSession'
+    sessionTime: "",
     tag: [] as string[],// Changed from 'tags' to 'tag'
     demoLink: "",           // NEW
   });
@@ -474,6 +475,7 @@ const TutorProfileForm = () => {
       sub: newCourse.sub,
       level: newCourse.level,
       pricePerSession: newCourse.pricePerSession,
+      sessionTime: newCourse.sessionTime,
       tag: newCourse.tag,
       demoLink: newCourse.demoLink,
       tutorId: userId,
@@ -503,6 +505,7 @@ const TutorProfileForm = () => {
         sub: "",
         level: "",
         pricePerSession: 0,
+        sessionTime: "",
         tag: [],
         demoLink: ""
       });
@@ -1091,6 +1094,16 @@ const TutorProfileForm = () => {
                       placeholder="0 = Free, 50 = ₹50 / session"
                     />
                   </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="session-time">Session Time</Label>
+                  <Input
+                    id="session-time"
+                    value={newCourse.sessionTime}
+                    onChange={(e) => setNewCourse(prev => ({ ...prev, sessionTime: e.target.value }))}
+                    placeholder="e.g., Monday 3:00 PM - 4:00 PM"
+                  />
                 </div>
 
                 <div>

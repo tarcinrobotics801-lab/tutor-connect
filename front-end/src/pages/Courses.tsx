@@ -316,7 +316,7 @@ const Courses = () => {
                           <Clock className="h-3 w-3" />
                           Session Time:
                         </span>
-                        <span className="font-semibold text-green-600">2:00PM - 3:00PM</span>
+                        <span className="font-semibold text-green-600">{course.sessionTime}</span>
                       </div>
                     </div>
 

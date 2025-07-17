@@ -75,6 +75,7 @@ export interface Course {
   level: string;
   pricePerSession: number;
   description: string;
+  sessionTime: string;
   tag: string[];
   tutorId: string;
   tutorName?: string;
