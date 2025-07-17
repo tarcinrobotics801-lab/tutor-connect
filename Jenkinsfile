@@ -34,7 +34,7 @@ pipeline {
             ssh -o StrictHostKeyChecking=no ${REMOTE_USER}@${REMOTE_HOST} "mkdir -p ${REMOTE_DIR}"
 
             echo "[INFO] Copying files to ${REMOTE_HOST}..."
-            scp -r docker compose.yml back-end front-end ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_DIR}/
+            scp -r docker-compose.yml back-end front-end ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_DIR}/
 
             echo "[INFO] Running remote docker compose commands..."
             ssh -o StrictHostKeyChecking=no ${REMOTE_USER}@${REMOTE_HOST} "
