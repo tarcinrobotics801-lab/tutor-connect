@@ -16,6 +16,7 @@ export const createCourse: RequestHandler = async (req, res) => {
       sub,
       level,
       pricePerSession,
+      sessionTime,
       tag,
       demoLink,
     } = req.body;
@@ -36,6 +37,7 @@ export const createCourse: RequestHandler = async (req, res) => {
       sub,
       level,
       pricePerSession,
+      sessionTime,
       tag,
       demoLink,
     });
