@@ -6,6 +6,7 @@ services:
       - "5000:5000"
     environment:
       - PORT=5000
+    restart: always  
       
   frontend:
     build:
@@ -14,6 +15,7 @@ services:
       - "7000:80"
     depends_on:
       - backend
+    restart: always  
 
-
+ 
 
