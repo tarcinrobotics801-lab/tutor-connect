@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import {useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -15,6 +16,7 @@ const Resources = () => {
   const [selectedSubject, setSelectedSubject] = useState("All");
   const [selectedClass, setSelectedClass] = useState("All");
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchResources = async () => {
@@ -55,18 +57,13 @@ const Resources = () => {
               <p className="text-gray-600 mb-8 max-w-md mx-auto">
                 You need to be logged in to view and access learning resources.
               </p>
-              
               {/* Login button */}
-              <Button 
-                className="bg-blue-600 hover:bg-blue-700 px-8 py-3 text-lg"
-                onClick={() => {
-                  // You can customize this to redirect to your login page
-                  // or trigger your login modal
-                  window.location.href = '/login'; // Adjust path as needed
-                }}
-              >
-                Login Now
-              </Button>
+              <Button
+              onClick={() => navigate("/login")}
+              className="mt-4 bg-gradient-to-r from-blue-600 to-purple-600"
+            >
+              Login Now
+            </Button>
             </div>
           </div>
         </div>

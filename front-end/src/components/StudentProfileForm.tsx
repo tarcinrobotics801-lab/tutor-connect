@@ -16,7 +16,7 @@ const uploadStudentImage = async (file: File, studentId: string): Promise<string
     const formData = new FormData();
     formData.append("photo", file);
 
-    const res = await fetch(`/api/uploads/student-photo/${studentId}`, {
+    const res = await fetch(`http://localhost:5000/api/uploads/student-photo/${studentId}`, {
       method: "POST",
       body: formData,
     });
@@ -59,6 +59,25 @@ const StudentProfileForm = () => {
     }));
   };
 
+  const handlePhotoUpload = async (file: File) => {
+    if (!file || !currentUser?._id) return;
+
+    // Show local preview immediately
+    const previewUrl = URL.createObjectURL(file);
+    setProfileData((prev) => ({ ...prev, photo: previewUrl }));
+
+    // Upload to backend (Cloudinary)
+    const permanentUrl = await uploadStudentImage(file, currentUser._id);
+    if (permanentUrl) {
+      setProfileData((prev) => ({ ...prev, photo: permanentUrl }));
+    } else {
+      toast({
+        title: "Upload failed",
+        description: "Could not save photo. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
   const handleSave = async () => {
     // Add validation for currentUser and currentUser._id
@@ -206,6 +225,7 @@ const StudentProfileForm = () => {
       });
     }
   };
+
   const getInitials = (name: string) => {
     return name
       .split(' ')
@@ -267,7 +287,11 @@ const StudentProfileForm = () => {
               <div className="lg:col-span-1">
                 <Card className="bg-white/80 backdrop-blur-sm border-blue-100">
                   <CardHeader className="text-center">
-                    <div className="relative w-32 h-32 mx-auto bg-blue-100 rounded-full flex items-center justify-center mb-4 overflow-hidden">
+                    {/* Profile Photo Circle with Hover */}
+                    <div 
+                      className="relative w-32 h-32 mx-auto bg-blue-100 rounded-full flex items-center justify-center mb-4 overflow-hidden group cursor-pointer"
+                      onClick={() => document.getElementById('photo-upload-initial')?.click()}
+                    >
                       {profileData.photo ? (
                         <img src={profileData.photo} alt="Profile" className="w-full h-full object-cover" />
                       ) : (
@@ -275,41 +299,42 @@ const StudentProfileForm = () => {
                           {profileData.name ? getInitials(profileData.name) : <User className="h-16 w-16" />}
                         </div>
                       )}
-                      <Button
-                        size="sm"
-                        className="absolute bottom-0 right-0 w-8 h-8 rounded-full p-0"
-                        onClick={() => document.getElementById('photo-upload')?.click()}
-                      >
-                        <Upload className="h-4 w-4" />
-                      </Button>
+                      
+                      {/* Hover overlay */}
+                      <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-full">
+                        <div className="text-white text-center">
+                          <Upload className="h-6 w-6 mx-auto mb-1" />
+                          <span className="text-xs font-medium">Upload Photo</span>
+                        </div>
+                      </div>
                     </div>
+
+                    {/* Hidden file input */}
                     <input
-                      id="photo-upload"
+                      id="photo-upload-initial"
                       type="file"
                       accept="image/*"
                       className="hidden"
                       onChange={async (e) => {
                         const file = e.target.files?.[0];
-                        if (!file || !currentUser?._id) return;
-
-                        // 1️⃣ Show local preview immediately
-                        const previewUrl = URL.createObjectURL(file);
-                        setProfileData((prev) => ({ ...prev, photo: previewUrl }));
-
-                        // 2️⃣ Upload to backend (Cloudinary)
-                        const permanentUrl = await uploadStudentImage(file, currentUser._id);
-                        if (permanentUrl) {
-                          setProfileData((prev) => ({ ...prev, photo: permanentUrl }));
-                        } else {
-                          toast({
-                            title: "Upload failed",
-                            description: "Could not save photo. Please try again.",
-                            variant: "destructive",
-                          });
+                        if (file) {
+                          await handlePhotoUpload(file);
                         }
                       }}
                     />
-                    <CardTitle>{profileData.name}</CardTitle>
+
+                    {/* Upload Photo Button */}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="mt-2 text-blue-600 border-blue-200 hover:bg-blue-50"
+                      onClick={() => document.getElementById('photo-upload-initial')?.click()}
+                    >
+                      <Upload className="h-4 w-4 mr-2" />
+                      Upload Photo
+                    </Button>
+
+                    <CardTitle className="mt-4">{profileData.name}</CardTitle>
                     <CardDescription className="capitalize">Student</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
@@ -520,7 +545,11 @@ const StudentProfileForm = () => {
                 <div className="lg:col-span-1">
                   <Card className="bg-white/80 backdrop-blur-sm border-blue-100">
                     <CardHeader className="text-center">
-                      <div className="relative w-32 h-32 mx-auto bg-blue-100 rounded-full flex items-center justify-center mb-4 overflow-hidden">
+                      {/* Profile Photo Circle with Hover - Only show hover when editing */}
+                      <div 
+                        className={`relative w-32 h-32 mx-auto bg-blue-100 rounded-full flex items-center justify-center mb-4 overflow-hidden ${isEditing ? 'group cursor-pointer' : ''}`}
+                        onClick={() => isEditing ? document.getElementById('photo-upload-profile')?.click() : null}
+                      >
                         {profileData.photo ? (
                           <img src={profileData.photo} alt="Profile" className="w-full h-full object-cover" />
                         ) : (
@@ -528,42 +557,45 @@ const StudentProfileForm = () => {
                             {profileData.name ? getInitials(profileData.name) : <User className="h-16 w-16" />}
                           </div>
                         )}
+                        
+                        {/* Hover overlay - only show when editing */}
                         {isEditing && (
-                          <Button
-                            size="sm"
-                            className="absolute bottom-0 right-0 w-8 h-8 rounded-full p-0"
-                            onClick={() => document.getElementById('photo-upload')?.click()}
-                          >
-                            <Upload className="h-4 w-4" />
-                          </Button>
+                          <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-full">
+                            <div className="text-white text-center">
+                              <Upload className="h-6 w-6 mx-auto mb-1" />
+                              <span className="text-xs font-medium">Upload Photo</span>
+                            </div>
+                          </div>
                         )}
                       </div>
+
+                      {/* Hidden file input */}
                       <input
-                        id="photo-upload"
+                        id="photo-upload-profile"
                         type="file"
                         accept="image/*"
                         className="hidden"
                         onChange={async (e) => {
                           const file = e.target.files?.[0];
-                          if (!file || !currentUser?._id || !isEditing) return; // ✅ only if editing
-
-                          // 1️⃣ Show local preview immediately
-                          const previewUrl = URL.createObjectURL(file);
-                          setProfileData((prev) => ({ ...prev, photo: previewUrl }));
-
-                          // 2️⃣ Upload to backend (Cloudinary)
-                          const permanentUrl = await uploadStudentImage(file, currentUser._id);
-                          if (permanentUrl) {
-                            setProfileData((prev) => ({ ...prev, photo: permanentUrl }));
-                          } else {
-                            toast({
-                              title: "Upload failed",
-                              description: "Could not save photo. Please try again.",
-                              variant: "destructive",
-                            });
+                          if (file && isEditing) {
+                            await handlePhotoUpload(file);
                           }
                         }}
                       />
+
+                      {/* Upload Photo button - only show when editing */}
+                      {isEditing && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="mb-4 text-blue-600 border-blue-200 hover:bg-blue-50"
+                          onClick={() => document.getElementById('photo-upload-profile')?.click()}
+                        >
+                          <Upload className="h-4 w-4 mr-2" />
+                          Upload Photo
+                        </Button>
+                      )}
+
                       <CardTitle>{profileData.name}</CardTitle>
                       <CardDescription className="capitalize">Student</CardDescription>
                       <Button
