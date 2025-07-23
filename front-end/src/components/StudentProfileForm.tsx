@@ -16,7 +16,7 @@ const uploadStudentImage = async (file: File, studentId: string): Promise<string
     const formData = new FormData();
     formData.append("photo", file);
 
-    const res = await fetch(`http://localhost:5000/api/uploads/student-photo/${studentId}`, {
+    const res = await fetch(`/api/uploads/student-photo/${studentId}`, {
       method: "POST",
       body: formData,
     });
