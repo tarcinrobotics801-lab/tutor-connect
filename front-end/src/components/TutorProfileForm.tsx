@@ -12,7 +12,7 @@ import { useApp } from "@/contexts/AppContext";
 import { useNavigate } from "react-router-dom";
 import CertificateUpload from "@/components/CertificateUpload";
 import AchievementUpload from "@/components/AchievementUpload";
-// Error handling types
+// Error handling typesF
 interface ApiError {
   message: string;
   code?: string;
@@ -25,7 +25,7 @@ const uploadImageToBackend = async (file: File, tutorId: string): Promise<string
     const formData = new FormData();
     formData.append("photo", file);
 
-    const res = await fetch(`http://localhost:5000/api/uploads/tutor-photo/${tutorId}`, {
+    const res = await fetch(`/api/uploads/tutor-photo/${tutorId}`, {
       method: "POST",
       body: formData,
     });
@@ -115,9 +115,6 @@ const TutorProfileForm = () => {
     if (error) setError(null);
   };
 
-
-
-  // ⭐ ADDED Certificate handlers from 2nd code
   const handleCertificateUpload = (certificate: { name: string; url: string; uploadedAt: string }) => {
     setProfileData(prev => ({
       ...prev,
@@ -199,7 +196,7 @@ const TutorProfileForm = () => {
       case "availability": {
         const avail = value as typeof profileData.availability;
 
-        console.log("🔍 Availability validation input:", avail);
+        
 
         if (!avail || typeof avail !== "object") {
           return "Availability is required.";
@@ -345,7 +342,7 @@ const TutorProfileForm = () => {
       });
 
       const data = await response.json();
-      console.log('Response data:', data);
+      
 
       if (!response.ok) {
         throw new Error(data.message || 'Server Error');
@@ -353,7 +350,7 @@ const TutorProfileForm = () => {
 
       // Update user with _id
       updateUser(userId, data.user);
-      console.log("Updated User ID:", userId);
+      
       setIsEditing(false);
 
       toast({
@@ -609,79 +606,134 @@ const TutorProfileForm = () => {
       <div className="grid lg:grid-cols-3 gap-8">
         {/* Profile Picture and Basic Info */}
         <div className="lg:col-span-1">
-          <Card>
-            <CardHeader className="text-center">
-              <div className="relative w-32 h-32 mx-auto bg-blue-100 rounded-full flex items-center justify-center mb-4 overflow-hidden">
-                {profileData.photo ? (
-                  <img src={profileData.photo} alt="Profile" className="w-full h-full object-cover" />
-                ) : (
-                  <User className="h-16 w-16 text-blue-600" />
-                )}
-                {isEditing && (
-                  <Button
-                    size="sm"
-                    className="absolute bottom-0 right-0 w-8 h-8 rounded-full p-0"
-                    onClick={() => document.getElementById('photo-upload')?.click()}
-                  >
-                    <Upload className="h-4 w-4" />
-                  </Button>
-                )}
-              </div>
-              <input
-                id="photo-upload"
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={async (e) => {
-                  const file = e.target.files?.[0];
-                  if (!file || !currentUser?._id) return;
+<Card>
+  <CardHeader className="text-center">
+    <div className="relative w-40 h-40 mx-auto bg-blue-100 rounded-full flex items-center justify-center mb-4 overflow-hidden group cursor-pointer"
+         onClick={() => isEditing && document.getElementById('photo-upload')?.click()}>
+      {profileData.photo ? (
+        <img src={profileData.photo} alt="Profile" className="w-full h-full object-cover" />
+      ) : (
+        <User className="h-20 w-20 text-blue-600" />
+      )}
+      
+      {/* Hover overlay for entire circle */}
+      {isEditing && (
+        <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center rounded-full">
+          <div className="text-white text-center">
+            <Upload className="h-10 w-10 mx-auto mb-2" />
+            <span className="text-sm font-medium">Change Photo</span>
+          </div>
+        </div>
+      )}
+    </div>
+    
+    {/* Upload button below photo - always visible when editing */}
+    {isEditing && (
+      <Button
+        variant="outline"
+        size="sm"
+        className="mb-4 border-blue-300 text-blue-600 hover:bg-blue-50"
+        onClick={() => document.getElementById('photo-upload')?.click()}
+      >
+        <Upload className="h-4 w-4 mr-2" />
+        {profileData.photo ? 'Change Photo' : 'Upload Photo'}
+      </Button>
+    )}
+    
+    {/* Hidden file input */}
+    <input
+      id="photo-upload"
+      type="file"
+      accept="image/*"
+      className="hidden"
+      onChange={async (e) => {
+        const file = e.target.files?.[0];
+        if (!file || !currentUser?._id) return;
 
-                  // 1. Local preview
-                  const preview = URL.createObjectURL(file);
-                  handleInputChange("photo", preview);
+        // Validate file size (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+          toast({
+            title: "File too large",
+            description: "Please select an image smaller than 5MB.",
+            variant: "destructive",
+          });
+          return;
+        }
 
-                  // 2. Upload to Cloudinary via backend
-                  const permanentUrl = await uploadImageToBackend(file, currentUser._id);
-                  if (permanentUrl) {
-                    handleInputChange("photo", permanentUrl);
-                  } else {
-                    toast({
-                      title: "Upload failed",
-                      description: "Could not save photo. Please try again.",
-                      variant: "destructive",
-                    });
-                  }
-                }}
-              />
-              <CardTitle>{profileData.name}</CardTitle>
-              <CardDescription>
-                {profileData.educationalQualification || "Add your qualification"}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center space-x-3">
-                <Mail className="h-4 w-4 text-gray-400" />
-                <span className="text-sm">{profileData.email}</span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <Phone className="h-4 w-4 text-gray-400" />
-                <span className="text-sm">{profileData.phoneNumber || "Not provided"}</span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <Award className="h-4 w-4 text-gray-400" />
-                <span className="text-sm">
-                  {profileData.yearsOfExperience ? `${profileData.yearsOfExperience} experience ` : "Experience not added"}
-                </span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <LinkIcon className="h-4 w-4 text-gray-400" />
-                <span className="text-sm text-blue-600 truncate">
-                  {profileData.linkedinLink || "LinkedIn link not added"}
-                </span>
-              </div>
-            </CardContent>
-          </Card>
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+          toast({
+            title: "Invalid file type",
+            description: "Please select a valid image file.",
+            variant: "destructive",
+          });
+          return;
+        }
 
+        // Show loading state
+        toast({
+          title: "Uploading photo...",
+          description: "Please wait while we upload your photo.",
+        });
+
+        try {
+          // 1. Local preview
+          const preview = URL.createObjectURL(file);
+          handleInputChange("photo", preview);
+
+          // 2. Upload to Cloudinary via backend
+          const permanentUrl = await uploadImageToBackend(file, currentUser._id);
+          
+          if (permanentUrl) {
+            handleInputChange("photo", permanentUrl);
+            toast({
+              title: "Photo uploaded successfully!",
+              description: "Your profile photo has been updated.",
+            });
+          } else {
+            throw new Error("Upload failed");
+          }
+        } catch (error) {
+          // Revert to previous photo if upload failed
+          handleInputChange("photo", currentUser.photo || null);
+          toast({
+            title: "Upload failed",
+            description: "Could not save photo. Please try again.",
+            variant: "destructive",
+          });
+        }
+      }}
+    />
+    
+    <CardTitle>{profileData.name}</CardTitle>
+    <CardDescription>
+      {profileData.educationalQualification || "Add your qualification"}
+    </CardDescription>
+  </CardHeader>
+  
+  <CardContent className="space-y-4">
+    <div className="flex items-center space-x-3">
+      <Mail className="h-4 w-4 text-gray-400" />
+      <span className="text-sm">{profileData.email}</span>
+    </div>
+    <div className="flex items-center space-x-3">
+      <Phone className="h-4 w-4 text-gray-400" />
+      <span className="text-sm">{profileData.phoneNumber || "Not provided"}</span>
+    </div>
+    <div className="flex items-center space-x-3">
+      <Award className="h-4 w-4 text-gray-400" />
+      <span className="text-sm">
+        {profileData.yearsOfExperience ? `${profileData.yearsOfExperience} experience ` : "Experience not added"}
+      </span>
+    </div>
+    <div className="flex items-center space-x-3">
+      <LinkIcon className="h-4 w-4 text-gray-400" />
+      <span className="text-sm text-blue-600 truncate">
+        {profileData.linkedinLink || "LinkedIn link not added"}
+      </span>
+    </div>
+  </CardContent>
+</Card>
           <Card className="mt-6">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">

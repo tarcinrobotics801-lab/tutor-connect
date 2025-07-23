@@ -20,7 +20,6 @@ const Tutors = () => {
       try {
         const response = await fetch("/api/auth/completed-tutors");
         const data = await response.json();
-        console.log("Fetched tutors from backend:", data); // ✅ Add this
         if (response.ok) {
           setTutors(data.tutors);
         }
