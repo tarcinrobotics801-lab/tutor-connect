@@ -628,13 +628,37 @@ const acceptBookingRequest = async (requestId: string, meetingLink: string) => {
       userId: recipientUserId,
       type: "booking_accepted",
       title: "Booking Accepted!",
-      message: `Your booking for ${data.booking.courseName} has been accepted.`,
+      message: `Your booking for ${data.booking.courseName} has been accepted.
+
+      Session Time: ${data.booking.slotDay || 'N/A'} at ${data.booking.slotTime || 'N/A'} 
+      ${data.booking.sessionTime ? `(Session: ${data.booking.sessionTime})` : ''}
+
+      Join the session here: ${data.booking.meetingLink || 'Link not available'}`,
+
       bookingRequestId: requestId,
       createdAt: new Date().toISOString(),
       read: false,
     };
 
     setNotifications(prev => [...prev, notification]);
+
+  if (currentUser?._id === data.booking.userId) {
+  const updatedCourses = Array.from(
+    new Set([...(currentUser.enrolledCourses || []), data.booking.courseName])
+  );
+
+  const updatedUser = {
+    ...currentUser,
+    enrolledCourses: updatedCourses
+  };
+
+  
+  localStorage.setItem("tutorConnect_currentUser", JSON.stringify(updatedUser));
+  setCurrentUser(updatedUser);
+}
+
+
+
 
   } catch (err) {
     const error = err instanceof Error ? err : new Error("Unknown error occurred");
