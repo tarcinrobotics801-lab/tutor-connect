@@ -214,6 +214,8 @@ const TutorProfileForm = () => {
       }
       case 'certificates': // ⭐ ADDED certificate validation
         return !value || !(value as unknown[]).length ? 'At least one certificate is required' : null;
+      case 'achievements': // ⭐ ADDED certificate validation
+        return !value || !(value as unknown[]).length ? 'At least one achievement is required' : null;
       default:
         return null;
     }
@@ -241,7 +243,9 @@ const TutorProfileForm = () => {
       profileData.yearsOfExperience.trim() !== "" &&
       profileData.linkedinLink.trim() !== "" &&
       profileData.subjects.length > 0 &&
-      profileData.certificates.length > 0 // ⭐ ADDED certificate requirement
+      profileData.certificates.length > 0 && // ⭐ ADDED certificate requirement
+      profileData.achievements.length > 0 // NEW: achievements
+    
       // Note: photo is NOT required for completion
     );
   };
@@ -309,10 +313,10 @@ const TutorProfileForm = () => {
     });
 
     // ⭐ UPDATED validation to include certificates
-    if (missingFields.length > 0 || profileData.subjects.length === 0 || profileData.certificates.length === 0) {
+    if (missingFields.length > 0 || profileData.subjects.length === 0 || profileData.certificates.length === 0 || profileData.achievements.length === 0) {
       toast({
         title: "Profile Incomplete",
-        description: "Please complete all fields, add at least one subject, and upload at least one certificate.",
+        description: "Please complete all fields, add at least one subject, and upload at least one certificate and achievement.",
         variant: "destructive"
       });
       return;

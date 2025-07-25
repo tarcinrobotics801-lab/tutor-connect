@@ -13,6 +13,7 @@ export const completeStudentProfile: RequestHandler = async (req, res) => {
       city, 
       state, 
       photo,
+      enrolledCourses
     } = req.body;
 
     // Validate required fields
@@ -33,6 +34,7 @@ export const completeStudentProfile: RequestHandler = async (req, res) => {
         city,
         state,
         photo,
+        enrolledCourses, 
         profileCompleted: true,
       },
       { new: true, runValidators: true }
@@ -60,6 +62,7 @@ export const completeStudentProfile: RequestHandler = async (req, res) => {
         state: student.state,
         photo: student.photo,
         parentId: student.parentId,
+        enrolledCourses: student.enrolledCourses,
         createdAt: student.createdAt,
         updatedAt: student.updatedAt
       }

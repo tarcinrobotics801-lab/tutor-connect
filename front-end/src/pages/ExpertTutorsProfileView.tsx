@@ -65,12 +65,12 @@ const TutorProfileView = () => {
       <Navigation />
       <div className="container mx-auto px-4 py-8">
         <Button
-          onClick={() => navigate('/Courses')}
+          onClick={() => navigate('/tutors')}
           variant="ghost"
           className="mb-6 text-purple-600 hover:text-purple-700"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Courses
+          Back to Tutors
         </Button>
 
         <div className="grid lg:grid-cols-3 gap-8">

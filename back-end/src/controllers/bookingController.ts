@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { BookingRequest } from "../models/BookingRequest.model";
 import { TimeSlot } from "../models/TimeSlot.model";
-
+import { Student } from "../models/Student.model";
 export const createBookingRequest = async (req: Request, res: Response) => {
   try {
     const {
@@ -10,6 +10,7 @@ export const createBookingRequest = async (req: Request, res: Response) => {
       requestedBy,     // ✅ 'student' or 'parent'
       courseId,
       courseName,
+      sessionTime,
       tutorId,
       tutorName,
       slotId,
@@ -28,6 +29,7 @@ export const createBookingRequest = async (req: Request, res: Response) => {
       requestedBy,
       courseId,
       courseName,
+      sessionTime,
       tutorId,
       tutorName,
       slotId,
@@ -98,6 +100,13 @@ export const acceptBookingRequest = async (req: Request, res: Response): Promise
 
     slot.currentMembers += 1;
     await slot.save();
+
+    if (request.requestedBy === "student") {
+    await Student.updateOne(
+      { _id: request.userId },
+      { $addToSet: { enrolledCourses: request.courseName } }
+    );
+  }
 
     res.status(200).json({
       message: "Booking request accepted and slot updated",

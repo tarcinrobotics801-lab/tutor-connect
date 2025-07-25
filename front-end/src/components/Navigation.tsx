@@ -50,16 +50,13 @@ const Navigation = () => {
 
           {/* Desktop Navigation - Only show for students or non-logged users */}
           <div className="hidden md:flex items-center space-x-8">
-            {(!currentUser || currentUser.role === 'student') && (
+            {(!currentUser || currentUser.role === 'student'|| currentUser.role === 'parent') && (
               <>
                 <Link to="/" className="text-white/90 hover:text-white transition-colors font-medium">
                   Home
                 </Link>
                 <Link to="/courses" className="text-white/90 hover:text-white transition-colors font-medium">
                   Courses
-                </Link>
-                <Link to="/tutors" className="text-white/90 hover:text-white transition-colors font-medium">
-                  Tutors
                 </Link>
                 <Link to="/resources" className="text-white/90 hover:text-white transition-colors font-medium">
                   Resourses
@@ -108,6 +105,14 @@ const Navigation = () => {
                       <Link to="/student-profile" className="flex items-center">
                         <User className="mr-2 h-4 w-4" />
                         <span>Profile & Dashboard</span>
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
+                  {currentUser.role === 'parent' && (
+                    <DropdownMenuItem asChild>
+                      <Link to="/parent-profile" className="flex items-center">
+                        <User className="mr-2 h-4 w-4" />
+                        <span>My Account</span>
                       </Link>
                     </DropdownMenuItem>
                   )}

@@ -8,6 +8,9 @@ import { useApp } from "@/contexts/AppContext";
 
 const StudentDashboard = () => {
   const { currentUser } = useApp();
+  console.log("Student enrolledCourses:", currentUser?.enrolledCourses);
+
+  
 
   if (!currentUser || currentUser.role !== 'student') {
     return (
@@ -18,6 +21,7 @@ const StudentDashboard = () => {
     );
   }
 
+  
   if (!currentUser.profileCompleted) {
     return (
       <div className="text-center py-12">
@@ -39,6 +43,10 @@ const StudentDashboard = () => {
   const studentYear = currentUser.yearOfStudent || 0;
   const enrolledCourses = currentUser.enrolledCourses || [];
   const profilePhoto = currentUser.photo || null;
+  console.log("Current User ID:", currentUser?._id);
+  console.log("Student Name:", studentName);
+  console.log("Enrolled courses:", enrolledCourses);
+  
 
   // Create charts data based on student information
   const profileCompletionData = [
@@ -78,13 +86,15 @@ const StudentDashboard = () => {
           Update Profile
         </Button>
       </div>
-
+      
       {/* Key Metrics */}
       <div className="grid md:grid-cols-4 gap-6">
         <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-blue-800">Enrolled Courses</CardTitle>
             <BookOpen className="h-4 w-4 text-blue-600" />
+           
+
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-blue-900">{enrolledCourses.length}</div>
@@ -297,27 +307,7 @@ const StudentDashboard = () => {
           </CardContent>
         </Card>
 
-        {/* Academic Progress */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <GraduationCap className="h-5 w-5 text-purple-600" />
-              <span>Academic Progress</span>
-            </CardTitle>
-            <CardDescription>Year-wise completion status</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={200}>
-              <BarChart data={yearProgressData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="year" />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="completed" fill="#10B981" />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+        
       </div>
 
       {/* Profile Photo Display - if exists */}

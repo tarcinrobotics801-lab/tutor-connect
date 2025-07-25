@@ -34,6 +34,7 @@ const StudentProfileForm = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { currentUser, updateUser, getUserNotifications, markNotificationAsRead } = useApp();
+  const { setCurrentUser } = useApp();
   const [isEditing, setIsEditing] = useState(!currentUser?.profileCompleted);
   const [activeTab, setActiveTab] = useState(currentUser?.profileCompleted ? "dashboard" : "profile");
 
@@ -128,7 +129,7 @@ const StudentProfileForm = () => {
       collegeName: profileData.collegeName,
       city: profileData.city,
       state: profileData.state,
-      photo: profileData.photo || "",
+      photo: profileData.photo || "", 
     };
 
     try {
@@ -158,6 +159,7 @@ const StudentProfileForm = () => {
         throw new Error(`Server returned ${res.status}: ${res.statusText}`);
       }
 
+      
       if (!res.ok) {
         const errorMessage = data?.message || data?.error || `Server error: ${res.status} ${res.statusText}`;
         console.error("API Error Details:", {
@@ -191,6 +193,7 @@ const StudentProfileForm = () => {
           profileCompleted: true,
         });
       }
+      setCurrentUser(data.student); 
 
       toast({
         title: "Profile Saved",
@@ -776,38 +779,51 @@ const StudentProfileForm = () => {
                       </div>
                     ) : (
                       <div className="space-y-4">
-                        {notifications.map((notification) => (
-                          <Card
-                            key={notification.id}
-                            className={`cursor-pointer hover:bg-gray-50 transition-colors ${!notification.read ? 'border-blue-200 bg-blue-50' : 'border-gray-200'
-                              }`}
-                            onClick={() => handleNotificationClick(notification.id)}
-                          >
-                            <CardContent className="p-4">
-                              <div className="flex items-start gap-3">
-                                {getNotificationIcon(notification.type)}
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center justify-between">
-                                    <p className="font-medium text-sm text-gray-900">
-                                      {notification.title}
-                                    </p>
-                                    <div className="flex items-center gap-2">
-                                      <p className="text-xs text-gray-400">
-                                        {formatDate(notification.createdAt)}
-                                      </p>
-                                      {!notification.read && (
-                                        <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0" />
-                                      )}
-                                    </div>
-                                  </div>
-                                  <p className="text-sm text-gray-600 mt-1">
-                                    {notification.message}
-                                  </p>
-                                </div>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        ))}
+                        {notifications.map((notification) => {
+  const urlMatch = notification.message.match(/https?:\/\/[^\s]+/);
+  const meetingLink = urlMatch ? urlMatch[0] : null;
+
+  return (
+    <Card
+      key={notification.id}
+      className={`cursor-pointer hover:bg-gray-50 transition-colors ${
+        !notification.read ? 'border-blue-200 bg-blue-50' : 'border-gray-200'
+      }`}
+      onClick={() => handleNotificationClick(notification.id)}
+    >
+      <CardContent className="p-4">
+        <div className="flex items-start gap-3">
+          {getNotificationIcon(notification.type)}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between">
+              <p className="font-medium text-sm text-gray-900">{notification.title}</p>
+              <div className="flex items-center gap-2">
+                <p className="text-xs text-gray-400">{formatDate(notification.createdAt)}</p>
+                {!notification.read && <div className="w-2 h-2 bg-blue-500 rounded-full" />}
+              </div>
+            </div>
+            <div className="text-sm text-gray-600 mt-1 whitespace-pre-line">
+  {notification.message}
+</div>
+
+            {meetingLink && (
+              <Button
+                size="sm"
+                className="mt-2 bg-blue-600 hover:bg-blue-700 text-white"
+                onClick={(e) => {
+                  e.stopPropagation(); // don’t trigger mark-as-read when clicking button
+                  window.open(meetingLink, "_blank");
+                }}
+              >
+                Join Meeting
+              </Button>
+            )}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+})}
                       </div>
                     )}
                   </ScrollArea>
