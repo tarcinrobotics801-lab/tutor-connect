@@ -307,27 +307,7 @@ const StudentDashboard = () => {
           </CardContent>
         </Card>
 
-        {/* Academic Progress */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <GraduationCap className="h-5 w-5 text-purple-600" />
-              <span>Academic Progress</span>
-            </CardTitle>
-            <CardDescription>Year-wise completion status</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={200}>
-              <BarChart data={yearProgressData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="year" />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="completed" fill="#10B981" />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+        
       </div>
 
       {/* Profile Photo Display - if exists */}

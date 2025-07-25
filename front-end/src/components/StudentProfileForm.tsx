@@ -34,6 +34,7 @@ const StudentProfileForm = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { currentUser, updateUser, getUserNotifications, markNotificationAsRead } = useApp();
+  const { setCurrentUser } = useApp();
   const [isEditing, setIsEditing] = useState(!currentUser?.profileCompleted);
   const [activeTab, setActiveTab] = useState(currentUser?.profileCompleted ? "dashboard" : "profile");
 
@@ -158,6 +159,7 @@ const StudentProfileForm = () => {
         throw new Error(`Server returned ${res.status}: ${res.statusText}`);
       }
 
+      
       if (!res.ok) {
         const errorMessage = data?.message || data?.error || `Server error: ${res.status} ${res.statusText}`;
         console.error("API Error Details:", {
@@ -191,6 +193,7 @@ const StudentProfileForm = () => {
           profileCompleted: true,
         });
       }
+      setCurrentUser(data.student); 
 
       toast({
         title: "Profile Saved",

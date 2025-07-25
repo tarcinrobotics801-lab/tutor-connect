@@ -405,9 +405,31 @@ const ParentProfileForm = () => {
                                     )}
                                   </div>
                                 </div>
-                                <p className="text-sm text-gray-600 mt-1">
-                                  {notification.message}
-                                </p>
+                                <div className="text-sm text-gray-600 mt-1 whitespace-pre-line">
+  {notification.message}
+
+  {/* Show Join Meeting button below the link */}
+  {(() => {
+    const urlMatch = notification.message.match(/https?:\/\/[^\s]+/);
+    if (urlMatch && urlMatch[0]) {
+      return (
+        <div className="mt-3">
+          <Button
+            size="sm"
+            className="bg-purple-600 hover:bg-purple-700 text-white"
+            onClick={(e) => {
+              e.stopPropagation(); // don't trigger mark-as-read click
+              window.open(urlMatch[0], "_blank");
+            }}
+          >
+            Join Meeting
+          </Button>
+        </div>
+      );
+    }
+    return null;
+  })()}
+</div>
                               </div>
                             </div>
                           </CardContent>

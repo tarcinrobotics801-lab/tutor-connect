@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { BookOpen, Users, Calendar, Award, GraduationCap, Search, User, Settings, LogOut, UserCheck, BookOpenCheck, Target, Zap, TrendingUp,Heart,Clock,Shield, Star } from "lucide-react";
+import { BookOpen, Users, Calendar, Award, GraduationCap, Search, User, Settings, LogOut, UserCheck, BookOpenCheck, Target, Zap, TrendingUp, Heart, Clock, Shield, Star, MapPin, DollarSign, ChevronRight, Filter } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import {
@@ -41,6 +41,13 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-800 to-indigo-900 relative overflow-hidden">
+      {/* Professional Background Image Overlay */}
+      <div 
+        className="absolute inset-0 opacity-10 bg-cover bg-center bg-no-repeat transition-opacity duration-1000"
+        style={{
+          backgroundImage: "url('https://images.unsplash.com/photo-1553877522-43269d4ea984?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')"
+        }}
+      ></div>
       {/* Enhanced floating background elements */}
       <div className="absolute inset-0">
         <div className="absolute top-20 left-20 w-40 h-40 bg-purple-500/30 rounded-full blur-3xl animate-pulse animation-delay-0"></div>
@@ -61,7 +68,7 @@ const Index = () => {
         </p>
       </div>
 
-      {/* Header - Now Dynamic */}
+      {/* Header - Updated Navigation */}
       <header className="bg-black/20 backdrop-blur-md border-b border-white/10 relative z-10">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <Link to="/" className="flex items-center space-x-2">
@@ -77,8 +84,7 @@ const Index = () => {
           
           <nav className="hidden md:flex space-x-8">
             <Link to="/" className="text-white hover:text-purple-300 transition-colors font-medium">Home</Link>
-            <Link to="/courses" className="text-white hover:text-purple-300 transition-colors font-medium">Courses</Link>
-            <Link to="/Tutors" className="text-white hover:text-purple-300 transition-colors font-medium">Find Tutors</Link>
+            <Link to="/courses" className="text-white hover:text-purple-300 transition-colors font-medium">Discover Courses & Tutors</Link>
             <Link to="/resources" className="text-white hover:text-purple-300 transition-colors font-medium">Resources</Link>
           </nav>
           
@@ -137,7 +143,7 @@ const Index = () => {
                     <DropdownMenuItem asChild>
                       <Link to="/parent-profile" className="flex items-center">
                         <User className="mr-2 h-4 w-4" />
-                        <span>Profile & Student Dashboard</span>
+                        <span>My Account</span>
                       </Link>
                     </DropdownMenuItem>
                   )}
@@ -238,148 +244,149 @@ const Index = () => {
       </div>
 
       {/* Interactive Sections for Tutors and Students */}
-<section className="container mx-auto px-4 py-20 relative z-10">
-  <h2 className="text-5xl font-bold text-center text-white mb-4">
-    Choose Your Path
-  </h2>
-  <p className="text-xl text-center text-purple-200 mb-16">
-    Whether you're here to learn or teach, we have the perfect solution for you
-  </p>
-  
-  <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-8 max-w-7xl mx-auto">
-    {/* For Students */}
-    <Card 
-      className={`bg-white/90 backdrop-blur-xl border-2 border-blue-200/50 hover:border-blue-300/80 transition-all duration-700 hover:shadow-2xl hover:shadow-blue-500/30 transform hover:scale-105 hover:-translate-y-2 cursor-pointer group ${hoveredCard === 'students' ? 'scale-105 -translate-y-2 shadow-2xl shadow-blue-500/30' : ''}`}
-      onMouseEnter={() => setHoveredCard('students')}
-      onMouseLeave={() => setHoveredCard(null)}
-    >
-      <CardHeader className="text-center pb-6">
-        <div className="mx-auto mb-4 p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl w-fit shadow-lg group-hover:shadow-2xl group-hover:shadow-blue-500/40 transition-all duration-500 group-hover:rotate-6">
-          <BookOpenCheck className="h-12 w-12 text-white group-hover:scale-110 transition-transform duration-300" />
-        </div>
-        <CardTitle className="text-2xl text-gray-800 mb-3 font-bold group-hover:text-blue-700 transition-colors duration-300">For Students</CardTitle>
-        <CardDescription className="text-gray-600 text-sm font-medium group-hover:text-gray-700 transition-colors duration-300">
-          Unlock your potential with personalized learning experiences
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-3">
-          <div className="flex items-center space-x-3 text-gray-700 hover:text-blue-600 transition-all duration-300 hover:translate-x-2 group/item">
-            <Target className="h-5 w-5 text-blue-500 group-hover/item:scale-110 transition-transform duration-300" />
-            <span className="text-sm font-semibold">Personalized Learning Paths</span>
-          </div>
-          <div className="flex items-center space-x-3 text-gray-700 hover:text-blue-600 transition-all duration-300 hover:translate-x-2 group/item">
-            <Users className="h-5 w-5 text-blue-500 group-hover/item:scale-110 transition-transform duration-300" />
-            <span className="text-sm font-semibold">Expert Tutors Worldwide</span>
-          </div>
-          <div className="flex items-center space-x-3 text-gray-700 hover:text-blue-600 transition-all duration-300 hover:translate-x-2 group/item">
-            <Zap className="h-5 w-5 text-blue-500 group-hover/item:scale-110 transition-transform duration-300" />
-            <span className="text-sm font-semibold">Interactive Learning Tools</span>
-          </div>
-          <div className="flex items-center space-x-3 text-gray-700 hover:text-blue-600 transition-all duration-300 hover:translate-x-2 group/item">
-            <Award className="h-5 w-5 text-blue-500 group-hover/item:scale-110 transition-transform duration-300" />
-            <span className="text-sm font-semibold">Certified Achievements</span>
-          </div>
-        </div>
-        <div className="pt-4">
-          <Link to="/signup" className="block">
-            <Button className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-2.5 text-base font-semibold rounded-lg shadow-lg hover:shadow-2xl hover:shadow-blue-500/30 transition-all duration-500 hover:scale-105">
-              Start Learning Today
-            </Button>
-          </Link>
-        </div>
-      </CardContent>
-    </Card>
+      <section className="container mx-auto px-4 py-20 relative z-10">
+        <h2 className="text-5xl font-bold text-center text-white mb-4">
+          Choose Your Path
+        </h2>
+        <p className="text-xl text-center text-purple-200 mb-16">
+          Whether you're here to learn or teach, we have the perfect solution for you
+        </p>
+        
+        <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-8 max-w-7xl mx-auto">
+          {/* For Students */}
+          <Card 
+            className={`bg-white/90 backdrop-blur-xl border-2 border-blue-200/50 hover:border-blue-300/80 transition-all duration-700 hover:shadow-2xl hover:shadow-blue-500/30 transform hover:scale-105 hover:-translate-y-2 cursor-pointer group ${hoveredCard === 'students' ? 'scale-105 -translate-y-2 shadow-2xl shadow-blue-500/30' : ''}`}
+            onMouseEnter={() => setHoveredCard('students')}
+            onMouseLeave={() => setHoveredCard(null)}
+          >
+            <CardHeader className="text-center pb-6">
+              <div className="mx-auto mb-4 p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl w-fit shadow-lg group-hover:shadow-2xl group-hover:shadow-blue-500/40 transition-all duration-500 group-hover:rotate-6">
+                <BookOpenCheck className="h-12 w-12 text-white group-hover:scale-110 transition-transform duration-300" />
+              </div>
+              <CardTitle className="text-2xl text-gray-800 mb-3 font-bold group-hover:text-blue-700 transition-colors duration-300">For Students</CardTitle>
+              <CardDescription className="text-gray-600 text-sm font-medium group-hover:text-gray-700 transition-colors duration-300">
+                Unlock your potential with personalized learning experiences
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-3">
+                <div className="flex items-center space-x-3 text-gray-700 hover:text-blue-600 transition-all duration-300 hover:translate-x-2 group/item">
+                  <Target className="h-5 w-5 text-blue-500 group-hover/item:scale-110 transition-transform duration-300" />
+                  <span className="text-sm font-semibold">Personalized Learning Paths</span>
+                </div>
+                <div className="flex items-center space-x-3 text-gray-700 hover:text-blue-600 transition-all duration-300 hover:translate-x-2 group/item">
+                  <Users className="h-5 w-5 text-blue-500 group-hover/item:scale-110 transition-transform duration-300" />
+                  <span className="text-sm font-semibold">Expert Tutors Worldwide</span>
+                </div>
+                <div className="flex items-center space-x-3 text-gray-700 hover:text-blue-600 transition-all duration-300 hover:translate-x-2 group/item">
+                  <Zap className="h-5 w-5 text-blue-500 group-hover/item:scale-110 transition-transform duration-300" />
+                  <span className="text-sm font-semibold">Interactive Learning Tools</span>
+                </div>
+                <div className="flex items-center space-x-3 text-gray-700 hover:text-blue-600 transition-all duration-300 hover:translate-x-2 group/item">
+                  <Award className="h-5 w-5 text-blue-500 group-hover/item:scale-110 transition-transform duration-300" />
+                  <span className="text-sm font-semibold">Certified Achievements</span>
+                </div>
+              </div>
+              <div className="pt-4">
+                <Link to="/signup" className="block">
+                  <Button className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-2.5 text-base font-semibold rounded-lg shadow-lg hover:shadow-2xl hover:shadow-blue-500/30 transition-all duration-500 hover:scale-105">
+                    Start Learning Today
+                  </Button>
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
 
-    {/* For Tutors */}
-    <Card 
-      className={`bg-white/90 backdrop-blur-xl border-2 border-purple-200/50 hover:border-purple-300/80 transition-all duration-700 hover:shadow-2xl hover:shadow-purple-500/30 transform hover:scale-105 hover:-translate-y-2 cursor-pointer group ${hoveredCard === 'tutors' ? 'scale-105 -translate-y-2 shadow-2xl shadow-purple-500/30' : ''}`}
-      onMouseEnter={() => setHoveredCard('tutors')}
-      onMouseLeave={() => setHoveredCard(null)}
-    >
-      <CardHeader className="text-center pb-6">
-        <div className="mx-auto mb-4 p-3 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl w-fit shadow-lg group-hover:shadow-2xl group-hover:shadow-purple-500/40 transition-all duration-500 group-hover:rotate-6">
-          <UserCheck className="h-12 w-12 text-white group-hover:scale-110 transition-transform duration-300" />
+          {/* For Tutors */}
+          <Card 
+            className={`bg-white/90 backdrop-blur-xl border-2 border-purple-200/50 hover:border-purple-300/80 transition-all duration-700 hover:shadow-2xl hover:shadow-purple-500/30 transform hover:scale-105 hover:-translate-y-2 cursor-pointer group ${hoveredCard === 'tutors' ? 'scale-105 -translate-y-2 shadow-2xl shadow-purple-500/30' : ''}`}
+            onMouseEnter={() => setHoveredCard('tutors')}
+            onMouseLeave={() => setHoveredCard(null)}
+          >
+            <CardHeader className="text-center pb-6">
+              <div className="mx-auto mb-4 p-3 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl w-fit shadow-lg group-hover:shadow-2xl group-hover:shadow-purple-500/40 transition-all duration-500 group-hover:rotate-6">
+                <UserCheck className="h-12 w-12 text-white group-hover:scale-110 transition-transform duration-300" />
+              </div>
+              <CardTitle className="text-2xl text-gray-800 mb-3 font-bold group-hover:text-purple-700 transition-colors duration-300">For Tutors</CardTitle>
+              <CardDescription className="text-gray-600 text-sm font-medium group-hover:text-gray-700 transition-colors duration-300">
+                Share your expertise and build a thriving teaching career
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-3">
+                <div className="flex items-center space-x-3 text-gray-700 hover:text-purple-600 transition-all duration-300 hover:translate-x-2 group/item">
+                  <TrendingUp className="h-5 w-5 text-purple-500 group-hover/item:scale-110 transition-transform duration-300" />
+                  <span className="text-sm font-semibold">Grow Your Income</span>
+                </div>
+                <div className="flex items-center space-x-3 text-gray-700 hover:text-purple-600 transition-all duration-300 hover:translate-x-2 group/item">
+                  <Calendar className="h-5 w-5 text-purple-500 group-hover/item:scale-110 transition-transform duration-300" />
+                  <span className="text-sm font-semibold">Flexible Schedule</span>
+                </div>
+                <div className="flex items-center space-x-3 text-gray-700 hover:text-purple-600 transition-all duration-300 hover:translate-x-2 group/item">
+                  <BookOpen className="h-5 w-5 text-purple-500 group-hover/item:scale-110 transition-transform duration-300" />
+                  <span className="text-sm font-semibold">Create Custom Courses</span>
+                </div>
+                <div className="flex items-center space-x-3 text-gray-700 hover:text-purple-600 transition-all duration-300 hover:translate-x-2 group/item">
+                  <Star className="h-5 w-5 text-purple-500 group-hover/item:scale-110 transition-transform duration-300" />
+                  <span className="text-sm font-semibold">Build Your Reputation</span>
+                </div>
+              </div>
+              <div className="pt-4">
+                <Link to="/signup" className="block">
+                  <Button className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white py-2.5 text-base font-semibold rounded-lg shadow-lg hover:shadow-2xl hover:shadow-purple-500/30 transition-all duration-500 hover:scale-105">
+                    Become a Tutor
+                  </Button>
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+          
+          {/* For Parents */}
+          <Card 
+            className={`bg-white/90 backdrop-blur-xl border-2 border-green-200/50 hover:border-green-300/80 transition-all duration-700 hover:shadow-2xl hover:shadow-green-500/30 transform hover:scale-105 hover:-translate-y-2 cursor-pointer group ${hoveredCard === 'parents' ? 'scale-105 -translate-y-2 shadow-2xl shadow-green-500/30' : ''}`}
+            onMouseEnter={() => setHoveredCard('parents')}
+            onMouseLeave={() => setHoveredCard(null)}
+          >
+            <CardHeader className="text-center pb-6">
+              <div className="mx-auto mb-4 p-3 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl w-fit shadow-lg group-hover:shadow-2xl group-hover:shadow-green-500/40 transition-all duration-500 group-hover:rotate-6">
+                <Heart className="h-12 w-12 text-white group-hover:scale-110 transition-transform duration-300" />
+              </div>
+              <CardTitle className="text-2xl text-gray-800 mb-3 font-bold group-hover:text-green-700 transition-colors duration-300">For Parents</CardTitle>
+              <CardDescription className="text-gray-600 text-sm font-medium group-hover:text-gray-700 transition-colors duration-300">
+                Support your child's educational journey with confidence
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-3">
+                <div className="flex items-center space-x-3 text-gray-700 hover:text-green-600 transition-all duration-300 hover:translate-x-2 group/item">
+                  <TrendingUp className="h-5 w-5 text-green-500 group-hover/item:scale-110 transition-transform duration-300" />
+                  <span className="text-sm font-semibold">Track Learning Progress</span>
+                </div>
+                <div className="flex items-center space-x-3 text-gray-700 hover:text-green-600 transition-all duration-300 hover:translate-x-2 group/item">
+                  <Shield className="h-5 w-5 text-green-500 group-hover/item:scale-110 transition-transform duration-300" />
+                  <span className="text-sm font-semibold">Verified Tutor Profiles</span>
+                </div>
+                <div className="flex items-center space-x-3 text-gray-700 hover:text-green-600 transition-all duration-300 hover:translate-x-2 group/item">
+                  <Clock className="h-5 w-5 text-green-500 group-hover/item:scale-110 transition-transform duration-300" />
+                  <span className="text-sm font-semibold">Flexible Scheduling</span>
+                </div>
+                <div className="flex items-center space-x-3 text-gray-700 hover:text-green-600 transition-all duration-300 hover:translate-x-2 group/item">
+                  <Star className="h-5 w-5 text-green-500 group-hover/item:scale-110 transition-transform duration-300" />
+                  <span className="text-sm font-semibold">Safety & Security</span>
+                </div>
+              </div>
+              <div className="pt-4">
+                <Link to="/signup" className="block">
+                  <Button className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white py-2.5 text-base font-semibold rounded-lg shadow-lg hover:shadow-2xl hover:shadow-green-500/30 transition-all duration-500 hover:scale-105">
+                    Get Started
+                  </Button>
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
         </div>
-        <CardTitle className="text-2xl text-gray-800 mb-3 font-bold group-hover:text-purple-700 transition-colors duration-300">For Tutors</CardTitle>
-        <CardDescription className="text-gray-600 text-sm font-medium group-hover:text-gray-700 transition-colors duration-300">
-          Share your expertise and build a thriving teaching career
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-3">
-          <div className="flex items-center space-x-3 text-gray-700 hover:text-purple-600 transition-all duration-300 hover:translate-x-2 group/item">
-            <TrendingUp className="h-5 w-5 text-purple-500 group-hover/item:scale-110 transition-transform duration-300" />
-            <span className="text-sm font-semibold">Grow Your Income</span>
-          </div>
-          <div className="flex items-center space-x-3 text-gray-700 hover:text-purple-600 transition-all duration-300 hover:translate-x-2 group/item">
-            <Calendar className="h-5 w-5 text-purple-500 group-hover/item:scale-110 transition-transform duration-300" />
-            <span className="text-sm font-semibold">Flexible Schedule</span>
-          </div>
-          <div className="flex items-center space-x-3 text-gray-700 hover:text-purple-600 transition-all duration-300 hover:translate-x-2 group/item">
-            <BookOpen className="h-5 w-5 text-purple-500 group-hover/item:scale-110 transition-transform duration-300" />
-            <span className="text-sm font-semibold">Create Custom Courses</span>
-          </div>
-          <div className="flex items-center space-x-3 text-gray-700 hover:text-purple-600 transition-all duration-300 hover:translate-x-2 group/item">
-            <Star className="h-5 w-5 text-purple-500 group-hover/item:scale-110 transition-transform duration-300" />
-            <span className="text-sm font-semibold">Build Your Reputation</span>
-          </div>
-        </div>
-        <div className="pt-4">
-          <Link to="/signup" className="block">
-            <Button className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white py-2.5 text-base font-semibold rounded-lg shadow-lg hover:shadow-2xl hover:shadow-purple-500/30 transition-all duration-500 hover:scale-105">
-              Become a Tutor
-            </Button>
-          </Link>
-        </div>
-      </CardContent>
-    </Card>
-    
-    {/* For Parents */}
-    <Card 
-      className={`bg-white/90 backdrop-blur-xl border-2 border-green-200/50 hover:border-green-300/80 transition-all duration-700 hover:shadow-2xl hover:shadow-green-500/30 transform hover:scale-105 hover:-translate-y-2 cursor-pointer group ${hoveredCard === 'parents' ? 'scale-105 -translate-y-2 shadow-2xl shadow-green-500/30' : ''}`}
-      onMouseEnter={() => setHoveredCard('parents')}
-      onMouseLeave={() => setHoveredCard(null)}
-    >
-      <CardHeader className="text-center pb-6">
-        <div className="mx-auto mb-4 p-3 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl w-fit shadow-lg group-hover:shadow-2xl group-hover:shadow-green-500/40 transition-all duration-500 group-hover:rotate-6">
-          <Heart className="h-12 w-12 text-white group-hover:scale-110 transition-transform duration-300" />
-        </div>
-        <CardTitle className="text-2xl text-gray-800 mb-3 font-bold group-hover:text-green-700 transition-colors duration-300">For Parents</CardTitle>
-        <CardDescription className="text-gray-600 text-sm font-medium group-hover:text-gray-700 transition-colors duration-300">
-          Support your child's educational journey with confidence
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-3">
-          <div className="flex items-center space-x-3 text-gray-700 hover:text-green-600 transition-all duration-300 hover:translate-x-2 group/item">
-            <TrendingUp className="h-5 w-5 text-green-500 group-hover/item:scale-110 transition-transform duration-300" />
-            <span className="text-sm font-semibold">Track Learning Progress</span>
-          </div>
-          <div className="flex items-center space-x-3 text-gray-700 hover:text-green-600 transition-all duration-300 hover:translate-x-2 group/item">
-            <Shield className="h-5 w-5 text-green-500 group-hover/item:scale-110 transition-transform duration-300" />
-            <span className="text-sm font-semibold">Verified Tutor Profiles</span>
-          </div>
-          <div className="flex items-center space-x-3 text-gray-700 hover:text-green-600 transition-all duration-300 hover:translate-x-2 group/item">
-            <Clock className="h-5 w-5 text-green-500 group-hover/item:scale-110 transition-transform duration-300" />
-            <span className="text-sm font-semibold">Flexible Scheduling</span>
-          </div>
-          <div className="flex items-center space-x-3 text-gray-700 hover:text-green-600 transition-all duration-300 hover:translate-x-2 group/item">
-            <Star className="h-5 w-5 text-green-500 group-hover/item:scale-110 transition-transform duration-300" />
-            <span className="text-sm font-semibold">Safety & Security</span>
-          </div>
-        </div>
-        <div className="pt-4">
-          <Link to="/signup" className="block">
-            <Button className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white py-2.5 text-base font-semibold rounded-lg shadow-lg hover:shadow-2xl hover:shadow-green-500/30 transition-all duration-500 hover:scale-105">
-              Get Started
-            </Button>
-          </Link>
-        </div>
-      </CardContent>
-    </Card>
-  </div>
-</section>
+      </section>
+
       {/* Features Section */}
       <section className="container mx-auto px-4 py-20 relative z-10">
         <h2 className="text-4xl font-bold text-center text-white mb-16">
@@ -434,6 +441,47 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Expert Tutors Section - New Section */}
+      <section className="container mx-auto px-4 py-20 relative z-10">
+        
+        {/* Tutors Display Section */}
+        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20">
+          <div className="text-center py-16">
+            <Users className="h-24 w-24 text-purple-300 mx-auto mb-6 opacity-60" />
+            <h3 className="text-2xl font-semibold text-white mb-4">
+              Discover Amazing Tutors
+            </h3>
+            <p className="text-lg text-purple-200 mb-8 max-w-2xl mx-auto">
+              Browse through our extensive network of qualified tutors across various subjects. 
+              Find the perfect match for your learning needs and start your educational journey today.
+            </p>
+            <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-8">
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20">
+                <BookOpen className="h-8 w-8 text-blue-400 mx-auto mb-3" />
+                <h4 className="text-white font-semibold mb-2">All Subjects</h4>
+                <p className="text-purple-200 text-sm">Mathematics, Science, Languages, Arts & more</p>
+              </div>
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20">
+                <Star className="h-8 w-8 text-yellow-400 mx-auto mb-3" />
+                <h4 className="text-white font-semibold mb-2">Verified Experts</h4>
+                <p className="text-purple-200 text-sm">Background-checked & certified professionals</p>
+              </div>
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20">
+                <MapPin className="h-8 w-8 text-green-400 mx-auto mb-3" />
+                <h4 className="text-white font-semibold mb-2">Global Reach</h4>
+                <p className="text-purple-200 text-sm">Connect with tutors from around the world</p>
+              </div>
+            </div>
+            <Link to="/ExpertTutors" >
+              <Button size="lg" className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white px-8 py-3 text-lg font-semibold rounded-lg shadow-lg hover:shadow-2xl hover:shadow-purple-500/30 transition-all duration-500 hover:scale-105">
+                View All Tutors
+                <ChevronRight className="ml-2 h-5 w-5" />
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* Stats Section */}
       <section className="py-20 text-blue-900 text-center">
         <div className="container mx-auto px-6 max-w-3xl text-center">
@@ -476,6 +524,7 @@ const Index = () => {
               <ul className="space-y-2 text-purple-100">
                 <li><Link to="/signup" className="hover:text-white transition-colors">Become a Tutor</Link></li>
                 <li><Link to="/tutor-profile" className="hover:text-white transition-colors">Tutor Dashboard</Link></li>
+                <li><Link to="/Tutors" className="hover:text-white transition-colors">View All Tutors</Link></li>
               </ul>
             </div>
             <div>

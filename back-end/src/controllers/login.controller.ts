@@ -105,6 +105,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
             state: student.state,
             photo: student.photo,
             parentId: student.parentId,
+            enrolledCourses: student.enrolledCourses || [],
           },
         });
         break;

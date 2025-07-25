@@ -245,60 +245,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  /* ---------------- localStorage I/O ----------------- */
-  useEffect(() => {
-    try {
-      const u = localStorage.getItem("tutorConnect_users");
-      const c = localStorage.getItem("tutorConnect_courses");
-      const e = localStorage.getItem("tutorConnect_enrollments");
-      const cu = localStorage.getItem("tutorConnect_currentUser");
-      const savedTimeSlots = localStorage.getItem('tutorConnect_timeSlots');
-      const savedBookingRequests = localStorage.getItem('tutorConnect_bookingRequests');
-      const savedNotifications = localStorage.getItem('tutorConnect_notifications');
-
-      if (u) setUsers(JSON.parse(u));
-      if (c) setCourses(JSON.parse(c));
-      if (e) setEnrollments(JSON.parse(e));
-      if (cu) setCurrentUser(JSON.parse(cu));
-      if (savedTimeSlots) setTimeSlots(JSON.parse(savedTimeSlots));
-      if (savedBookingRequests) setBookingRequests(JSON.parse(savedBookingRequests));
-      if (savedNotifications) setNotifications(JSON.parse(savedNotifications));
-    } catch (err) {
-      console.error("load localStorage:", err);
-      setError("Failed to load saved data");
-    }
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem("tutorConnect_users", JSON.stringify(users));
-  }, [users]);
-
-  useEffect(() => {
-    localStorage.setItem("tutorConnect_courses", JSON.stringify(courses));
-  }, [courses]);
-
-  useEffect(() => {
-    localStorage.setItem("tutorConnect_enrollments", JSON.stringify(enrollments));
-  }, [enrollments]);
-
-  useEffect(() => {
-    localStorage.setItem('tutorConnect_timeSlots', JSON.stringify(timeSlots));
-  }, [timeSlots]);
-
-  useEffect(() => {
-    localStorage.setItem('tutorConnect_bookingRequests', JSON.stringify(bookingRequests));
-  }, [bookingRequests]);
-
-  useEffect(() => {
-    localStorage.setItem('tutorConnect_notifications', JSON.stringify(notifications));
-  }, [notifications]);
-
-  useEffect(() => {
-    if (currentUser)
-      localStorage.setItem("tutorConnect_currentUser", JSON.stringify(currentUser));
-    else localStorage.removeItem("tutorConnect_currentUser");
-  }, [currentUser]);
-
   /* ------------------ user CRUD ------------------ */
   const addUser = (user: User): void => setUsers((p) => [...p, user]);
 
@@ -642,22 +588,29 @@ const acceptBookingRequest = async (requestId: string, meetingLink: string) => {
 
     setNotifications(prev => [...prev, notification]);
 
-  if (currentUser?._id === data.booking.userId) {
-  const updatedCourses = Array.from(
-    new Set([...(currentUser.enrolledCourses || []), data.booking.courseName])
-  );
+    if (currentUser?._id === data.booking.userId) {
+    try {
+    const endpoint =
+      currentUser.role === "tutor"
+        ? `/api/auth/tutor/${currentUser._id}`
+        : currentUser.role === "parent"
+          ? `/api/auth/parent/${currentUser._id}`
+          : `/api/auth/student/${currentUser._id}`;
 
-  const updatedUser = {
-    ...currentUser,
-    enrolledCourses: updatedCourses
-  };
+    const updatedUserRes = await fetch(endpoint, {
+      credentials: "include",
+    });
 
-  
-  localStorage.setItem("tutorConnect_currentUser", JSON.stringify(updatedUser));
-  setCurrentUser(updatedUser);
+    if (updatedUserRes.ok) {
+      const updatedUser: User = await updatedUserRes.json();
+      setCurrentUser(updatedUser);
+    } else {
+      console.warn("Failed to fetch updated user by role");
+    }
+  } catch (err) {
+    console.error("Error fetching updated user:", err);
+  }
 }
-
-
 
 
   } catch (err) {
@@ -765,7 +718,7 @@ const acceptBookingRequest = async (requestId: string, meetingLink: string) => {
   const logoutUser = (): void => {
     setCurrentUser(null);
     setError(null);
-    localStorage.removeItem("tutorConnect_currentUser");
+   
   };
 
   /* ---------------- queries / helpers -------------- */
