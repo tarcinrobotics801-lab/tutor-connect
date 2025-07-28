@@ -25,6 +25,8 @@ export interface ITutor extends Document {
   profileCompleted: boolean;
   educationalQualification?: string;
   yearsOfExperience?: string;
+  educationBoard?: "State" | "CBSE" | "ICSE" | "College";
+  gradeOrYear?: string;
   linkedinLink?: string;
   bio?: string;
   subjects?: string[];
@@ -45,73 +47,87 @@ export interface ITutor extends Document {
   updatedAt: Date;
 }
 
-const tutorSchema = new Schema<ITutor>({
-  name: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
-  phoneNumber: { type: String, required: true },
-  password: { type: String, required: true },
-  role: { type: String, default: 'tutor' },
+const tutorSchema = new Schema<ITutor>(
+  {
+    name: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
+    phoneNumber: { type: String, required: true },
+    password: { type: String, required: true },
+    role: { type: String, default: 'tutor' },
 
-  profileCompleted: { type: Boolean, default: false },
-  educationalQualification: { type: String },
-  yearsOfExperience: { type: String },
-  linkedinLink: { type: String },
-  bio: { type: String },
-  subjects: [{ type: String }],
-  photo: { type: String },
+    profileCompleted: { type: Boolean, default: false },
+    educationalQualification: { type: String },
+    yearsOfExperience: { type: String },
 
-  availability: {
-    monday: {
-      available: { type: Boolean, default: false },
-      timeSlots: [{ type: String }]
+    // NEW FIELDS
+    educationBoard: {
+      type: String,
+      enum: ["State", "CBSE", "ICSE", "College"],
+      default: ""
     },
-    tuesday: {
-      available: { type: Boolean, default: false },
-      timeSlots: [{ type: String }]
+    gradeOrYear: {
+      type: String,
+      default: ""
     },
-    wednesday: {
-      available: { type: Boolean, default: false },
-      timeSlots: [{ type: String }]
+
+    linkedinLink: { type: String },
+    bio: { type: String },
+    subjects: [{ type: String }],
+    photo: { type: String },
+
+    availability: {
+      monday: {
+        available: { type: Boolean, default: false },
+        timeSlots: [{ type: String }]
+      },
+      tuesday: {
+        available: { type: Boolean, default: false },
+        timeSlots: [{ type: String }]
+      },
+      wednesday: {
+        available: { type: Boolean, default: false },
+        timeSlots: [{ type: String }]
+      },
+      thursday: {
+        available: { type: Boolean, default: false },
+        timeSlots: [{ type: String }]
+      },
+      friday: {
+        available: { type: Boolean, default: false },
+        timeSlots: [{ type: String }]
+      },
+      saturday: {
+        available: { type: Boolean, default: false },
+        timeSlots: [{ type: String }]
+      },
+      sunday: {
+        available: { type: Boolean, default: false },
+        timeSlots: [{ type: String }]
+      }
     },
-    thursday: {
-      available: { type: Boolean, default: false },
-      timeSlots: [{ type: String }]
-    },
-    friday: {
-      available: { type: Boolean, default: false },
-      timeSlots: [{ type: String }]
-    },
-    saturday: {
-      available: { type: Boolean, default: false },
-      timeSlots: [{ type: String }]
-    },
-    sunday: {
-      available: { type: Boolean, default: false },
-      timeSlots: [{ type: String }]
-    }
+
+    courseNames: [{ type: String }],
+
+    certificates: [
+      {
+        name: { type: String, required: true },
+        url: { type: String, required: true },
+        uploadedAt: { type: Date, default: Date.now }
+      }
+    ],
+
+    achievements: [
+      {
+        name: { type: String, required: true },
+        url: { type: String, required: true },
+        uploadedAt: { type: Date, default: Date.now },
+        type: { type: String, required: true }
+      }
+    ]
   },
-
-  courseNames: [{ type: String }],
-
-  certificates: [
-    {
-      name: { type: String, required: true },
-      url: { type: String, required: true },
-      uploadedAt: { type: Date, default: Date.now }
-    }
-  ],
-
-  achievements: [
-    {
-      name: { type: String, required: true },
-      url: { type: String, required: true },
-      uploadedAt: { type: Date, default: Date.now },
-      type: { type: String, required: true }
-    }
-  ]
-
-}, {
-  timestamps: true
-});
+  {
+    timestamps: true
+  }
+);
 
 export const Tutor = mongoose.model<ITutor>('Tutor', tutorSchema);

@@ -17,8 +17,6 @@ import {
   Search,
   BookOpen,
   Clock,
-  Calendar,
-  DollarSign,
   PlayCircle,
   Star,
 } from "lucide-react";
@@ -29,82 +27,71 @@ import CustomLoader from "@/components/CustomLoader";
 
 const getYouTubeEmbedUrl = (url: string): string => {
   if (!url) return "";
-  // watch?v=VIDEO_ID → embed/VIDEO_ID
   if (url.includes("watch?v="))
     return url.replace("watch?v=", "embed/");
-  // youtu.be/VIDEO_ID → youtube.com/embed/VIDEO_ID
   if (url.includes("youtu.be/"))
     return url.replace("youtu.be/", "youtube.com/embed/");
-  return url; // assume it's already embed form
+  return url;
 };
 
 const Courses = () => {
-  const { currentUser, addSession } = useApp();
+  const { currentUser } = useApp();
   const { toast } = useToast();
   const navigate = useNavigate();
+
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSubject, setSelectedSubject] = useState("All");
+  const [selectedBoard, setSelectedBoard] = useState("All");
+  const [selectedGradeYear, setSelectedGradeYear] = useState("All");
   const [selectedCourse, setSelectedCourse] = useState<any>(null);
   const [bookingDialogOpen, setBookingDialogOpen] = useState(false);
   const [courses, setCourses] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true); // ⬅️ ADD THIS
+  const [loading, setLoading] = useState(true);
 
-
-  /* ───────────────────────────────────────────────────
-     Authentication and Profile Completion Guards
-  ──────────────────────────────────────────────────── */
-
-  // Check if user is not logged in
   if (!currentUser) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
         <Navigation />
-        <div className="container mx-auto px-4 py-16">
-          <div className="text-center">
-            <div className="w-24 h-24 bg-gradient-to-br from-red-100 to-orange-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <User className="h-12 w-12 text-red-500" />
-            </div>
-            <h3 className="text-2xl font-semibold text-gray-900 mb-3">Please Login</h3>
-            <p className="text-gray-600">You need to be logged in to view and book courses.</p>
-            <Button
-              onClick={() => navigate("/login")}
-              className="mt-4 bg-gradient-to-r from-blue-600 to-purple-600"
-            >
-              Login Now
-            </Button>
+        <div className="container mx-auto px-4 py-16 text-center">
+          <div className="w-24 h-24 bg-gradient-to-br from-red-100 to-orange-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <User className="h-12 w-12 text-red-500" />
           </div>
+          <h3 className="text-2xl font-semibold text-gray-900 mb-3">Please Login</h3>
+          <p className="text-gray-600">You need to be logged in to view and book courses.</p>
+          <Button
+            onClick={() => navigate("/login")}
+            className="mt-4 bg-gradient-to-r from-blue-600 to-purple-600"
+          >
+            Login Now
+          </Button>
         </div>
       </div>
     );
   }
 
-  // Check if student hasn't completed profile
   if (currentUser.role === 'student' && !currentUser.profileCompleted) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
         <Navigation />
-        <div className="container mx-auto px-4 py-16">
-          <div className="text-center">
-            <div className="w-24 h-24 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <User className="h-12 w-12 text-blue-600" />
-            </div>
-            <h3 className="text-2xl font-semibold text-gray-900 mb-3">Complete Your Profile</h3>
-            <p className="text-gray-600 mb-4">Please complete your student profile to browse and book courses.</p>
-            <Button
-              onClick={() => navigate("/student-profile")}
-              className="bg-gradient-to-r from-blue-600 to-purple-600"
-            >
-              Complete Profile
-            </Button>
+        <div className="container mx-auto px-4 py-16 text-center">
+          <div className="w-24 h-24 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <User className="h-12 w-12 text-blue-600" />
           </div>
+          <h3 className="text-2xl font-semibold text-gray-900 mb-3">Complete Your Profile</h3>
+          <p className="text-gray-600 mb-4">
+            Please complete your student profile to browse and book courses.
+          </p>
+          <Button
+            onClick={() => navigate("/student-profile")}
+            className="bg-gradient-to-r from-blue-600 to-purple-600"
+          >
+            Complete Profile
+          </Button>
         </div>
       </div>
     );
   }
 
-  /* ───────────────────────────────────────────────────
-     Fetch courses once on mount
-  ──────────────────────────────────────────────────── */
   useEffect(() => {
     const fetchCourses = async () => {
       try {
@@ -115,40 +102,35 @@ const Courses = () => {
       } catch (error) {
         console.error("Error fetching courses:", error);
       } finally {
-        setLoading(false); // ⬅️ ADD THIS LINE TO END LOADING STATE
+        setLoading(false);
       }
     };
     fetchCourses();
   }, []);
 
-
-  /* ───────────────────────────────────────────────────
-     Get unique subjects for filter buttons
-  ──────────────────────────────────────────────────── */
   const allSubjects = ["All", ...Array.from(new Set(courses.map(course => course.sub || "General")))];
 
-  /* ───────────────────────────────────────────────────
-     Enhanced search and subject filter
-  ──────────────────────────────────────────────────── */
   const filteredCourses = courses.filter((course) => {
     const term = searchTerm.toLowerCase();
-    const matchesSearch = (
+    const matchesSearch =
       (course.courseName?.toLowerCase() || "").includes(term) ||
       (course.sub?.toLowerCase() || "").includes(term) ||
       (course.description?.toLowerCase() || "").includes(term) ||
-      (course.tutorId?.name?.toLowerCase() || "").includes(term)
-    );
+      (course.tutorId?.name?.toLowerCase() || "").includes(term);
 
-    const matchesSubject = selectedSubject === "All" || (course.sub || "General") === selectedSubject;
+    const matchesSubject =
+      selectedSubject === "All" || (course.sub || "General") === selectedSubject;
 
-    return matchesSearch && matchesSubject;
+    const matchesBoard =
+      selectedBoard === "All" || course.educationBoard === selectedBoard;
+
+    const matchesGradeYear =
+      selectedGradeYear === "All" || course.classOrYear === selectedGradeYear;
+
+    return matchesSearch && matchesSubject && matchesBoard && matchesGradeYear;
   });
 
-  /* ───────────────────────────────────────────────────
-     Enhanced Book‑session handler with better notifications
-  ──────────────────────────────────────────────────── */
-  const handleBookSession = async (course: any) => {
-    /* Enhanced guard rails with better user feedback */
+  const handleBookSession = (course: any) => {
     if (!currentUser) {
       toast({
         title: "Login Required",
@@ -157,7 +139,6 @@ const Courses = () => {
       });
       return;
     }
-
     if (currentUser.role !== "student" && currentUser.role !== "parent") {
       toast({
         title: "Access Denied",
@@ -166,39 +147,23 @@ const Courses = () => {
       });
       return;
     }
-
-    if (currentUser.role === 'parent' && !currentUser.profileCompleted) {
+    if ((currentUser.role === 'parent' || currentUser.role === 'student') && !currentUser.profileCompleted) {
       toast({
         title: "Complete Profile",
-        description: "Please complete your parent profile before booking sessions.",
+        description: "Please complete your profile before booking sessions.",
         variant: "destructive",
       });
       return;
     }
-
-    if (currentUser.role === 'student' && !currentUser.profileCompleted) {
-      toast({
-        title: "Complete Profile",
-        description: "Please complete your student profile before booking sessions.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    /* Set selected course and open booking dialog */
     setSelectedCourse(course);
     setBookingDialogOpen(true);
   };
 
-  /* ───────────────────────────────────────────────────
-     JSX
-  ──────────────────────────────────────────────────── */
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       <Navigation />
 
       <div className="container mx-auto px-4 py-8">
-        {/* Enhanced Heading */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
             Discover Amazing Courses
@@ -207,8 +172,6 @@ const Courses = () => {
             Learn from expert tutors and advance your knowledge in various subjects.
           </p>
         </div>
-
-        {/* Enhanced Empty‑state */}
 
         {loading ? (
           <CustomLoader />
@@ -229,10 +192,8 @@ const Courses = () => {
           </div>
         ) : (
           <>
-            {/* Enhanced Search and Filter Bar */}
             <div className="bg-white p-6 rounded-xl shadow-lg mb-8 border border-blue-100">
               <div className="flex flex-col space-y-4">
-                {/* Search Bar */}
                 <div className="relative max-w-md">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
                   <Input
@@ -243,7 +204,7 @@ const Courses = () => {
                   />
                 </div>
 
-                {/* Subject Filter Buttons */}
+                {/* Subject Filter */}
                 <div className="flex flex-wrap gap-2">
                   {allSubjects.map((subject) => (
                     <Button
@@ -261,10 +222,55 @@ const Courses = () => {
                     </Button>
                   ))}
                 </div>
+
+                {/* Education Board & Grade Filters */}
+                <div className="flex flex-wrap gap-4 mt-2">
+                  <select
+                    value={selectedBoard}
+                    onChange={(e) => {
+                      setSelectedBoard(e.target.value);
+                      setSelectedGradeYear("All");
+                    }}
+                    className="border border-blue-300 rounded px-3 py-2"
+                  >
+                    <option value="All">All Boards</option>
+                    <option value="State">State</option>
+                    <option value="CBSE">CBSE</option>
+                    <option value="ICSE">ICSE</option>
+                    <option value="College">College</option>
+                  </select>
+
+                  {selectedBoard !== "All" && (
+                    <select
+                      value={selectedGradeYear}
+                      onChange={(e) => setSelectedGradeYear(e.target.value)}
+                      className="border border-blue-300 rounded px-3 py-2"
+                    >
+                      <option value="All">All Grades/Years</option>
+                      {selectedBoard === "College" ? (
+                        <>
+                          <option value="1st Year">1st Year</option>
+                          <option value="2nd Year">2nd Year</option>
+                          <option value="3rd Year">3rd Year</option>
+                          <option value="4th Year">4th Year</option>
+                        </>
+                      ) : (
+                        <>
+                          <option value="Grade 6">Grade 6</option>
+                          <option value="Grade 7">Grade 7</option>
+                          <option value="Grade 8">Grade 8</option>
+                          <option value="Grade 9">Grade 9</option>
+                          <option value="Grade 10">Grade 10</option>
+                          <option value="Grade 11">Grade 11</option>
+                          <option value="Grade 12">Grade 12</option>
+                        </>
+                      )}
+                    </select>
+                  )}
+                </div>
               </div>
             </div>
 
-            {/* Enhanced Courses grid */}
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 auto-rows-[1fr]">
               {filteredCourses.map((course) => (
                 <Card
@@ -289,7 +295,6 @@ const Courses = () => {
                   </CardHeader>
 
                   <CardContent className="flex flex-col gap-4 mt-auto">
-                    {/* Enhanced Tutor Info */}
                     <div className="flex items-center space-x-3">
                       <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center">
                         <User className="h-5 w-5 text-white" />
@@ -303,7 +308,18 @@ const Courses = () => {
                       </div>
                     </div>
 
-                    {/* Enhanced Course Details */}
+                    {/* Show Education Board and Grade/Year */}
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-sm text-gray-600">
+                        <span>Board:</span>
+                        <span className="font-medium text-gray-900">{course.educationBoard || "N/A"}</span>
+                      </div>
+                      <div className="flex justify-between text-sm text-gray-600">
+                        <span>Grade / Year:</span>
+                        <span className="font-medium text-gray-900">{course.classOrYear || "N/A"}</span>
+                      </div>
+                    </div>
+
                     <div className="space-y-2">
                       <div className="flex justify-between items-center">
                         <span className="text-sm text-gray-600">Price per session:</span>
@@ -320,7 +336,6 @@ const Courses = () => {
                       </div>
                     </div>
 
-                    {/* Demo Video */}
                     {course.demoLink && (
                       <div className="w-full">
                         <h4 className="text-sm font-semibold text-gray-700 mb-1 flex items-center gap-1">
@@ -341,15 +356,10 @@ const Courses = () => {
                       </div>
                     )}
 
-                    {/* Enhanced Tags */}
                     {course.tag?.length > 0 && (
                       <div className="flex flex-wrap gap-1">
                         {course.tag.slice(0, 3).map((tag: string, idx: number) => (
-                          <Badge
-                            key={`${tag}-${idx}`}
-                            variant="outline"
-                            className="text-xs"
-                          >
+                          <Badge key={`${tag}-${idx}`} variant="outline" className="text-xs">
                             {tag}
                           </Badge>
                         ))}
@@ -361,7 +371,6 @@ const Courses = () => {
                       </div>
                     )}
 
-                    {/* Enhanced Action buttons */}
                     <div className="pt-2">
                       <Button
                         onClick={() => handleBookSession(course)}
@@ -370,7 +379,6 @@ const Courses = () => {
                       >
                         {(currentUser.role === 'student' || currentUser.role === 'parent') ? 'Book Session' : 'Students/Parents Only'}
                       </Button>
-
                       <Link to={`/tutor/${course.tutorId._id}`}>
                         <Button
                           variant="outline"
@@ -385,7 +393,6 @@ const Courses = () => {
               ))}
             </div>
 
-            {/* Enhanced No‑results state */}
             {filteredCourses.length === 0 && courses.length > 0 && (
               <div className="text-center py-12">
                 <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
@@ -395,8 +402,7 @@ const Courses = () => {
                 <p className="text-gray-600">
                   {selectedSubject !== "All"
                     ? `No courses found for ${selectedSubject}. Try selecting a different subject or adjusting your search.`
-                    : "Try adjusting your search criteria to find the perfect course."
-                  }
+                    : "Try adjusting your search criteria to find the perfect course."}
                 </p>
               </div>
             )}
@@ -404,7 +410,6 @@ const Courses = () => {
         )}
       </div>
 
-      {/* Enhanced Booking Request Dialog */}
       <BookingRequestDialog
         open={bookingDialogOpen}
         onOpenChange={setBookingDialogOpen}

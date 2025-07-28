@@ -50,6 +50,8 @@ export interface User {
   courseNames?: string[];
   certificates?: Certificate[];
   achievements?: { name: string; url: string; uploadedAt: string; type: string }[];
+  educationBoard?:string;
+  gradeOrYear?: string;
   // Student‑specific ------------------------------------------
   yearOfStudent?: number;
   department?: string;
@@ -79,6 +81,8 @@ export interface Course {
   tag: string[];
   tutorId: string;
   tutorName?: string;
+  classOrYear?: string;
+  educationBoard?: string;
   createdAt: string;
   updatedAt: string;
 }

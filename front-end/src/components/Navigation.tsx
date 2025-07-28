@@ -50,15 +50,15 @@ const Navigation = () => {
 
           {/* Desktop Navigation - Only show for students or non-logged users */}
           <div className="hidden md:flex items-center space-x-8">
-            {(!currentUser || currentUser.role === 'student') && (
+            {(!currentUser || currentUser.role === 'student'|| currentUser.role === 'parent') && (
               <>
-                <Link to="/" className="text-white/90 hover:text-white transition-colors font-medium">
+                <Link to="/" className="text-white hover:text-white transition-colors font-bold">
                   Home
                 </Link>
-                <Link to="/courses" className="text-white/90 hover:text-white transition-colors font-medium">
+                <Link to="/courses" className="text-white hover:text-white transition-colors font-bold">
                   Courses
                 </Link>
-                <Link to="/resources" className="text-white/90 hover:text-white transition-colors font-medium">
+                <Link to="/resources" className="text-white hover:text-white transition-colors font-bold">
                   Resourses
                 </Link>
               </>

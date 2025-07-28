@@ -3,13 +3,15 @@ import mongoose, { Document, Schema } from "mongoose";
 /** A single course offered by a tutor */
 export interface ICourse extends Document {
   courseName: string;
-  sub: string;                     // keep plural → array
+  sub: string;                     // subject
   level: string;
   pricePerSession: number;         // 0 means “Free”
   description: string;
-  sessionTime: String,
+  sessionTime: string;
   tag: string[];
-  demoLink: string;                // NEW – YouTube demo video
+  demoLink: string;                // YouTube demo video
+  classOrYear?: string;            // NEW - class name or college year
+  educationBoard?: "State" | "CBSE" | "ICSE" | "College"; // NEW - board
   tutorId: mongoose.Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
@@ -26,6 +28,15 @@ const courseSchema = new Schema<ICourse>(
     pricePerSession:  { type: Number, required: true, min: 0 },
     description:      { type: String, required: true },
     sessionTime:      { type: String, required: true },
+
+    // NEW FIELDS
+    classOrYear:      { type: String, default: "" },
+    educationBoard: {
+      type: String,
+      enum: ["State", "CBSE", "ICSE", "College"],
+      default: ""
+    },
+
     tag:              { type: [String], default: [] },
     demoLink: {
       type: String,
@@ -40,4 +51,4 @@ const courseSchema = new Schema<ICourse>(
   { timestamps: true }
 );
 
-export const Course =mongoose.model<ICourse>("Course", courseSchema);
+export const Course = mongoose.model<ICourse>("Course", courseSchema);

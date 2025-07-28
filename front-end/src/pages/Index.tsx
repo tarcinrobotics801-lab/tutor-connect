@@ -83,9 +83,9 @@ const Index = () => {
           </Link>
           
           <nav className="hidden md:flex space-x-8">
-            <Link to="/" className="text-white hover:text-purple-300 transition-colors font-medium">Home</Link>
-            <Link to="/courses" className="text-white hover:text-purple-300 transition-colors font-medium">Discover Courses & Tutors</Link>
-            <Link to="/resources" className="text-white hover:text-purple-300 transition-colors font-medium">Resources</Link>
+            <Link to="/" className="text-white hover:text-purple-300 transition-colors font-bold">Home</Link>
+            <Link to="/courses" className="text-white hover:text-purple-300 transition-colors font-bold">Discover Courses & Tutors</Link>
+            <Link to="/resources" className="text-white hover:text-purple-300 transition-colors font-bold">Resources</Link>
           </nav>
           
           <div className="flex items-center space-x-4">
