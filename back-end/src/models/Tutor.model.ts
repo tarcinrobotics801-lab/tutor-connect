@@ -63,11 +63,12 @@ const tutorSchema = new Schema<ITutor>(
     educationBoard: {
       type: String,
       enum: ["State", "CBSE", "ICSE", "College"],
-      default: ""
+      required: false
     },
     gradeOrYear: {
       type: String,
-      default: ""
+      required: false,
+      default: "NO"
     },
 
     linkedinLink: { type: String },

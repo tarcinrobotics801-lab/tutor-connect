@@ -22,7 +22,6 @@ const Login = () => {
 
     try {
       const user = await loginUser(email, password); // ✅ Calls backend & updates context
-
       if (user) {
         toast({
           title: "Welcome back!",

@@ -9,6 +9,11 @@ import { Calendar, Clock, User, LinkIcon, Check, X } from "lucide-react";
 import { useApp } from "@/contexts/AppContext";
 import { useToast } from "@/hooks/use-toast";
 
+const isValidGoogleMeetLink = (link: string): boolean => {
+  const regex = /^https:\/\/meet\.google\.com\/[a-z]{3}-[a-z]{4}-[a-z]{3}$/;
+  return regex.test(link.trim());
+};
+
 const TutorBookingRequests = () => {
   const { currentUser, getTutorBookingRequests, acceptBookingRequest, rejectBookingRequest } = useApp();
   const { toast } = useToast();
@@ -31,10 +36,19 @@ const TutorBookingRequests = () => {
       return;
     }
 
+    if (!isValidGoogleMeetLink(meetingLink)) {
+      toast({
+        title: "Invalid Link",
+        description: "Please enter a valid Google Meet link in the format https://meet.google.com/xxx-xxxx-xxx",
+        variant: "destructive"
+      });
+      return;
+    }
+
     acceptBookingRequest(requestId, meetingLink);
     setOpenDialogs(prev => ({ ...prev, [requestId]: false }));
     setMeetingLinks(prev => ({ ...prev, [requestId]: '' }));
-    
+
     toast({
       title: "Request Accepted!",
       description: "The booking request has been accepted and the student has been notified.",
@@ -109,8 +123,8 @@ const TutorBookingRequests = () => {
                 </div>
 
                 <div className="flex gap-3">
-                  <Dialog 
-                    open={openDialogs[request._id] || false} 
+                  <Dialog
+                    open={openDialogs[request._id] || false}
                     onOpenChange={(open) => setDialogOpen(request._id, open)}
                   >
                     <DialogTrigger asChild>
@@ -141,13 +155,13 @@ const TutorBookingRequests = () => {
                           </div>
                         </div>
                         <div className="flex justify-end gap-3">
-                          <Button 
-                            variant="outline" 
+                          <Button
+                            variant="outline"
                             onClick={() => setDialogOpen(request._id, false)}
                           >
                             Cancel
                           </Button>
-                          <Button 
+                          <Button
                             onClick={() => handleAcceptRequest(request._id)}
                             className="bg-green-600 hover:bg-green-700"
                           >
@@ -158,7 +172,7 @@ const TutorBookingRequests = () => {
                     </DialogContent>
                   </Dialog>
 
-                  <Button 
+                  <Button
                     variant="destructive"
                     onClick={() => handleRejectRequest(request._id)}
                   >

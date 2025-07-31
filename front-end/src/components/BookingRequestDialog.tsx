@@ -21,7 +21,7 @@ interface BookingRequestDialogProps {
 }
 
 const BookingRequestDialog = ({ open, onOpenChange, course }: BookingRequestDialogProps) => {
-  const { currentUser, getCourseTimeSlots, createTimeSlots, createBookingRequest } = useApp();
+  const { currentUser, getCourseTimeSlots, createTimeSlots, createBookingRequest, bookingRequests } = useApp();
   const { toast } = useToast();
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [timeSlots, setTimeSlots] = useState<any[]>([]);
@@ -85,7 +85,23 @@ const BookingRequestDialog = ({ open, onOpenChange, course }: BookingRequestDial
       });
       return;
     }
-
+    const alreadyBooked = bookingRequests.some(
+      (req) =>
+        req.userId === currentUser._id &&
+        req.courseId === course._id &&
+        req.slotId === selectedSlot &&
+        req.status !== "rejected"
+    );
+    
+    if (alreadyBooked) {
+      toast({
+        title: "Already Enrolled",
+        description: "You have already booked this time slot for this course.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     createBookingRequest({
       userId: currentUser._id,     
       userName: currentUser.name,      // ✅ student or parent ID

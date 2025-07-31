@@ -25,6 +25,29 @@ import { useApp } from "@/contexts/AppContext";
 import { useNavigate } from "react-router-dom";
 import CustomLoader from "@/components/CustomLoader";
 
+// Normalize grade/year text for consistent comparison
+const normalizeGrade = (value: string): string => {
+  if (!value) return "";
+  const lower = value.toLowerCase().trim();
+
+  // Normalize school grades (6–12)
+  if (lower.includes("6")) return "grade 6";
+  if (lower.includes("7")) return "grade 7";
+  if (lower.includes("8")) return "grade 8";
+  if (lower.includes("9")) return "grade 9";
+  if (lower.includes("10")) return "grade 10";
+  if (lower.includes("11")) return "grade 11";
+  if (lower.includes("12")) return "grade 12";
+
+  // Normalize college years (1st–4th)
+  if (lower.includes("1st year") || lower.includes("first year")) return "1st year";
+  if (lower.includes("2nd year") || lower.includes("second year")) return "2nd year";
+  if (lower.includes("3rd year") || lower.includes("third year")) return "3rd year";
+  if (lower.includes("4th year") || lower.includes("fourth year")) return "4th year";
+
+  return lower;
+};
+
 const getYouTubeEmbedUrl = (url: string): string => {
   if (!url) return "";
   if (url.includes("watch?v="))
@@ -112,6 +135,7 @@ const Courses = () => {
 
   const filteredCourses = courses.filter((course) => {
     const term = searchTerm.toLowerCase();
+
     const matchesSearch =
       (course.courseName?.toLowerCase() || "").includes(term) ||
       (course.sub?.toLowerCase() || "").includes(term) ||
@@ -125,7 +149,8 @@ const Courses = () => {
       selectedBoard === "All" || course.educationBoard === selectedBoard;
 
     const matchesGradeYear =
-      selectedGradeYear === "All" || course.classOrYear === selectedGradeYear;
+      selectedGradeYear === "All" ||
+      normalizeGrade(course.classOrYear) === normalizeGrade(selectedGradeYear);
 
     return matchesSearch && matchesSubject && matchesBoard && matchesGradeYear;
   });
@@ -192,6 +217,7 @@ const Courses = () => {
           </div>
         ) : (
           <>
+            {/* Filters */}
             <div className="bg-white p-6 rounded-xl shadow-lg mb-8 border border-blue-100">
               <div className="flex flex-col space-y-4">
                 <div className="relative max-w-md">
@@ -271,6 +297,7 @@ const Courses = () => {
               </div>
             </div>
 
+            {/* Course Cards */}
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 auto-rows-[1fr]">
               {filteredCourses.map((course) => (
                 <Card
