@@ -23,6 +23,9 @@ const Login = () => {
     try {
       const user = await loginUser(email, password); // ✅ Calls backend & updates context
       if (user) {
+        
+       console.log("📦 Login response data:", user);
+
         toast({
           title: "Welcome back!",
           description: `Successfully logged in as ${user.name}`,

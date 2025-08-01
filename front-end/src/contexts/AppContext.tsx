@@ -27,7 +27,7 @@ export interface User {
   _id: string;
   name: string;
   email: string;
-  role: "student" | "tutor" | "parent" | "admin";
+  role: "student" | "tutor" | "parent" |"admin";
   profileCompleted: boolean;
   phoneNumber?: string;
 
@@ -50,7 +50,7 @@ export interface User {
   courseNames?: string[];
   certificates?: Certificate[];
   achievements?: { name: string; url: string; uploadedAt: string; type: string }[];
-  educationBoard?: string;
+  educationBoard?:string;
   gradeOrYear?: string;
   // Student‑specific ------------------------------------------
   yearOfStudent?: number;
@@ -100,7 +100,7 @@ export interface TimeSlot {
 export interface BookingRequest {
   _id: string;
 
-  userId: string;
+  userId: string;    
   userName: string;                      // ✅ ID of student or parent
   requestedBy: 'student' | 'parent';   // ✅ Who made the request
 
@@ -213,7 +213,10 @@ interface AppContextType {
   getTutorEnrollments: (tutorId: string) => Enrollment[];
   createTimeSlots: (courseId: string, tutorId: string) => void;
   getCourseTimeSlots: (courseId: string) => Promise<TimeSlot[]>;
-  createBookingRequest: (request: Omit<BookingRequest, '_id' | 'requestedAt' | 'status'>) => void;
+  createBookingRequest: (
+    request: Omit<BookingRequest, '_id' | 'requestedAt' | 'status'>
+  ) => Promise<{ success: boolean; error?: string }>;
+  
   getTutorBookingRequests: (tutorId: string) => BookingRequest[];
   acceptBookingRequest: (requestId: string, meetingLink: string) => void;
   rejectBookingRequest: (requestId: string) => void;
@@ -248,20 +251,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
-  useEffect(() => {
-    const storedUser = localStorage.getItem("currentUser");
-    const storedRequests = localStorage.getItem("tutorBookingRequests");
-
-    if (storedUser) {
-      const parsedUser = JSON.parse(storedUser);
-      setCurrentUser(parsedUser);
-
-      if (parsedUser.role === "tutor" && storedRequests) {
-        setBookingRequests(JSON.parse(storedRequests));
-      }
-    }
-  }, []);
 
   /* ------------------ user CRUD ------------------ */
   const addUser = (user: User): void => setUsers((p) => [...p, user]);
@@ -323,9 +312,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       const res = await fetch(`/api/admin/tutors/${tutorId}`, {
         method: "DELETE",
       });
-
+  
       if (!res.ok) throw new Error("Failed to delete tutor");
-
+  
       // ✅ Backend deletion successful — do local state cleanup
       setTimeSlots((prev) => prev.filter((slot) => slot.tutorId !== tutorId));
       setBookingRequests((prev) =>
@@ -339,7 +328,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       setNotifications((prev) => prev.filter((notif) => notif.userId !== tutorId));
       setUsers((prev) => prev.filter((u) => u._id !== tutorId));
       setCourses((prev) => prev.filter((c) => c.tutorId !== tutorId));
-
+  
       return true;
     } catch (err) {
       console.error("Error deleting tutor:", err);
@@ -437,40 +426,40 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const createTimeSlots = async (courseId: string, tutorId: string): Promise<void> => {
-    try {
-      const res = await fetch("/api/timeslots/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ courseId, tutorId }),
-      });
+  try {
+    const res = await fetch("/api/timeslots/create", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ courseId, tutorId }),
+    });
 
-      if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.message || "Failed to create time slots");
-      }
-    } catch (err) {
-      console.error("createTimeSlots error:", err);
-      throw err;
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.message || "Failed to create time slots");
     }
-  };
+  } catch (err) {
+    console.error("createTimeSlots error:", err);
+    throw err;
+  }
+};
 
 
   const getCourseTimeSlots = async (courseId: string): Promise<TimeSlot[]> => {
-    try {
-      const res = await fetch(`/api/timeslots/${courseId}`);
-      if (!res.ok) {
-        throw new Error("Failed to fetch time slots");
-      }
-      const data = await res.json();
-      return data;
-    } catch (err) {
-      console.error("getCourseTimeSlots error:", err);
-      throw err;
+  try {
+    const res = await fetch(`/api/timeslots/${courseId}`);
+    if (!res.ok) {
+      throw new Error("Failed to fetch time slots");
     }
-  };
+    const data = await res.json();
+    return data;
+  } catch (err) {
+    console.error("getCourseTimeSlots error:", err);
+    throw err;
+  }
+};
 
-  // Add these console logs in your AppContext createBookingRequest function
-  const createBookingRequest = async (
+// Add these console logs in your AppContext createBookingRequest function
+const createBookingRequest = async (
   request: Omit<BookingRequest, '_id' | 'requestedAt' | 'status'>
 ): Promise<{ success: boolean; error?: string }> => {
   console.log('🔄 Creating booking request:', request);
@@ -531,117 +520,117 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   }
 };
 
-  // Also add this to getTutorBookingRequests
-  // Add this debug code to your getTutorBookingRequests function to see the actual tutorId values:
+// Also add this to getTutorBookingRequests
+// Add this debug code to your getTutorBookingRequests function to see the actual tutorId values:
 
-  const getTutorBookingRequests = (tutorId: string) => {
-    console.log('🔍 Looking for tutor ID:', tutorId);
-    console.log('🔍 All booking requests with their tutorIds:');
+const getTutorBookingRequests = (tutorId: string) => {
+  console.log('🔍 Looking for tutor ID:', tutorId);
+  console.log('🔍 All booking requests with their tutorIds:');
 
-    bookingRequests.forEach((request, index) => {
-      console.log(`Request ${index}:`, {
-        tutorId: request.tutorId,
-        tutorId_id: typeof request.tutorId === 'object' ? request.tutorId._id : request.tutorId,
-        tutorName: typeof request.tutorId === 'object' ? request.tutorId.name : 'N/A',
-        userName: request.userName,
-        courseName: request.courseName
-      });
+  bookingRequests.forEach((request, index) => {
+    console.log(`Request ${index}:`, {
+      tutorId: request.tutorId,
+      tutorId_id: typeof request.tutorId === 'object' ? request.tutorId._id : request.tutorId,
+      tutorName: typeof request.tutorId === 'object' ? request.tutorId.name : 'N/A',
+      userName: request.userName,
+      courseName: request.courseName
+    });
+  });
+
+  const requests = bookingRequests.filter(request => {
+    const requestTutorId = typeof request.tutorId === 'object' 
+      ? request.tutorId._id 
+      : request.tutorId;
+
+    console.log(`Comparing: ${requestTutorId} === ${tutorId} = ${requestTutorId === tutorId}`);
+    return requestTutorId === tutorId;
+  });
+
+  console.log(`📋 Found ${requests.length} requests for tutor ${tutorId}`);
+  return requests;
+};
+
+
+const acceptBookingRequest = async (requestId: string, meetingLink: string) => {
+  try {
+    const res = await fetch("/api/bookings/accept", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ requestId, meetingLink }),
     });
 
-    const requests = bookingRequests.filter(request => {
-      const requestTutorId = typeof request.tutorId === 'object'
-        ? request.tutorId._id
-        : request.tutorId;
+    const data = await res.json();
 
-      console.log(`Comparing: ${requestTutorId} === ${tutorId} = ${requestTutorId === tutorId}`);
-      return requestTutorId === tutorId;
-    });
+    if (!res.ok) throw new Error(data.message || "Accept failed");
 
-    console.log(`📋 Found ${requests.length} requests for tutor ${tutorId}`);
-    return requests;
-  };
+    // 🔄 Update booking request in state
+    setBookingRequests(prev =>
+      prev.map(request =>
+        request._id === requestId ? data.booking : request
+      )
+    );
 
+    // 👤 Dynamic user ID (student or parent)
+    const recipientUserId =
+      data.booking.userId || data.booking.studentId;
 
-  const acceptBookingRequest = async (requestId: string, meetingLink: string) => {
-    try {
-      const res = await fetch("/api/bookings/accept", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ requestId, meetingLink }),
-      });
+    const recipientName =
+      data.booking.userName || data.booking.studentName || "User";
 
-      const data = await res.json();
-
-      if (!res.ok) throw new Error(data.message || "Accept failed");
-
-      // 🔄 Update booking request in state
-      setBookingRequests(prev =>
-        prev.map(request =>
-          request._id === requestId ? data.booking : request
-        )
-      );
-
-      // 👤 Dynamic user ID (student or parent)
-      const recipientUserId =
-        data.booking.userId || data.booking.studentId;
-
-      const recipientName =
-        data.booking.userName || data.booking.studentName || "User";
-
-      // 🔔 Create notification
-      const notification: Notification = {
-        id: `notif-${Date.now()}`,
-        userId: recipientUserId,
-        type: "booking_accepted",
-        title: "Booking Accepted!",
-        message: `Your booking for ${data.booking.courseName} has been accepted.
+    // 🔔 Create notification
+    const notification: Notification = {
+      id: `notif-${Date.now()}`,
+      userId: recipientUserId,
+      type: "booking_accepted",
+      title: "Booking Accepted!",
+      message: `Your booking for ${data.booking.courseName} has been accepted.
 
       Session Time: ${data.booking.slotDay || 'N/A'} at ${data.booking.slotTime || 'N/A'} 
       ${data.booking.sessionTime ? `(Session: ${data.booking.sessionTime})` : ''}
 
       Join the session here: ${data.booking.meetingLink || 'Link not available'}`,
 
-        bookingRequestId: requestId,
-        createdAt: new Date().toISOString(),
-        read: false,
-      };
+      bookingRequestId: requestId,
+      createdAt: new Date().toISOString(),
+      read: false,
+    };
 
-      setNotifications(prev => [...prev, notification]);
+    setNotifications(prev => [...prev, notification]);
 
-      if (currentUser?._id === data.booking.userId) {
-        try {
-          const endpoint =
-            currentUser.role === "tutor"
-              ? `/api/auth/tutor/${currentUser._id}`
-              : currentUser.role === "parent"
-                ? `/api/auth/parent/${currentUser._id}`
-                : `/api/auth/student/${currentUser._id}`;
+    if (currentUser?._id === data.booking.userId) {
+    try {
+    const endpoint =
+      currentUser.role === "tutor"
+        ? `/api/auth/tutor/${currentUser._id}`
+        : currentUser.role === "parent"
+          ? `/api/auth/parent/${currentUser._id}`
+          : `/api/auth/student/${currentUser._id}`;
 
-          const updatedUserRes = await fetch(endpoint, {
-            credentials: "include",
-          });
+    const updatedUserRes = await fetch(endpoint, {
+      credentials: "include",
+    });
 
-          if (updatedUserRes.ok) {
-            const updatedUser: User = await updatedUserRes.json();
-            setCurrentUser(updatedUser);
-          } else {
-            console.warn("Failed to fetch updated user by role");
-          }
-        } catch (err) {
-          console.error("Error fetching updated user:", err);
-        }
-      }
-
-
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error("Unknown error occurred");
-      console.error("❌ Accept booking failed:", error.message);
+    if (updatedUserRes.ok) {
+      const updatedUser: User = await updatedUserRes.json();
+      setCurrentUser(updatedUser);
+    } else {
+      console.warn("Failed to fetch updated user by role");
     }
-  };
+  } catch (err) {
+    console.error("Error fetching updated user:", err);
+  }
+}
+
+
+  } catch (err) {
+    const error = err instanceof Error ? err : new Error("Unknown error occurred");
+    console.error("❌ Accept booking failed:", error.message);
+  }
+};
 
 
 
-  const rejectBookingRequest = async (requestId: string) => {
+const rejectBookingRequest = async (requestId: string) => {
   try {
     const res = await fetch("/api/bookings/reject", {
       method: "POST",
@@ -683,20 +672,20 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
 
   const getUserNotifications = (userId: string) => {
-    return notifications.filter(notif => notif.userId === userId).sort((a, b) =>
+    return notifications.filter(notif => notif.userId === userId).sort((a, b) => 
       new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     );
   };
 
   const markNotificationAsRead = (notificationId: string) => {
-    setNotifications(prev => prev.map(notif =>
+    setNotifications(prev => prev.map(notif => 
       notif.id === notificationId ? { ...notif, read: true } : notif
     ));
   };
   /* ---------------- auth helpers ------------------ */
   const loginUser = async (email: string, password: string): Promise<User | null> => {
     try {
-
+      
       setLoading(true);
       setError(null);
 
@@ -730,16 +719,19 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       }
 
       setCurrentUser(user);
-      localStorage.setItem("currentUser", JSON.stringify(user));
+localStorage.setItem("currentUser", JSON.stringify(user));
 
-      // ✅ if tutor, store booking requests
-      if (user.role === "tutor" && data.user.bookingRequests) {
-        setBookingRequests(data.user.bookingRequests);
-        localStorage.setItem("tutorBookingRequests", JSON.stringify(data.user.bookingRequests));
-      }
+// ✅ if tutor, store booking requests
+if (user.role === "tutor" && data.user.bookingRequests) {
+  setBookingRequests(data.user.bookingRequests);
+  localStorage.setItem("tutorBookingRequests", JSON.stringify(data.user.bookingRequests));
+}
 
-      setUsers((prev) => (prev.some((u) => u._id === user._id) ? prev : [...prev, user]));
-      return user;
+setUsers((prev) => (prev.some((u) => u._id === user._id) ? prev : [...prev, user]));
+return user;
+
+
+
     } catch (err: any) {
       console.error("Login error:", err);
       setError(err.message || "Login failed");
@@ -752,7 +744,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const logoutUser = (): void => {
     setCurrentUser(null);
     setError(null);
-
+   
   };
 
   /* ---------------- queries / helpers -------------- */
@@ -777,7 +769,21 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     enrollments.filter((e) => e.tutorId === tutorId);
 
   const clearError = (): void => setError(null);
-  
+  useEffect(() => {
+  const storedUser = localStorage.getItem("currentUser");
+  const storedRequests = localStorage.getItem("tutorBookingRequests");
+
+  if (storedUser) {
+    const parsedUser = JSON.parse(storedUser);
+    setCurrentUser(parsedUser);
+
+    if (parsedUser.role === "tutor" && storedRequests) {
+      setBookingRequests(JSON.parse(storedRequests));
+    }
+  }
+}, []);
+
+
   /* ---------------- provider ----------------------- */
   return (
     <AppContext.Provider
@@ -787,9 +793,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         courses,
         enrollments,
         timeSlots,
-        bookingRequests,
-        resources,
-        notifications,
+      bookingRequests,
+      resources,
+      notifications,
         currentUser,
         loading,
         error,
@@ -817,17 +823,17 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         getStudentEnrollments,
         getTutorEnrollments,
         clearError,
-        createTimeSlots,
-        getCourseTimeSlots,
-        createBookingRequest,
-        getTutorBookingRequests,
-        acceptBookingRequest,
-        rejectBookingRequest,
-        getUserNotifications,
-        markNotificationAsRead,
-        addResource,
-        removeTutor,
-        getAppStats
+      createTimeSlots,
+      getCourseTimeSlots,
+      createBookingRequest,
+      getTutorBookingRequests,
+      acceptBookingRequest,
+      rejectBookingRequest,
+      getUserNotifications,
+      markNotificationAsRead,
+      addResource,
+      removeTutor,
+      getAppStats
       }}
     >
       {children}

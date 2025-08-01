@@ -6,7 +6,7 @@ import { Student } from "../models/Student.model";
 export const createBookingRequest = async (
   req: Request,
   res: Response
-): Promise<void> => { // ✅ Make sure it returns Promise<void> only
+): Promise<void> => { // ✅ Make sure it returns `Promise<void>` only
   try {
     const {
       userId,
