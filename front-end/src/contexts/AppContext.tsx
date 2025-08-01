@@ -252,6 +252,21 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  
+  useEffect(() => {
+  const storedUser = localStorage.getItem("currentUser");
+  const storedRequests = localStorage.getItem("tutorBookingRequests");
+
+  if (storedUser) {
+    const parsedUser = JSON.parse(storedUser);
+    setCurrentUser(parsedUser);
+
+    if (parsedUser.role === "tutor" && storedRequests) {
+      setBookingRequests(JSON.parse(storedRequests));
+    }
+  }
+}, []);
+
   /* ------------------ user CRUD ------------------ */
   const addUser = (user: User): void => setUsers((p) => [...p, user]);
 
@@ -769,19 +784,7 @@ return user;
     enrollments.filter((e) => e.tutorId === tutorId);
 
   const clearError = (): void => setError(null);
-  useEffect(() => {
-  const storedUser = localStorage.getItem("currentUser");
-  const storedRequests = localStorage.getItem("tutorBookingRequests");
 
-  if (storedUser) {
-    const parsedUser = JSON.parse(storedUser);
-    setCurrentUser(parsedUser);
-
-    if (parsedUser.role === "tutor" && storedRequests) {
-      setBookingRequests(JSON.parse(storedRequests));
-    }
-  }
-}, []);
 
 
   /* ---------------- provider ----------------------- */

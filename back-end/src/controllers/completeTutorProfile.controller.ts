@@ -4,7 +4,7 @@ import { Tutor } from "../models/Tutor.model";
 import { Course } from "../models/Course.model";
 
 const YOUTUBE_REGEX =
-  /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)[\w\-]{11}$/;
+  /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})(?:[&?].*)?$/;
 
 export const completeTutorProfile = async (
   req: Request<{ userId: string }, {}, any>,

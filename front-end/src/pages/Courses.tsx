@@ -49,12 +49,10 @@ const normalizeGrade = (value: string): string => {
 };
 
 const getYouTubeEmbedUrl = (url: string): string => {
-  if (!url) return "";
-  if (url.includes("watch?v="))
-    return url.replace("watch?v=", "embed/");
-  if (url.includes("youtu.be/"))
-    return url.replace("youtu.be/", "youtube.com/embed/");
-  return url;
+  const match = url.match(
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})/
+  );
+  return match ? `https://www.youtube.com/embed/${match[1]}` : "";
 };
 
 const Courses = () => {

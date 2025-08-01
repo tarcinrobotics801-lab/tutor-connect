@@ -18,7 +18,7 @@ export interface ICourse extends Document {
 }
 
 const YOUTUBE_REGEX =
-  /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)[\w\-]{11}$/;
+  /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})(?:[&?].*)?$/;
 
 const courseSchema = new Schema<ICourse>(
   {

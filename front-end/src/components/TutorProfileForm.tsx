@@ -414,7 +414,8 @@ const TutorProfileForm = () => {
     }
   };
   const YOUTUBE_REGEX =
-    /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)[\w-]{11}$/;
+  /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})(?:[&?].*)?$/;
+
 
   // Fixed: Use only _id property and correct field names for course
   const handleAddCourse = async () => {
