@@ -4,7 +4,7 @@ import { Tutor } from "../models/Tutor.model";
 import { Course } from "../models/Course.model";
 
 const YOUTUBE_REGEX =
-  /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)[\w\-]{11}$/;
+  /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})(?:[&?].*)?$/;
 
 export const completeTutorProfile = async (
   req: Request<{ userId: string }, {}, any>,
@@ -22,7 +22,9 @@ export const completeTutorProfile = async (
       courses = [],
       photo,
       certificates = [],
-      achievements = [], // ✅ New
+      achievements = [],
+      educationBoard,    // NEW FIELD
+      gradeOrYear        // NEW FIELD
     } = req.body;
 
     const tutor = await Tutor.findById(userId);
@@ -46,6 +48,16 @@ export const completeTutorProfile = async (
       return;
     }
 
+    if (!educationBoard || !["State", "CBSE", "ICSE", "College"].includes(educationBoard)) {
+      res.status(400).json({ message: "Valid education board is required." });
+      return;
+    }
+
+    if (!gradeOrYear || !String(gradeOrYear).trim()) {
+      res.status(400).json({ message: "Grade or Year must be provided." });
+      return;
+    }
+
     const LINKEDIN_REGEX = /^https?:\/\/(www\.)?linkedin\.com\/in\/[a-zA-Z0-9-_.]+\/?(\?.*)?$/i;
     if (!linkedinLink || !LINKEDIN_REGEX.test(String(linkedinLink).trim())) {
       res.status(400).json({
@@ -59,7 +71,8 @@ export const completeTutorProfile = async (
       res.status(400).json({ message: "Bio must be at least 50 words" });
       return;
     }
-    // ✅ Availability validation
+
+    // Availability validation
     if (!availability || typeof availability !== "object") {
       res.status(400).json({ message: "Availability is required." });
       return;
@@ -74,12 +87,11 @@ export const completeTutorProfile = async (
       return;
     }
 
-    // ✅ Certificates validation
+    // Certificates validation
     if (!Array.isArray(certificates)) {
       res.status(400).json({ message: "Certificates must be an array" });
       return;
     }
-
     for (const cert of certificates) {
       if (!cert.name || !cert.url || !cert.uploadedAt) {
         res.status(400).json({
@@ -89,12 +101,11 @@ export const completeTutorProfile = async (
       }
     }
 
-    // ✅ Achievements validation
+    // Achievements validation
     if (!Array.isArray(achievements)) {
       res.status(400).json({ message: "Achievements must be an array" });
       return;
     }
-
     for (const ach of achievements) {
       if (!ach.name || !ach.url || !ach.uploadedAt || !ach.type) {
         res.status(400).json({
@@ -125,11 +136,9 @@ export const completeTutorProfile = async (
       const existingNames = new Set<string>(
         await Course.find({ tutorId: tutor._id }).distinct("courseName")
       );
-
       const freshCourses = courses.filter(
         (c: any) => !existingNames.has(c.courseName)
       );
-
       if (freshCourses.length) {
         await Course.insertMany(
           freshCourses.map((c: any) => ({
@@ -144,7 +153,7 @@ export const completeTutorProfile = async (
       .map((c: any) => c.courseName || c.name || c.title)
       .filter(Boolean);
 
-    // ✅ Final update
+    // Final update
     const updatedTutor = await Tutor.findByIdAndUpdate(
       tutor._id,
       {
@@ -156,7 +165,9 @@ export const completeTutorProfile = async (
         subjects,
         photo,
         certificates,
-        achievements, // ✅ store in MongoDB
+        achievements,
+        educationBoard,   // store new field
+        gradeOrYear,      // store new field
         profileCompleted: true,
         $addToSet: { courseNames: { $each: namesToAdd } },
       },
@@ -186,7 +197,9 @@ export const completeTutorProfile = async (
         courseNames: updatedTutor.courseNames,
         photo: updatedTutor.photo,
         certificates: updatedTutor.certificates,
-        achievements: updatedTutor.achievements, // ✅ Include in response
+        achievements: updatedTutor.achievements,
+        educationBoard: updatedTutor.educationBoard,  // return to frontend
+        gradeOrYear: updatedTutor.gradeOrYear,        // return to frontend
         updatedAt: updatedTutor.updatedAt,
       },
     });

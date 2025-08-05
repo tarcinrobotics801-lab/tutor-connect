@@ -13,15 +13,23 @@ import { Clock, User, Calendar } from "lucide-react";
 import { useApp } from "@/contexts/AppContext";
 import { useToast } from "@/hooks/use-toast";
 
-
 interface BookingRequestDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   course: any;
 }
 
-const BookingRequestDialog = ({ open, onOpenChange, course }: BookingRequestDialogProps) => {
-  const { currentUser, getCourseTimeSlots, createTimeSlots, createBookingRequest } = useApp();
+const BookingRequestDialog = ({
+  open,
+  onOpenChange,
+  course,
+}: BookingRequestDialogProps) => {
+  const {
+    currentUser,
+    getCourseTimeSlots,
+    createTimeSlots,
+    createBookingRequest,
+  } = useApp();
   const { toast } = useToast();
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [timeSlots, setTimeSlots] = useState<any[]>([]);
@@ -29,26 +37,28 @@ const BookingRequestDialog = ({ open, onOpenChange, course }: BookingRequestDial
 
   useEffect(() => {
     if (open && course) {
-      console.log("Dialog opened for course:", course);
       setLoading(true);
-
       const initialize = async () => {
-        await createTimeSlots(course._id, course.tutorId._id); // 👈 Fix here
-        console.log("Time slots created for course:", course._id, "by tutor:", course.tutorId._id);
-
-        const slots = await getCourseTimeSlots(course._id);
-        console.log("Retrieved time slots:", slots);
-        setTimeSlots(
-          slots.map((s) => ({
-            ...s,
-            id: s._id,
-            currentMembers: s.currentMembers ?? 0, // ✅ default to 0 if undefined
-          }))
-        );
-
-        setLoading(false);
+        try {
+          await createTimeSlots(course._id, course.tutorId._id);
+          const slots = await getCourseTimeSlots(course._id);
+          setTimeSlots(
+            slots.map((s) => ({
+              ...s,
+              id: s._id,
+              currentMembers: s.currentMembers ?? 0,
+            }))
+          );
+        } catch (err) {
+          toast({
+            title: "Error loading slots",
+            description: "Please try again later.",
+            variant: "destructive",
+          });
+        } finally {
+          setLoading(false);
+        }
       };
-
       initialize();
     }
   }, [open, course, createTimeSlots, getCourseTimeSlots]);
@@ -57,7 +67,7 @@ const BookingRequestDialog = ({ open, onOpenChange, course }: BookingRequestDial
     setSelectedSlot(slotId);
   };
 
-  const handleBookingSubmit = () => {
+  const handleBookingSubmit = async () => {
     if (!selectedSlot || !currentUser) {
       toast({
         title: "Error",
@@ -80,18 +90,20 @@ const BookingRequestDialog = ({ open, onOpenChange, course }: BookingRequestDial
     if (slot.currentMembers >= slot.maxMembers) {
       toast({
         title: "Slot Full",
-        description: "This time slot is already full. Please select another slot.",
+        description:
+          "This time slot is already full. Please select another slot.",
         variant: "destructive",
       });
       return;
     }
 
-    createBookingRequest({
-      userId: currentUser._id,     
-      userName: currentUser.name,      // ✅ student or parent ID
-      requestedBy: currentUser.role === "student" || currentUser.role === "parent"
-        ? currentUser.role
-        : "student",     // ✅ "student" or "parent"
+    const result = await createBookingRequest({
+      userId: currentUser._id,
+      userName: currentUser.name,
+      requestedBy:
+        currentUser.role === "student" || currentUser.role === "parent"
+          ? currentUser.role
+          : "student",
       courseId: course._id,
       courseName: course.courseName,
       tutorId: course.tutorId,
@@ -101,6 +113,16 @@ const BookingRequestDialog = ({ open, onOpenChange, course }: BookingRequestDial
       slotTime: slot.time,
     });
 
+    if (!result.success) {
+      toast({
+        title: "Booking Failed",
+        description:
+          result.error ||
+          "Something went wrong. You might have already booked this slot.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     toast({
       title: "Booking Request Sent!",
@@ -112,7 +134,8 @@ const BookingRequestDialog = ({ open, onOpenChange, course }: BookingRequestDial
     setSelectedSlot(null);
   };
 
-  const isSlotAvailable = (slot: any) => slot.currentMembers < slot.maxMembers;
+  const isSlotAvailable = (slot: any) =>
+    slot.currentMembers < slot.maxMembers;
 
   if (!course) return null;
 
@@ -124,7 +147,8 @@ const BookingRequestDialog = ({ open, onOpenChange, course }: BookingRequestDial
             Book Session - {course.title}
           </DialogTitle>
           <DialogDescription>
-            Select an available time slot for your session with {course.tutorName}
+            Select an available time slot for your session with{" "}
+            {course.tutorName}
           </DialogDescription>
         </DialogHeader>
 
@@ -137,11 +161,15 @@ const BookingRequestDialog = ({ open, onOpenChange, course }: BookingRequestDial
 
             {loading ? (
               <div className="text-center py-8">
-                <p className="text-gray-600">Loading available time slots...</p>
+                <p className="text-gray-600">
+                  Loading available time slots...
+                </p>
               </div>
             ) : timeSlots.length === 0 ? (
               <div className="text-center py-8">
-                <p className="text-gray-600">No time slots available for this course.</p>
+                <p className="text-gray-600">
+                  No time slots available for this course.
+                </p>
                 <p className="text-sm text-gray-500 mt-2">
                   The tutor may not have set their availability yet.
                 </p>
@@ -151,19 +179,24 @@ const BookingRequestDialog = ({ open, onOpenChange, course }: BookingRequestDial
                 {timeSlots.map((slot) => (
                   <Card
                     key={slot.id}
-                    className={`cursor-pointer transition-all border-2 ${selectedSlot === slot.id
+                    className={`cursor-pointer transition-all border-2 ${
+                      selectedSlot === slot.id
                         ? "border-purple-500 bg-purple-50"
                         : isSlotAvailable(slot)
-                          ? "border-gray-200 hover:border-purple-300"
-                          : "border-red-200 bg-red-50 cursor-not-allowed"
-                      }`}
-                    onClick={() => isSlotAvailable(slot) && handleSlotSelect(slot.id)}
+                        ? "border-gray-200 hover:border-purple-300"
+                        : "border-red-200 bg-red-50 cursor-not-allowed"
+                    }`}
+                    onClick={() =>
+                      isSlotAvailable(slot) && handleSlotSelect(slot.id)
+                    }
                   >
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-4">
                           <div className="text-center">
-                            <p className="font-semibold text-gray-900 capitalize">{slot.day}</p>
+                            <p className="font-semibold text-gray-900 capitalize">
+                              {slot.day}
+                            </p>
                             <div className="flex items-center gap-1 text-sm text-gray-600">
                               <Clock className="h-3 w-3" />
                               {slot.time}
@@ -178,7 +211,10 @@ const BookingRequestDialog = ({ open, onOpenChange, course }: BookingRequestDial
                         </div>
                         <div className="flex items-center gap-2">
                           {isSlotAvailable(slot) ? (
-                            <Badge variant="secondary" className="bg-green-100 text-green-700">
+                            <Badge
+                              variant="secondary"
+                              className="bg-green-100 text-green-700"
+                            >
                               Available
                             </Badge>
                           ) : (

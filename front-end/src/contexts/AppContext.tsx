@@ -50,6 +50,8 @@ export interface User {
   courseNames?: string[];
   certificates?: Certificate[];
   achievements?: { name: string; url: string; uploadedAt: string; type: string }[];
+  educationBoard?:string;
+  gradeOrYear?: string;
   // Student‑specific ------------------------------------------
   yearOfStudent?: number;
   department?: string;
@@ -79,6 +81,8 @@ export interface Course {
   tag: string[];
   tutorId: string;
   tutorName?: string;
+  classOrYear?: string;
+  educationBoard?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -119,7 +123,7 @@ export interface BookingRequest {
 
 
 interface Notification {
-  id: string;
+  id?: string;
   userId: string;
   type: 'booking_request' | 'booking_accepted' | 'booking_rejected';
   title: string;
@@ -209,12 +213,16 @@ interface AppContextType {
   getTutorEnrollments: (tutorId: string) => Enrollment[];
   createTimeSlots: (courseId: string, tutorId: string) => void;
   getCourseTimeSlots: (courseId: string) => Promise<TimeSlot[]>;
-  createBookingRequest: (request: Omit<BookingRequest, '_id' | 'requestedAt' | 'status'>) => void;
+  createBookingRequest: (
+    request: Omit<BookingRequest, '_id' | 'requestedAt' | 'status'>
+  ) => Promise<{ success: boolean; error?: string }>;
+  
   getTutorBookingRequests: (tutorId: string) => BookingRequest[];
   acceptBookingRequest: (requestId: string, meetingLink: string) => void;
   rejectBookingRequest: (requestId: string) => void;
   getUserNotifications: (userId: string) => Notification[];
-  markNotificationAsRead: (notificationId: string) => void;
+  markNotificationAsRead: (notificationId: string) => Promise<void>;
+  clearAllNotifications: (userId: string) => Promise<void>;
   addResource: (resource: Resource) => void;
   removeTutor: (tutorId: string) => Promise<boolean>;
   getAppStats: () => { totalTutors: number; totalCourses: number; totalStudents: number; totalParents: number }
@@ -454,16 +462,15 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 // Add these console logs in your AppContext createBookingRequest function
 const createBookingRequest = async (
   request: Omit<BookingRequest, '_id' | 'requestedAt' | 'status'>
-) => {
+): Promise<{ success: boolean; error?: string }> => {
   console.log('🔄 Creating booking request:', request);
 
   const tutorId =
     typeof request.tutorId === 'object' ? request.tutorId._id : request.tutorId;
 
-  // ✅ Fallback if tutorName is missing (avoid backend validation error)
   const safeRequest = {
     ...request,
-    tutorName: request.tutorName || "Tutor", // <-- fallback if undefined
+    tutorName: request.tutorName || "Tutor",
   };
 
   try {
@@ -476,20 +483,20 @@ const createBookingRequest = async (
 
     const data = await res.json();
 
-    if (!res.ok) throw new Error(data.message || "Booking creation failed");
+    if (!res.ok) {
+      console.error("❌ Backend rejected booking request:", data.message);
+      return { success: false, error: data.message || "Booking creation failed" };
+    }
 
     const newRequest: BookingRequest = data.booking;
 
-    // Update state with booking request
     setBookingRequests(prev => {
       const updated = [...prev, newRequest];
       console.log("📋 Booking requests after backend save:", updated);
       return updated;
     });
 
-    // Create notification
     const notification: Notification = {
-      id: `notif-${Date.now()}`,
       userId: tutorId,
       type: "booking_request",
       title: "New Booking Request",
@@ -498,6 +505,14 @@ const createBookingRequest = async (
       createdAt: new Date().toISOString(),
       read: false,
     };
+    console.log("📤 Sending notification to backend:", notification);
+
+    await fetch("/api/notifications", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify(notification),
+    });
 
     setNotifications(prev => {
       const updated = [...prev, notification];
@@ -506,8 +521,10 @@ const createBookingRequest = async (
     });
 
     console.log("✅ Booking request created & notification sent");
+    return { success: true };
   } catch (err: any) {
     console.error("❌ Failed to create booking request:", err.message || err);
+    return { success: false, error: err.message || "Network error" };
   }
 };
 
@@ -555,11 +572,16 @@ const acceptBookingRequest = async (requestId: string, meetingLink: string) => {
     if (!res.ok) throw new Error(data.message || "Accept failed");
 
     // 🔄 Update booking request in state
-    setBookingRequests(prev =>
-      prev.map(request =>
-        request._id === requestId ? data.booking : request
-      )
-    );
+    const updatedRequests = bookingRequests.map(request =>
+      request._id === requestId ? data.booking : request
+    ).filter(request => request.status === "pending");
+
+    setBookingRequests(updatedRequests);
+
+    // ✅ Also sync to localStorage
+    if (currentUser?.role === "tutor") {
+      localStorage.setItem("tutorBookingRequests", JSON.stringify(updatedRequests));
+    }
 
     // 👤 Dynamic user ID (student or parent)
     const recipientUserId =
@@ -570,7 +592,6 @@ const acceptBookingRequest = async (requestId: string, meetingLink: string) => {
 
     // 🔔 Create notification
     const notification: Notification = {
-      id: `notif-${Date.now()}`,
       userId: recipientUserId,
       type: "booking_accepted",
       title: "Booking Accepted!",
@@ -585,7 +606,15 @@ const acceptBookingRequest = async (requestId: string, meetingLink: string) => {
       createdAt: new Date().toISOString(),
       read: false,
     };
+    console.log("📤 Sending notification to backend:", notification);
 
+    await fetch("/api/notifications", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify(notification),
+    });
+    
     setNotifications(prev => [...prev, notification]);
 
     if (currentUser?._id === data.booking.userId) {
@@ -621,7 +650,7 @@ const acceptBookingRequest = async (requestId: string, meetingLink: string) => {
 
 
 
-  const rejectBookingRequest = async (requestId: string) => {
+const rejectBookingRequest = async (requestId: string) => {
   try {
     const res = await fetch("/api/bookings/reject", {
       method: "POST",
@@ -632,15 +661,24 @@ const acceptBookingRequest = async (requestId: string, meetingLink: string) => {
     const data = await res.json();
     if (!res.ok) throw new Error(data.message || "Reject failed");
 
-    setBookingRequests(prev =>
-      prev.map(request =>
-        request._id === requestId ? data.booking : request
-      )
-    );
+    // ✅ Update state with the rejected booking
+    const updatedRequests = bookingRequests.map(request =>
+      request._id === requestId ? data.booking : request
+    ).filter(request => request.status === "pending");
 
+    setBookingRequests(updatedRequests);
+
+    // ✅ Also sync to localStorage
+    if (currentUser?.role === "tutor") {
+      localStorage.setItem("tutorBookingRequests", JSON.stringify(updatedRequests));
+    }
+
+    // ✅ Use correct userId from backend response
+    const recipientUserId = data.booking.userId || data.booking.studentId || "";
+
+    // 🔔 Create and push notification
     const notification: Notification = {
-      id: `notif-${Date.now()}`,
-      userId: data.booking.studentId,
+      userId: recipientUserId,
       type: "booking_rejected",
       title: "Booking Rejected",
       message: `Your booking request for ${data.booking.courseName} was rejected.`,
@@ -648,7 +686,15 @@ const acceptBookingRequest = async (requestId: string, meetingLink: string) => {
       createdAt: new Date().toISOString(),
       read: false,
     };
+    console.log("📤 Sending notification to backend:", notification);
 
+    await fetch("/api/notifications", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify(notification),
+    });
+    
     setNotifications(prev => [...prev, notification]);
   } catch (err) {
     const error = err instanceof Error ? err : new Error("Unknown error occurred");
@@ -663,48 +709,100 @@ const acceptBookingRequest = async (requestId: string, meetingLink: string) => {
     );
   };
 
-  const markNotificationAsRead = (notificationId: string) => {
-    setNotifications(prev => prev.map(notif => 
-      notif.id === notificationId ? { ...notif, read: true } : notif
-    ));
+  const markNotificationAsRead = async (notificationId: string): Promise<void> => {
+  try {
+    await fetch(`/api/notifications/${notificationId}/read`, {
+      method: "PATCH",
+    });
+
+    setNotifications((prev) =>
+      prev.map((n) =>
+        n.id === notificationId ? { ...n, read: true } : n
+      )
+    );
+  } catch (err) {
+    console.error("Failed to mark notification as read", err);
+  }
+};
+
+  
+  const clearAllNotifications = async (userId: string): Promise<void> => {
+    try {
+      await fetch(`/api/notifications/clear/${userId}`, {
+        method: "PATCH",
+      });
+      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    } catch (err) {
+      console.error("Failed to clear notifications", err);
+    }
   };
+  
   /* ---------------- auth helpers ------------------ */
   const loginUser = async (email: string, password: string): Promise<User | null> => {
     try {
       setLoading(true);
       setError(null);
-
+  
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({ email, password }),
       });
+  
       const data = await res.json();
       if (!res.ok) {
         setError(data.message || "Login failed");
         return null;
       }
-      if (email === 'admin@tarcin.in' && password === 'Tarcin@12345') {
+  
+      // Admin hardcoded login
+      if (email === "admin@tarcin.in" && password === "Tarcin@12345") {
         const adminUser: User = {
-          _id: 'admin-1',
-          name: 'Admin',
-          email: 'admin@tarcin.in',
-          role: 'admin',
-          profileCompleted: true
+          _id: "admin-1",
+          name: "Admin",
+          email: "admin@tarcin.in",
+          role: "admin",
+          profileCompleted: true,
         };
         setCurrentUser(adminUser);
         return adminUser;
       }
-
+  
       const user: User = data.student || data.tutor || data.user;
       if (!user) {
         setError("Invalid login response format");
         return null;
       }
-
+  
       setCurrentUser(user);
-      setUsers((prev) => (prev.some((u) => u._id === user._id) ? prev : [...prev, user]));
+      localStorage.setItem("currentUser", JSON.stringify(user));
+  
+      // ✅ if tutor, store booking requests
+      if (user.role === "tutor" && data.user.bookingRequests) {
+        setBookingRequests(data.user.bookingRequests);
+        localStorage.setItem(
+          "tutorBookingRequests",
+          JSON.stringify(data.user.bookingRequests)
+        );
+      }
+  
+      // ✅ Fetch notifications (students/parents only)
+      if (user.role === "student" || user.role === "parent") {
+        try {
+          const notifRes = await fetch(`/api/notifications/${user._id}`);
+          const notifData = await notifRes.json();
+          if (notifRes.ok && notifData.notifications) {
+            setNotifications(notifData.notifications);
+          }
+        } catch (err) {
+          console.error("Failed to fetch notifications:", err);
+        }
+      }
+  
+      setUsers((prev) =>
+        prev.some((u) => u._id === user._id) ? prev : [...prev, user]
+      );
       return user;
     } catch (err: any) {
       console.error("Login error:", err);
@@ -714,6 +812,7 @@ const acceptBookingRequest = async (requestId: string, meetingLink: string) => {
       setLoading(false);
     }
   };
+  
 
   const logoutUser = (): void => {
     setCurrentUser(null);
@@ -743,6 +842,36 @@ const acceptBookingRequest = async (requestId: string, meetingLink: string) => {
     enrollments.filter((e) => e.tutorId === tutorId);
 
   const clearError = (): void => setError(null);
+  
+  useEffect(() => {
+    const storedUser = localStorage.getItem("currentUser");
+    const storedRequests = localStorage.getItem("tutorBookingRequests");
+  
+    if (storedUser) {
+      const parsedUser = JSON.parse(storedUser);
+      setCurrentUser(parsedUser);
+  
+      if (parsedUser.role === "tutor" && storedRequests) {
+        setBookingRequests(JSON.parse(storedRequests));
+      }
+  
+      // ✅ Fetch notifications on page reload
+      if (parsedUser.role === "student" || parsedUser.role === "parent") {
+        fetch(`/api/notifications/${parsedUser._id}`)
+          .then(res => res.json())
+          .then(data => {
+            if (data.notifications) {
+              setNotifications(data.notifications);
+            }
+          })
+          .catch(err => {
+            console.error("Failed to fetch notifications on reload", err);
+          });
+      }
+    }
+  }, []);
+  
+
 
   /* ---------------- provider ----------------------- */
   return (
@@ -791,6 +920,7 @@ const acceptBookingRequest = async (requestId: string, meetingLink: string) => {
       rejectBookingRequest,
       getUserNotifications,
       markNotificationAsRead,
+      clearAllNotifications,
       addResource,
       removeTutor,
       getAppStats

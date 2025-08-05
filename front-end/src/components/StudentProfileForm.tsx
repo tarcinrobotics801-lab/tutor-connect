@@ -112,7 +112,7 @@ const StudentProfileForm = () => {
       return;
     }
 
-    if (!profileData.yearOfStudent || !profileData.department || !profileData.collegeName || !profileData.city || !profileData.state) {
+    if (!profileData.yearOfStudent  || !profileData.collegeName || !profileData.city || !profileData.state) {
       toast({
         title: "Validation Error",
         description: "All fields marked with * are required.",
@@ -125,7 +125,7 @@ const StudentProfileForm = () => {
     const payload = {
       phoneNumber: profileData.phoneNumber,
       yearOfStudent: profileData.yearOfStudent,
-      department: profileData.department,
+      department: profileData.department || "", // Optional field
       collegeName: profileData.collegeName,
       city: profileData.city,
       state: profileData.state,
@@ -409,16 +409,16 @@ const StudentProfileForm = () => {
                   <CardContent className="space-y-4">
                     <div className="grid md:grid-cols-2 gap-4">
                       <div>
-                        <Label htmlFor="yearOfStudent">Year of Study *</Label>
+                        <Label htmlFor="yearOfStudent">Year of Study / Grade *</Label>
                         <Input
                           id="yearOfStudent"
                           value={profileData.yearOfStudent}
                           onChange={(e) => handleInputChange("yearOfStudent", e.target.value)}
-                          placeholder="e.g., 2nd Year, Final Year"
+                          placeholder="e.g. 2nd Year or 10th Grade"
                         />
                       </div>
                       <div>
-                        <Label htmlFor="department">Department Name *</Label>
+                        <Label htmlFor="department">Department (Only for College Students)</Label>
                         <Input
                           id="department"
                           value={profileData.department}
@@ -428,12 +428,12 @@ const StudentProfileForm = () => {
                       </div>
                     </div>
                     <div>
-                      <Label htmlFor="collegeName">College Name *</Label>
+                      <Label htmlFor="collegeName">College / School Name *</Label>
                       <Input
                         id="collegeName"
                         value={profileData.collegeName}
                         onChange={(e) => handleInputChange("collegeName", e.target.value)}
-                        placeholder="Enter your college name"
+                        placeholder="Enter your college (or school name if you're a school student)"
                       />
                     </div>
                   </CardContent>
@@ -480,10 +480,7 @@ const StudentProfileForm = () => {
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
           <div className="flex justify-between items-center mb-8">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Student Dashboard</h1>
-              <p className="text-gray-600 mt-2">Welcome back, {currentUser.name}!</p>
-            </div>
+            
           </div>
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -493,7 +490,7 @@ const StudentProfileForm = () => {
                 className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white"
               >
                 <User className="h-4 w-4" />
-                Dashboard
+                Start Now
               </TabsTrigger>
               <TabsTrigger
                 value="profile"
@@ -520,13 +517,13 @@ const StudentProfileForm = () => {
               <Card className="shadow-xl border-blue-100 bg-white/80 backdrop-blur-sm">
                 <CardHeader>
                   <CardTitle className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                    Student Dashboard
+                    Start Your Learning Journey
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="text-center py-16">
                   <GraduationCap className="h-16 w-16 text-blue-400 mx-auto mb-6" />
                   <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                    Welcome to Your Dashboard
+                    Ready to Learn? Explore Our Courses
                   </h3>
                   <p className="text-gray-600 mb-8 max-w-md mx-auto">
                     Your profile is complete! You can now browse courses and book sessions with tutors.
@@ -535,7 +532,7 @@ const StudentProfileForm = () => {
                     <Button onClick={() => navigate("/courses")} className="bg-blue-600 hover:bg-blue-700">
                       Browse Courses
                     </Button>
-                    <Button onClick={() => navigate("/tutors")} variant="outline">
+                    <Button onClick={() => navigate("/ExpertTutors")} variant="outline">
                       View Tutors
                     </Button>
                   </div>
@@ -686,17 +683,17 @@ const StudentProfileForm = () => {
                     <CardContent className="space-y-4">
                       <div className="grid md:grid-cols-2 gap-4">
                         <div>
-                          <Label htmlFor="yearOfStudent">Year of Study *</Label>
+                          <Label htmlFor="yearOfStudent">Year of Study / Grade *</Label>
                           <Input
                             id="yearOfStudent"
                             value={profileData.yearOfStudent}
                             onChange={(e) => handleInputChange("yearOfStudent", e.target.value)}
                             disabled={!isEditing}
-                            placeholder="e.g., 2nd Year, Final Year"
+                            placeholder="e.g. 2nd Year or 10th Grade"
                           />
                         </div>
                         <div>
-                          <Label htmlFor="department">Department Name *</Label>
+                          <Label htmlFor="department">Department (Only for College Students)</Label>
                           <Input
                             id="department"
                             value={profileData.department}
@@ -707,13 +704,13 @@ const StudentProfileForm = () => {
                         </div>
                       </div>
                       <div>
-                        <Label htmlFor="collegeName">College Name *</Label>
+                        <Label htmlFor="collegeName">College / School Name *</Label>
                         <Input
                           id="collegeName"
                           value={profileData.collegeName}
                           onChange={(e) => handleInputChange("collegeName", e.target.value)}
                           disabled={!isEditing}
-                          placeholder="Enter your college name"
+                          placeholder="Enter your college (or school name if you're a school student)"
                         />
                       </div>
                     </CardContent>

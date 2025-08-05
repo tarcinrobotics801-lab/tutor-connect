@@ -7,6 +7,7 @@ import { completeStudentProfile } from "../controllers/completeStudentProfile.co
 import { getAllCourses } from "../controllers/auth.controller";
 import { completeParentProfile } from "../controllers/parentProfile.controller";
 import { createCourse } from "../controllers/createCourseController";
+import { deleteCourseByName } from "../controllers/deleteCoursecontroller";
 const router = Router();
 
 // Auth routes
@@ -18,10 +19,14 @@ router.put("/tutor/:userId/profile", completeTutorProfile);
 router.put("/student/:userId/profile", completeStudentProfile);
 router.put("/parent/:userId/profile", completeParentProfile);
 router.post("/courses", createCourse);
+
+
+
 // Data retrieval
 router.get("/completed-tutors", getCompletedTutors);
 router.get("/tutor/:userId", TutorById);
 router.get("/courses", getAllCourses);
+router.delete("/deleteByName/:courseName", deleteCourseByName);
 router.get("/counts", getCounts);
 
 export default router;

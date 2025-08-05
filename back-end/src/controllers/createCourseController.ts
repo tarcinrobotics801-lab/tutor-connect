@@ -4,8 +4,7 @@ import { Course } from "../models/Course.model";
 import { Tutor } from "../models/Tutor.model";
 
 const YOUTUBE_REGEX =
-  /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)[\w-]{11}$/;
-
+  /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})(?:[&?].*)?$/;
 export const createCourse: RequestHandler = async (req, res) => {
   try {
     const {
@@ -19,16 +18,35 @@ export const createCourse: RequestHandler = async (req, res) => {
       sessionTime,
       tag,
       demoLink,
+      classOrYear,       // NEW FIELD
+      educationBoard,    // NEW FIELD
     } = req.body;
 
+    // Validate required fields
     if (
-      !tutorId || !courseName || !sub || !description || !demoLink ||
+      !tutorId ||
+      !courseName ||
+      !sub ||
+      !description ||
+      !demoLink ||
       !YOUTUBE_REGEX.test(String(demoLink).trim())
     ) {
       res.status(400).json({ message: "Missing or invalid fields" });
       return;
     }
 
+    // Validate new fields
+    if (!classOrYear || !String(classOrYear).trim()) {
+      res.status(400).json({ message: "Class or Year is required." });
+      return;
+    }
+
+    if (!educationBoard || !["State", "CBSE", "ICSE", "College"].includes(educationBoard)) {
+      res.status(400).json({ message: "Valid education board is required." });
+      return;
+    }
+
+    // Create the course with all fields
     const course = await Course.create({
       tutorId,
       tutorName,
@@ -40,8 +58,11 @@ export const createCourse: RequestHandler = async (req, res) => {
       sessionTime,
       tag,
       demoLink,
+      classOrYear,       // Store new field
+      educationBoard,    // Store new field
     });
 
+    // Add course name to tutor's list (avoid duplicates)
     await Tutor.findByIdAndUpdate(tutorId, {
       $addToSet: { courseNames: courseName },
     });
@@ -50,9 +71,15 @@ export const createCourse: RequestHandler = async (req, res) => {
   } catch (err) {
     console.error("createCourse error:", err);
     res.status(500).json({
-    message: "Server error",
-    error: typeof err === "object" && err !== null && "message" in err ? (err as any).message : String(err),
-    details: typeof err === "object" && err !== null && "errors" in err ? (err as any).errors : null, // shows validation fields if it's a Mongoose error
-  });
-}
+      message: "Server error",
+      error:
+        typeof err === "object" && err !== null && "message" in err
+          ? (err as any).message
+          : String(err),
+      details:
+        typeof err === "object" && err !== null && "errors" in err
+          ? (err as any).errors
+          : null,
+    });
+  }
 };

@@ -314,6 +314,8 @@ export const getAllTutors = async (
             yearsOfExperience: tutor.yearsOfExperience,
             subjects: tutor.subjects,
             bio: tutor.bio,
+            educationBoard: tutor.educationBoard,
+            gradeOrYear: tutor.gradeOrYear,
             createdAt: tutor.createdAt
         }));
 

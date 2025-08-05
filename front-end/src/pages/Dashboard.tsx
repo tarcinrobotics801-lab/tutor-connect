@@ -43,11 +43,6 @@ const StudentDashboard = () => {
   const studentYear = currentUser.yearOfStudent || 0;
   const enrolledCourses = currentUser.enrolledCourses || [];
   const profilePhoto = currentUser.photo || null;
-  console.log("Current User ID:", currentUser?._id);
-  console.log("Student Name:", studentName);
-  console.log("Enrolled courses:", enrolledCourses);
-  
-
   // Create charts data based on student information
   const profileCompletionData = [
     { name: 'Completed', value: 100, color: '#10B981' }
@@ -81,10 +76,6 @@ const StudentDashboard = () => {
           <h1 className="text-3xl font-bold text-gray-900">Welcome back, {studentName}!</h1>
           <p className="text-gray-600 mt-2">Here's your academic profile and course enrollment overview.</p>
         </div>
-        <Button className="bg-blue-600 hover:bg-blue-700">
-          <User className="h-4 w-4 mr-2" />
-          Update Profile
-        </Button>
       </div>
       
       {/* Key Metrics */}
@@ -104,12 +95,11 @@ const StudentDashboard = () => {
 
         <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-green-800">Academic Year</CardTitle>
+            <CardTitle className="text-sm font-medium text-green-800">Academic Year/Grade</CardTitle>
             <GraduationCap className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-900">{studentYear}</div>
-            <p className="text-xs text-green-600">Current year</p>
           </CardContent>
         </Card>
 
@@ -119,7 +109,7 @@ const StudentDashboard = () => {
             <Building2 className="h-4 w-4 text-purple-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-lg font-bold text-purple-900">{studentDepartment}</div>
+            <div className="text-lg font-bold text-purple-900">{studentDepartment || 'N/A'}  </div>
             <p className="text-xs text-purple-600">Study program</p>
           </CardContent>
         </Card>
@@ -176,30 +166,13 @@ const StudentDashboard = () => {
                 </p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-700">College</label>
+                <label className="text-sm font-medium text-gray-700">College / School Name</label>
                 <p className="text-gray-900 flex items-center">
                   <Building2 className="h-4 w-4 mr-2 text-gray-400" />
                   {studentCollege}
                 </p>
               </div>
-              <div>
-                <label className="text-sm font-medium text-gray-700">Department</label>
-                <p className="text-gray-900 flex items-center">
-                  <GraduationCap className="h-4 w-4 mr-2 text-gray-400" />
-                  {studentDepartment}
-                </p>
-              </div>
             </div>
-            
-            <div>
-              <label className="text-sm font-medium text-gray-700">Academic Information</label>
-              <div className="mt-2 p-3 bg-gray-50 rounded-lg">
-                <p className="text-gray-900">
-                  Currently in <span className="font-semibold">{studentYear} Year</span> of {studentDepartment} at {studentCollege}
-                </p>
-              </div>
-            </div>
-
             {currentUser.createdAt && (
               <div>
                 <label className="text-sm font-medium text-gray-700">Member Since</label>
@@ -252,64 +225,6 @@ const StudentDashboard = () => {
         </Card>
       </div>
 
-      {/* Charts Row */}
-      <div className="grid lg:grid-cols-3 gap-8">
-        {/* Profile Completion */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <User className="h-5 w-5 text-blue-600" />
-              <span>Profile Status</span>
-            </CardTitle>
-            <CardDescription>Profile completion overview</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={200}>
-              <PieChart>
-                <Pie
-                  data={profileCompletionData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={80}
-                  dataKey="value"
-                  startAngle={90}
-                  endAngle={-270}
-                >
-                  <Cell fill="#10B981" />
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-            <p className="text-center text-green-600 font-medium mt-2">Complete</p>
-          </CardContent>
-        </Card>
-
-        {/* Course Overview */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <BookOpen className="h-5 w-5 text-green-600" />
-              <span>Course Overview</span>
-            </CardTitle>
-            <CardDescription>Enrolled vs available courses</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={200}>
-              <BarChart data={courseProgressData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="courses" fill="#3B82F6" />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
-        
-      </div>
-
       {/* Profile Photo Display - if exists */}
       {profilePhoto && (
         <Card>
@@ -332,36 +247,7 @@ const StudentDashboard = () => {
       )}
 
       {/* Account Details */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Calendar className="h-5 w-5 text-gray-600" />
-            <span>Account Information</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid md:grid-cols-3 gap-4">
-            <div>
-              <label className="text-sm font-medium text-gray-700">Student ID</label>
-              <p className="text-gray-900 font-mono text-sm">
-                {currentUser._id ? currentUser._id.slice(-8).toUpperCase() : 'N/A'}
-              </p>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-gray-700">Role</label>
-              <Badge variant="secondary" className="mt-1">
-                {currentUser.role}
-              </Badge>
-            </div>
-            {currentUser.updatedAt && (
-              <div>
-                <label className="text-sm font-medium text-gray-700">Last Updated</label>
-                <p className="text-gray-900">{formatDate(currentUser.updatedAt)}</p>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+      
     </div>
   );
 };

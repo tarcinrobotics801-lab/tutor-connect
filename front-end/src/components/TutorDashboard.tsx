@@ -1,12 +1,14 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Users, BookOpen, Calendar, TrendingUp, Star, Clock, Video, MessageSquare, User, Award, MapPin, Phone, Mail } from "lucide-react";
+import { Users, BookOpen, Calendar, TrendingUp, Star, Clock, Video, MessageSquare, User, Award, MapPin, Phone, Mail, BookMarked, Trash2 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { useApp } from "@/contexts/AppContext";
+import { useEffect } from "react";
+
 
 const TutorDashboard = () => {
-  const { currentUser } = useApp();
+  const { currentUser, setCurrentUser } = useApp();
 
   if (!currentUser || currentUser.role !== 'tutor') {
     return (
@@ -34,7 +36,37 @@ const TutorDashboard = () => {
   const tutorEducation = currentUser.educationalQualification || "";
   const tutorAvailability = currentUser.availability || {};
   const tutorLinkedIn = currentUser.linkedinLink || "";
+  const tutorCourses = currentUser.courseNames || [];
   const tutorPhoto = currentUser.photo || null;
+
+  const handleDeleteCourse = async (courseName: string) => {
+  try {
+    const confirmed = window.confirm(`Are you sure you want to delete "${courseName}"?`);
+    if (!confirmed) return;
+
+    const cleanName = courseName.trim(); // remove extra whitespace
+    const encodedName = encodeURIComponent(cleanName); // safely encode for URL
+
+    const response = await fetch(`/api/courses/deleteByName/${encodedName}`, {
+      method: "DELETE",
+    });
+
+    if (response.ok) {
+      console.log("✅ Course deleted successfully");
+      // Optional: remove from local state or refetch user data
+    } else {
+      console.error("❌ Failed to delete course");
+    }
+  } catch (error) {
+    console.error("❌ Error deleting course", error);
+  }
+};
+
+
+
+
+
+
 
   // Helper function to check if a day is actually available
   const isActuallyAvailable = (dayData: any) => {
@@ -85,10 +117,6 @@ const TutorDashboard = () => {
           <h1 className="text-3xl font-bold text-gray-900">Welcome back, {currentUser.name}!</h1>
           <p className="text-gray-600 mt-2">Here's your teaching profile overview and specializations.</p>
         </div>
-        <Button className="bg-blue-600 hover:bg-blue-700">
-          <User className="h-4 w-4 mr-2" />
-          Update Profile
-        </Button>
       </div>
 
       {/* Key Metrics */}
@@ -256,29 +284,59 @@ const TutorDashboard = () => {
             </CardContent>
           </Card>
 
-          {/* Teaching Levels - Only show if experience > 0 */}
-          {courseLevelData.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <BookOpen className="h-5 w-5 text-green-600" />
-                  <span>Teaching Capability</span>
-                </CardTitle>
-                <CardDescription>Levels you can teach based on experience</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={courseLevelData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip />
-                    <Bar dataKey="value" fill="#10B981" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-          )}
+
+
+          <Card>
+  <CardHeader>
+    <CardTitle className="flex items-center space-x-2">
+      <BookMarked className="h-5 w-5 text-purple-600" />
+      <span>Your Courses</span>
+    </CardTitle>
+  </CardHeader>
+
+  <CardContent>
+    {tutorCourses.length > 0 ? (
+      <div className="space-y-3">
+        {tutorCourses.map((courseName, index) => (
+          <div
+            key={`${courseName}-${index}`}
+            className="p-3 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg border-l-4 border-purple-500"
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="font-semibold text-gray-800">{courseName}</h4>
+                <p className="text-sm text-gray-600">Course {index + 1}</p>
+              </div>
+
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => handleDeleteCourse(courseName)}
+                className="text-red-600 hover:text-red-800"
+              >
+                <Trash2 className="h-5 w-5" />
+              </Button>
+            </div>
+          </div>
+        ))}
+
+        <div className="mt-4 p-3 bg-gray-50 rounded-lg text-center">
+          <p className="text-sm font-semibold text-purple-600">
+            Total Courses: {tutorCourses.length}
+          </p>
+        </div>
+      </div>
+    ) : (
+      <div className="text-center py-8">
+        <BookMarked className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+        <p className="text-gray-500">You haven’t added any courses yet</p>
+      </div>
+    )}
+  </CardContent>
+</Card>
+
+
+
         </div>
       )}
 
@@ -301,8 +359,8 @@ const TutorDashboard = () => {
 
               return (
                 <div key={day} className={`p-3 rounded-lg text-center border ${isAvailable
-                    ? 'bg-green-100 border-green-200'
-                    : 'bg-red-100 border-red-200'
+                  ? 'bg-green-100 border-green-200'
+                  : 'bg-red-100 border-red-200'
                   }`}>
                   <div className="font-medium text-sm">{day.slice(0, 3)}</div>
 

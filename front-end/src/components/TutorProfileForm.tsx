@@ -69,7 +69,8 @@ const TutorProfileForm = () => {
       saturday: { available: false, timeSlots: [] },
       sunday: { available: false, timeSlots: [] },
     },
-
+    educationBoard: currentUser?.educationBoard || "",
+    gradeOrYear: currentUser?.gradeOrYear || "",
     linkedinLink: currentUser?.linkedinLink || "",
     photo: currentUser?.photo || null,
     certificates: currentUser?.certificates || [], // ⭐ ADDED from 2nd code
@@ -83,6 +84,8 @@ const TutorProfileForm = () => {
     sub: "",
     level: "",
     pricePerSession: 0, // Changed from 'price' to 'pricePerSession'
+    classOrYear: "",
+    educationBoard: "",
     sessionTime: "",
     tag: [] as string[],// Changed from 'tags' to 'tag'
     demoLink: "",           // NEW
@@ -196,7 +199,7 @@ const TutorProfileForm = () => {
       case "availability": {
         const avail = value as typeof profileData.availability;
 
-        
+
 
         if (!avail || typeof avail !== "object") {
           return "Availability is required.";
@@ -243,12 +246,14 @@ const TutorProfileForm = () => {
       profileData.yearsOfExperience.trim() !== "" &&
       profileData.linkedinLink.trim() !== "" &&
       profileData.subjects.length > 0 &&
-      profileData.certificates.length > 0 && // ⭐ ADDED certificate requirement
-      profileData.achievements.length > 0 // NEW: achievements
-    
+      profileData.certificates.length > 0 &&
+      profileData.achievements.length > 0 &&
+      profileData.educationBoard.trim() !== "" &&
+      profileData.gradeOrYear.trim() !== ""  // <-- include this
       // Note: photo is NOT required for completion
     );
   };
+
 
   const handleApiError = (error: unknown): ApiError => {
     if (!navigator.onLine) {
@@ -342,11 +347,14 @@ const TutorProfileForm = () => {
           certificates: profileData.certificates, // ⭐ ADDED certificates to payload
           achievements: profileData.achievements, // NEW: achievements
           photo: profileData.photo,
+          educationBoard: profileData.educationBoard,
+          gradeOrYear: profileData.gradeOrYear,
+
         }),
       });
 
       const data = await response.json();
-      
+
 
       if (!response.ok) {
         throw new Error(data.message || 'Server Error');
@@ -354,7 +362,7 @@ const TutorProfileForm = () => {
 
       // Update user with _id
       updateUser(userId, data.user);
-      
+
       setIsEditing(false);
 
       toast({
@@ -406,7 +414,8 @@ const TutorProfileForm = () => {
     }
   };
   const YOUTUBE_REGEX =
-    /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)[\w-]{11}$/;
+  /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})(?:[&?].*)?$/;
+
 
   // Fixed: Use only _id property and correct field names for course
   const handleAddCourse = async () => {
@@ -466,7 +475,26 @@ const TutorProfileForm = () => {
         variant: "destructive"
       });
       return;
+
     }
+    if (!newCourse.classOrYear.trim()) {
+      toast({
+        title: "Course Incomplete",
+        description: "Please specify the class or year name.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!newCourse.educationBoard.trim()) {
+      toast({
+        title: "Course Incomplete",
+        description: "Please select an education board.",
+        variant: "destructive"
+      });
+      return;
+    }
+
 
     const userId = currentUser._id;
 
@@ -476,6 +504,8 @@ const TutorProfileForm = () => {
       sub: newCourse.sub,
       level: newCourse.level,
       pricePerSession: newCourse.pricePerSession,
+      classOrYear: newCourse.classOrYear,
+      educationBoard: newCourse.educationBoard,
       sessionTime: newCourse.sessionTime,
       tag: newCourse.tag,
       demoLink: newCourse.demoLink,
@@ -506,6 +536,8 @@ const TutorProfileForm = () => {
         sub: "",
         level: "",
         pricePerSession: 0,
+        classOrYear: "",
+        educationBoard: "",
         sessionTime: "",
         tag: [],
         demoLink: ""
@@ -610,134 +642,135 @@ const TutorProfileForm = () => {
       <div className="grid lg:grid-cols-3 gap-8">
         {/* Profile Picture and Basic Info */}
         <div className="lg:col-span-1">
-<Card>
-  <CardHeader className="text-center">
-    <div className="relative w-40 h-40 mx-auto bg-blue-100 rounded-full flex items-center justify-center mb-4 overflow-hidden group cursor-pointer"
-         onClick={() => isEditing && document.getElementById('photo-upload')?.click()}>
-      {profileData.photo ? (
-        <img src={profileData.photo} alt="Profile" className="w-full h-full object-cover" />
-      ) : (
-        <User className="h-20 w-20 text-blue-600" />
-      )}
-      
-      {/* Hover overlay for entire circle */}
-      {isEditing && (
-        <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center rounded-full">
-          <div className="text-white text-center">
-            <Upload className="h-10 w-10 mx-auto mb-2" />
-            <span className="text-sm font-medium">Change Photo</span>
-          </div>
-        </div>
-      )}
-    </div>
-    
-    {/* Upload button below photo - always visible when editing */}
-    {isEditing && (
-      <Button
-        variant="outline"
-        size="sm"
-        className="mb-4 border-blue-300 text-blue-600 hover:bg-blue-50"
-        onClick={() => document.getElementById('photo-upload')?.click()}
-      >
-        <Upload className="h-4 w-4 mr-2" />
-        {profileData.photo ? 'Change Photo' : 'Upload Photo'}
-      </Button>
-    )}
-    
-    {/* Hidden file input */}
-    <input
-      id="photo-upload"
-      type="file"
-      accept="image/*"
-      className="hidden"
-      onChange={async (e) => {
-        const file = e.target.files?.[0];
-        if (!file || !currentUser?._id) return;
+          <Card>
+            <CardHeader className="text-center">
+              <div className="relative w-40 h-40 mx-auto bg-blue-100 rounded-full flex items-center justify-center mb-4 overflow-hidden group cursor-pointer"
+                onClick={() => isEditing && document.getElementById('photo-upload')?.click()}>
+                {profileData.photo ? (
+                  <img src={profileData.photo} alt="Profile" className="w-full h-full object-cover" />
+                ) : (
+                  <User className="h-20 w-20 text-blue-600" />
+                )}
 
-        // Validate file size (max 5MB)
-        if (file.size > 5 * 1024 * 1024) {
-          toast({
-            title: "File too large",
-            description: "Please select an image smaller than 5MB.",
-            variant: "destructive",
-          });
-          return;
-        }
+                {/* Hover overlay for entire circle */}
+                {isEditing && (
+                  <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center rounded-full">
+                    <div className="text-white text-center">
+                      <Upload className="h-10 w-10 mx-auto mb-2" />
+                      <span className="text-sm font-medium">Change Photo</span>
+                    </div>
+                  </div>
+                )}
+              </div>
 
-        // Validate file type
-        if (!file.type.startsWith('image/')) {
-          toast({
-            title: "Invalid file type",
-            description: "Please select a valid image file.",
-            variant: "destructive",
-          });
-          return;
-        }
+              {/* Upload button below photo - always visible when editing */}
+              {isEditing && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="mb-4 border-blue-300 text-blue-600 hover:bg-blue-50"
+                  onClick={() => document.getElementById('photo-upload')?.click()}
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  {profileData.photo ? 'Change Photo' : 'Upload Photo'}
+                </Button>
+              )}
 
-        // Show loading state
-        toast({
-          title: "Uploading photo...",
-          description: "Please wait while we upload your photo.",
-        });
+              {/* Hidden file input */}
+              <input
+                id="photo-upload"
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file || !currentUser?._id) return;
 
-        try {
-          // 1. Local preview
-          const preview = URL.createObjectURL(file);
-          handleInputChange("photo", preview);
+                  // Validate file size (max 5MB)
+                  if (file.size > 5 * 1024 * 1024) {
+                    toast({
+                      title: "File too large",
+                      description: "Please select an image smaller than 5MB.",
+                      variant: "destructive",
+                    });
+                    return;
+                  }
 
-          // 2. Upload to Cloudinary via backend
-          const permanentUrl = await uploadImageToBackend(file, currentUser._id);
-          
-          if (permanentUrl) {
-            handleInputChange("photo", permanentUrl);
-            toast({
-              title: "Photo uploaded successfully!",
-              description: "Your profile photo has been updated.",
-            });
-          } else {
-            throw new Error("Upload failed");
-          }
-        } catch (error) {
-          // Revert to previous photo if upload failed
-          handleInputChange("photo", currentUser.photo || null);
-          toast({
-            title: "Upload failed",
-            description: "Could not save photo. Please try again.",
-            variant: "destructive",
-          });
-        }
-      }}
-    />
-    
-    <CardTitle>{profileData.name}</CardTitle>
-    <CardDescription>
-      {profileData.educationalQualification || "Add your qualification"}
-    </CardDescription>
-  </CardHeader>
-  
-  <CardContent className="space-y-4">
-    <div className="flex items-center space-x-3">
-      <Mail className="h-4 w-4 text-gray-400" />
-      <span className="text-sm">{profileData.email}</span>
-    </div>
-    <div className="flex items-center space-x-3">
-      <Phone className="h-4 w-4 text-gray-400" />
-      <span className="text-sm">{profileData.phoneNumber || "Not provided"}</span>
-    </div>
-    <div className="flex items-center space-x-3">
-      <Award className="h-4 w-4 text-gray-400" />
-      <span className="text-sm">
-        {profileData.yearsOfExperience ? `${profileData.yearsOfExperience} experience ` : "Experience not added"}
-      </span>
-    </div>
-    <div className="flex items-center space-x-3">
-      <LinkIcon className="h-4 w-4 text-gray-400" />
-      <span className="text-sm text-blue-600 truncate">
-        {profileData.linkedinLink || "LinkedIn link not added"}
-      </span>
-    </div>
-  </CardContent>
-</Card>
+                  // Validate file type
+                  if (!file.type.startsWith('image/')) {
+                    toast({
+                      title: "Invalid file type",
+                      description: "Please select a valid image file.",
+                      variant: "destructive",
+                    });
+                    return;
+                  }
+
+                  // Show loading state
+                  toast({
+                    title: "Uploading photo...",
+                    description: "Please wait while we upload your photo.",
+                  });
+
+                  try {
+                    // 1. Local preview
+                    const preview = URL.createObjectURL(file);
+                    handleInputChange("photo", preview);
+
+                    // 2. Upload to Cloudinary via backend
+                    const permanentUrl = await uploadImageToBackend(file, currentUser._id);
+
+                    if (permanentUrl) {
+                      handleInputChange("photo", permanentUrl);
+                      toast({
+                        title: "Photo uploaded successfully!",
+                        description: "Your profile photo has been updated.",
+                      });
+                    } else {
+                      throw new Error("Upload failed");
+                    }
+                  } catch (error) {
+                    // Revert to previous photo if upload failed
+                    handleInputChange("photo", currentUser.photo || null);
+                    toast({
+                      title: "Upload failed",
+                      description: "Could not save photo. Please try again.",
+                      variant: "destructive",
+                    });
+                  }
+                }}
+              />
+
+              <CardTitle>{profileData.name}</CardTitle>
+              <CardDescription>
+                {profileData.educationalQualification || "Add your qualification"}
+              </CardDescription>
+            </CardHeader>
+
+            <CardContent className="space-y-4">
+              <div className="flex items-center space-x-3">
+                <Mail className="h-4 w-4 text-gray-400" />
+                <span className="text-sm">{profileData.email}</span>
+              </div>
+              <div className="flex items-center space-x-3">
+                <Phone className="h-4 w-4 text-gray-400" />
+                <span className="text-sm">{profileData.phoneNumber || "Not provided"}</span>
+              </div>
+              <div className="flex items-center space-x-3">
+                <Award className="h-4 w-4 text-gray-400" />
+                <span className="text-sm">
+                  {profileData.yearsOfExperience ? `${profileData.yearsOfExperience} experience ` : "Experience not added"}
+                </span>
+              </div>
+
+              <div className="flex items-center space-x-3">
+                <LinkIcon className="h-4 w-4 text-gray-400" />
+                <span className="text-sm text-blue-600 truncate">
+                  {profileData.linkedinLink || "LinkedIn link not added"}
+                </span>
+              </div>
+            </CardContent>
+          </Card>
           <Card className="mt-6">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
@@ -947,6 +980,39 @@ const TutorProfileForm = () => {
                   <p className="text-red-500 text-sm mt-1">{fieldErrors.educationalQualification}</p>
                 )}
               </div>
+              <div>
+                <Label htmlFor="education-board">
+                  Education Board <span className="text-red-500">*</span>
+                </Label>
+                <Select
+                  value={profileData.educationBoard}
+                  onValueChange={(value) => handleInputChange("educationBoard", value)}
+                  disabled={!isEditing}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select board" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white">
+                    <SelectItem value="State">State</SelectItem>
+                    <SelectItem value="CBSE">CBSE</SelectItem>
+                    <SelectItem value="ICSE">ICSE</SelectItem>
+                    <SelectItem value="College">College</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="grade-year">
+                  Grade / Year <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="grade-year"
+                  value={profileData.gradeOrYear}
+                  onChange={(e) => handleInputChange("gradeOrYear", e.target.value)}
+                  disabled={!isEditing}
+                  placeholder="e.g., Grade 10 or 2nd Year"
+                />
+              </div>
 
               <div>
                 <Label htmlFor="experience">
@@ -1149,6 +1215,31 @@ const TutorProfileForm = () => {
                       onChange={(e) => setNewCourse(prev => ({ ...prev, pricePerSession: Number(e.target.value), }))}
                       placeholder="0 = Free, 50 = ₹50 / session"
                     />
+                  </div>
+                </div>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="class-year">Class / Year Name</Label>
+                    <Input
+                      id="class-year"
+                      value={newCourse.classOrYear}
+                      onChange={(e) => setNewCourse(prev => ({ ...prev, classOrYear: e.target.value }))}
+                      placeholder="e.g., Grade 12 or 3rd Year"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="course-board">Education Board</Label>
+                    <Select onValueChange={(value) => setNewCourse(prev => ({ ...prev, educationBoard: value }))}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select board" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white">
+                        <SelectItem value="State">State</SelectItem>
+                        <SelectItem value="CBSE">CBSE</SelectItem>
+                        <SelectItem value="ICSE">ICSE</SelectItem>
+                        <SelectItem value="College">College</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
 

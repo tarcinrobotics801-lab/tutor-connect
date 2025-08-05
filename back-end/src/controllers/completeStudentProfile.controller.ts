@@ -17,7 +17,7 @@ export const completeStudentProfile: RequestHandler = async (req, res) => {
     } = req.body;
 
     // Validate required fields
-    if (!yearOfStudent || !department || !collegeName || !city || !state) {
+    if (!yearOfStudent || !collegeName || !city || !state) {
       res.status(400).json({ 
         message: "All fields are required: yearOfStudent, department, collegeName, city, state" 
       });

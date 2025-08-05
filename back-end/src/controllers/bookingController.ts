@@ -2,12 +2,16 @@ import { Request, Response } from "express";
 import { BookingRequest } from "../models/BookingRequest.model";
 import { TimeSlot } from "../models/TimeSlot.model";
 import { Student } from "../models/Student.model";
-export const createBookingRequest = async (req: Request, res: Response) => {
+
+export const createBookingRequest = async (
+  req: Request,
+  res: Response
+): Promise<void> => { // ✅ Make sure it returns `Promise<void>` only
   try {
     const {
-      userId,     
-      userName,     // ✅ required for both student/parent
-      requestedBy,     // ✅ 'student' or 'parent'
+      userId,
+      userName,
+      requestedBy,
       courseId,
       courseName,
       sessionTime,
@@ -20,6 +24,20 @@ export const createBookingRequest = async (req: Request, res: Response) => {
 
     if (!userId || !requestedBy) {
       res.status(400).json({ message: "userId and requestedBy are required" });
+      return;
+    }
+
+    const existingBooking = await BookingRequest.findOne({
+      userId,
+      courseId,
+      slotId,
+      status: { $in: ["pending", "accepted"] },
+    });
+
+    if (existingBooking) {
+      res.status(400).json({
+        message: "You have already requested or booked this slot for this course.",
+      });
       return;
     }
 
@@ -39,7 +57,6 @@ export const createBookingRequest = async (req: Request, res: Response) => {
       status: "pending",
     });
 
-
     const saved = await newRequest.save();
     res.status(201).json({ booking: saved });
   } catch (err) {
@@ -47,6 +64,7 @@ export const createBookingRequest = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Failed to create booking request" });
   }
 };
+
 
 // ✅ Accept Booking Request
 export const acceptBookingRequest = async (req: Request, res: Response): Promise<void> => {

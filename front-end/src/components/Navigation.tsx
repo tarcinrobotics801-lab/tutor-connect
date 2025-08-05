@@ -1,7 +1,5 @@
-
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Menu, X, User, Settings, LogOut } from "lucide-react";
+import { BookOpen, User, LogOut } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   DropdownMenu,
@@ -15,11 +13,10 @@ import { useApp } from "@/contexts/AppContext";
 import { useToast } from "@/hooks/use-toast";
 
 const Navigation = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { currentUser, setCurrentUser } = useApp();
   const { toast } = useToast();
   const navigate = useNavigate();
-  
+
   const handleLogout = () => {
     setCurrentUser(null);
     toast({
@@ -31,41 +28,40 @@ const Navigation = () => {
 
   const getInitials = (name: string) => {
     return name
-      .split(' ')
-      .map(word => word.charAt(0))
-      .join('')
+      .split(" ")
+      .map((word) => word.charAt(0))
+      .join("")
       .toUpperCase()
       .slice(0, 2);
   };
-  
+
   return (
     <nav className="bg-gradient-to-r from-blue-600 to-purple-600 shadow-lg border-b sticky top-0 z-50">
       <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex flex-wrap justify-between items-center h-16 gap-4">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
             <BookOpen className="h-8 w-8 text-white" />
             <span className="text-xl font-bold text-white">Tutor Connect</span>
           </Link>
 
-          {/* Desktop Navigation - Only show for students or non-logged users */}
-          <div className="hidden md:flex items-center space-x-8">
-            {(!currentUser || currentUser.role === 'student'|| currentUser.role === 'parent') && (
+          {/* Main Navigation (always visible) */}
+          <div className="flex items-center space-x-8">
+            {(!currentUser || currentUser.role === "student" || currentUser.role === "parent") && (
               <>
-                <Link to="/" className="text-white/90 hover:text-white transition-colors font-medium">
+                <Link to="/" className="text-white hover:text-white transition-colors font-bold">
                   Home
                 </Link>
-                <Link to="/courses" className="text-white/90 hover:text-white transition-colors font-medium">
+                <Link to="/courses" className="text-white hover:text-white transition-colors font-bold">
                   Courses
                 </Link>
-                <Link to="/resources" className="text-white/90 hover:text-white transition-colors font-medium">
-                  Resourses
+                <Link to="/resources" className="text-white hover:text-white transition-colors font-bold">
+                  Resources
                 </Link>
               </>
             )}
           </div>
-
-          {/* User Menu */}
+          {/* User Menu or Auth Links */}
           <div className="flex items-center space-x-4">
             {currentUser ? (
               <DropdownMenu>
@@ -92,7 +88,7 @@ const Navigation = () => {
                     </div>
                   </div>
                   <DropdownMenuSeparator />
-                  {currentUser.role === 'tutor' && (
+                  {currentUser.role === "tutor" && (
                     <DropdownMenuItem asChild>
                       <Link to="/tutor-profile" className="flex items-center">
                         <User className="mr-2 h-4 w-4" />
@@ -100,7 +96,7 @@ const Navigation = () => {
                       </Link>
                     </DropdownMenuItem>
                   )}
-                  {currentUser.role === 'student' && (
+                  {currentUser.role === "student" && (
                     <DropdownMenuItem asChild>
                       <Link to="/student-profile" className="flex items-center">
                         <User className="mr-2 h-4 w-4" />
@@ -108,7 +104,7 @@ const Navigation = () => {
                       </Link>
                     </DropdownMenuItem>
                   )}
-                  {currentUser.role === 'parent' && (
+                  {currentUser.role === "parent" && (
                     <DropdownMenuItem asChild>
                       <Link to="/parent-profile" className="flex items-center">
                         <User className="mr-2 h-4 w-4" />
@@ -117,7 +113,7 @@ const Navigation = () => {
                     </DropdownMenuItem>
                   )}
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem 
+                  <DropdownMenuItem
                     className="text-red-600 focus:text-red-600 cursor-pointer"
                     onClick={handleLogout}
                   >
@@ -140,47 +136,10 @@ const Navigation = () => {
                 </Link>
               </div>
             )}
-
-            {/* Mobile menu button */}
-            <Button
-              variant="ghost"
-              size="sm"
-              className="md:hidden text-white hover:bg-white/20"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-            >
-              {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </Button>
           </div>
         </div>
-
-        {/* Mobile Navigation */}
-        {isMenuOpen && (
-          <div className="md:hidden border-t border-white/20 bg-white/10 py-4">
-            <div className="flex flex-col space-y-3">
-              {(!currentUser || currentUser.role === 'student') && (
-                <>
-                  <Link
-                    to="/courses"
-                    className="text-white/90 hover:text-white transition-colors px-2"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Courses
-                  </Link>
-                  <Link
-                    to="/tutors"
-                    className="text-white/90 hover:text-white transition-colors px-2"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Tutors
-                  </Link>
-                </>
-              )}
-            </div>
-          </div>
-        )}
       </div>
     </nav>
   );
 };
-
 export default Navigation;
