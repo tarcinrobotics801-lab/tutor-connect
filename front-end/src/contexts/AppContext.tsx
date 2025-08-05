@@ -123,7 +123,7 @@ export interface BookingRequest {
 
 
 interface Notification {
-  id: string;
+  id?: string;
   userId: string;
   type: 'booking_request' | 'booking_accepted' | 'booking_rejected';
   title: string;
@@ -221,7 +221,8 @@ interface AppContextType {
   acceptBookingRequest: (requestId: string, meetingLink: string) => void;
   rejectBookingRequest: (requestId: string) => void;
   getUserNotifications: (userId: string) => Notification[];
-  markNotificationAsRead: (notificationId: string) => void;
+  markNotificationAsRead: (notificationId: string) => Promise<void>;
+  clearAllNotifications: (userId: string) => Promise<void>;
   addResource: (resource: Resource) => void;
   removeTutor: (tutorId: string) => Promise<boolean>;
   getAppStats: () => { totalTutors: number; totalCourses: number; totalStudents: number; totalParents: number }
@@ -251,21 +252,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  
-  useEffect(() => {
-  const storedUser = localStorage.getItem("currentUser");
-  const storedRequests = localStorage.getItem("tutorBookingRequests");
-
-  if (storedUser) {
-    const parsedUser = JSON.parse(storedUser);
-    setCurrentUser(parsedUser);
-
-    if (parsedUser.role === "tutor" && storedRequests) {
-      setBookingRequests(JSON.parse(storedRequests));
-    }
-  }
-}, []);
 
   /* ------------------ user CRUD ------------------ */
   const addUser = (user: User): void => setUsers((p) => [...p, user]);
@@ -511,7 +497,6 @@ const createBookingRequest = async (
     });
 
     const notification: Notification = {
-      id: `notif-${Date.now()}`,
       userId: tutorId,
       type: "booking_request",
       title: "New Booking Request",
@@ -520,6 +505,14 @@ const createBookingRequest = async (
       createdAt: new Date().toISOString(),
       read: false,
     };
+    console.log("📤 Sending notification to backend:", notification);
+
+    await fetch("/api/notifications", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify(notification),
+    });
 
     setNotifications(prev => {
       const updated = [...prev, notification];
@@ -579,11 +572,16 @@ const acceptBookingRequest = async (requestId: string, meetingLink: string) => {
     if (!res.ok) throw new Error(data.message || "Accept failed");
 
     // 🔄 Update booking request in state
-    setBookingRequests(prev =>
-      prev.map(request =>
-        request._id === requestId ? data.booking : request
-      )
-    );
+    const updatedRequests = bookingRequests.map(request =>
+      request._id === requestId ? data.booking : request
+    ).filter(request => request.status === "pending");
+
+    setBookingRequests(updatedRequests);
+
+    // ✅ Also sync to localStorage
+    if (currentUser?.role === "tutor") {
+      localStorage.setItem("tutorBookingRequests", JSON.stringify(updatedRequests));
+    }
 
     // 👤 Dynamic user ID (student or parent)
     const recipientUserId =
@@ -594,7 +592,6 @@ const acceptBookingRequest = async (requestId: string, meetingLink: string) => {
 
     // 🔔 Create notification
     const notification: Notification = {
-      id: `notif-${Date.now()}`,
       userId: recipientUserId,
       type: "booking_accepted",
       title: "Booking Accepted!",
@@ -609,7 +606,15 @@ const acceptBookingRequest = async (requestId: string, meetingLink: string) => {
       createdAt: new Date().toISOString(),
       read: false,
     };
+    console.log("📤 Sending notification to backend:", notification);
 
+    await fetch("/api/notifications", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify(notification),
+    });
+    
     setNotifications(prev => [...prev, notification]);
 
     if (currentUser?._id === data.booking.userId) {
@@ -657,18 +662,22 @@ const rejectBookingRequest = async (requestId: string) => {
     if (!res.ok) throw new Error(data.message || "Reject failed");
 
     // ✅ Update state with the rejected booking
-    setBookingRequests(prev =>
-      prev.map(request =>
-        request._id === requestId ? data.booking : request
-      )
-    );
+    const updatedRequests = bookingRequests.map(request =>
+      request._id === requestId ? data.booking : request
+    ).filter(request => request.status === "pending");
+
+    setBookingRequests(updatedRequests);
+
+    // ✅ Also sync to localStorage
+    if (currentUser?.role === "tutor") {
+      localStorage.setItem("tutorBookingRequests", JSON.stringify(updatedRequests));
+    }
 
     // ✅ Use correct userId from backend response
     const recipientUserId = data.booking.userId || data.booking.studentId || "";
 
     // 🔔 Create and push notification
     const notification: Notification = {
-      id: `notif-${Date.now()}`,
       userId: recipientUserId,
       type: "booking_rejected",
       title: "Booking Rejected",
@@ -677,7 +686,15 @@ const rejectBookingRequest = async (requestId: string) => {
       createdAt: new Date().toISOString(),
       read: false,
     };
+    console.log("📤 Sending notification to backend:", notification);
 
+    await fetch("/api/notifications", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify(notification),
+    });
+    
     setNotifications(prev => [...prev, notification]);
   } catch (err) {
     const error = err instanceof Error ? err : new Error("Unknown error occurred");
@@ -692,61 +709,101 @@ const rejectBookingRequest = async (requestId: string) => {
     );
   };
 
-  const markNotificationAsRead = (notificationId: string) => {
-    setNotifications(prev => prev.map(notif => 
-      notif.id === notificationId ? { ...notif, read: true } : notif
-    ));
+  const markNotificationAsRead = async (notificationId: string): Promise<void> => {
+  try {
+    await fetch(`/api/notifications/${notificationId}/read`, {
+      method: "PATCH",
+    });
+
+    setNotifications((prev) =>
+      prev.map((n) =>
+        n.id === notificationId ? { ...n, read: true } : n
+      )
+    );
+  } catch (err) {
+    console.error("Failed to mark notification as read", err);
+  }
+};
+
+  
+  const clearAllNotifications = async (userId: string): Promise<void> => {
+    try {
+      await fetch(`/api/notifications/clear/${userId}`, {
+        method: "PATCH",
+      });
+      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    } catch (err) {
+      console.error("Failed to clear notifications", err);
+    }
   };
+  
   /* ---------------- auth helpers ------------------ */
   const loginUser = async (email: string, password: string): Promise<User | null> => {
     try {
-      
       setLoading(true);
       setError(null);
-
+  
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({ email, password }),
       });
+  
       const data = await res.json();
       if (!res.ok) {
         setError(data.message || "Login failed");
         return null;
       }
-      if (email === 'admin@tarcin.in' && password === 'Tarcin@12345') {
+  
+      // Admin hardcoded login
+      if (email === "admin@tarcin.in" && password === "Tarcin@12345") {
         const adminUser: User = {
-          _id: 'admin-1',
-          name: 'Admin',
-          email: 'admin@tarcin.in',
-          role: 'admin',
-          profileCompleted: true
+          _id: "admin-1",
+          name: "Admin",
+          email: "admin@tarcin.in",
+          role: "admin",
+          profileCompleted: true,
         };
         setCurrentUser(adminUser);
         return adminUser;
       }
-
+  
       const user: User = data.student || data.tutor || data.user;
       if (!user) {
         setError("Invalid login response format");
         return null;
       }
-
+  
       setCurrentUser(user);
-localStorage.setItem("currentUser", JSON.stringify(user));
-
-// ✅ if tutor, store booking requests
-if (user.role === "tutor" && data.user.bookingRequests) {
-  setBookingRequests(data.user.bookingRequests);
-  localStorage.setItem("tutorBookingRequests", JSON.stringify(data.user.bookingRequests));
-}
-
-setUsers((prev) => (prev.some((u) => u._id === user._id) ? prev : [...prev, user]));
-return user;
-
-
-
+      localStorage.setItem("currentUser", JSON.stringify(user));
+  
+      // ✅ if tutor, store booking requests
+      if (user.role === "tutor" && data.user.bookingRequests) {
+        setBookingRequests(data.user.bookingRequests);
+        localStorage.setItem(
+          "tutorBookingRequests",
+          JSON.stringify(data.user.bookingRequests)
+        );
+      }
+  
+      // ✅ Fetch notifications (students/parents only)
+      if (user.role === "student" || user.role === "parent") {
+        try {
+          const notifRes = await fetch(`/api/notifications/${user._id}`);
+          const notifData = await notifRes.json();
+          if (notifRes.ok && notifData.notifications) {
+            setNotifications(notifData.notifications);
+          }
+        } catch (err) {
+          console.error("Failed to fetch notifications:", err);
+        }
+      }
+  
+      setUsers((prev) =>
+        prev.some((u) => u._id === user._id) ? prev : [...prev, user]
+      );
+      return user;
     } catch (err: any) {
       console.error("Login error:", err);
       setError(err.message || "Login failed");
@@ -755,6 +812,7 @@ return user;
       setLoading(false);
     }
   };
+  
 
   const logoutUser = (): void => {
     setCurrentUser(null);
@@ -784,7 +842,35 @@ return user;
     enrollments.filter((e) => e.tutorId === tutorId);
 
   const clearError = (): void => setError(null);
-
+  
+  useEffect(() => {
+    const storedUser = localStorage.getItem("currentUser");
+    const storedRequests = localStorage.getItem("tutorBookingRequests");
+  
+    if (storedUser) {
+      const parsedUser = JSON.parse(storedUser);
+      setCurrentUser(parsedUser);
+  
+      if (parsedUser.role === "tutor" && storedRequests) {
+        setBookingRequests(JSON.parse(storedRequests));
+      }
+  
+      // ✅ Fetch notifications on page reload
+      if (parsedUser.role === "student" || parsedUser.role === "parent") {
+        fetch(`/api/notifications/${parsedUser._id}`)
+          .then(res => res.json())
+          .then(data => {
+            if (data.notifications) {
+              setNotifications(data.notifications);
+            }
+          })
+          .catch(err => {
+            console.error("Failed to fetch notifications on reload", err);
+          });
+      }
+    }
+  }, []);
+  
 
 
   /* ---------------- provider ----------------------- */
@@ -834,6 +920,7 @@ return user;
       rejectBookingRequest,
       getUserNotifications,
       markNotificationAsRead,
+      clearAllNotifications,
       addResource,
       removeTutor,
       getAppStats

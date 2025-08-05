@@ -10,6 +10,7 @@ import timeSlotRoutes from "./routes/timeslot.routes";
 import bookingRoutes from "./routes/booking.routes";
 import resourceRoutes from "./routes/resource.routes";
 import { createCourse } from "./controllers/createCourseController";
+import notificationRoutes from "./routes/notificationRoutes";
 const app = express();
 
 // Enable CORS for frontend (adjust origin if needed)
@@ -30,5 +31,6 @@ app.use("/api/timeslots", timeSlotRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/resources", resourceRoutes);
 app.use("/api/courses", authRoutes); // Assuming this is for course-related routes
+app.use("/api/notifications", notificationRoutes);
 
 export default app;
