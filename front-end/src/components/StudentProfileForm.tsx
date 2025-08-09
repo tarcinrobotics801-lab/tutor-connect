@@ -261,8 +261,8 @@ const StudentProfileForm = () => {
     return date.toLocaleDateString();
   };
 
-  const handleNotificationClick = (notificationId: string) => {
-    markNotificationAsRead(notificationId);
+  const handleNotificationClick = (userId: string) => {
+    markNotificationAsRead(currentUser._id);
   };
 
   if (!currentUser?.profileCompleted) {

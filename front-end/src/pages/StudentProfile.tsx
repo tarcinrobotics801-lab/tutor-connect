@@ -52,8 +52,8 @@ const StudentProfile = () => {
     return date.toLocaleDateString();
   };
 
-  const handleNotificationClick = (notificationId: string) => {
-    markNotificationAsRead(notificationId);
+  const handleNotificationClick = (notification: string) => {
+    markNotificationAsRead(currentUser._id);
   };
 
   const unreadCount = notifications.filter(n => !n.read).length;

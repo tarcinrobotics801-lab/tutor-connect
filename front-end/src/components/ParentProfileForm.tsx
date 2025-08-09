@@ -23,7 +23,7 @@ interface Child {
 }
 
 const ParentProfileForm = () => {
-  const { currentUser, updateUser, getUserNotifications, markNotificationAsRead } = useApp();
+  const { currentUser, updateUser, getUserNotifications, markNotificationAsRead, clearAllNotifications } = useApp();
   const { toast } = useToast();
   const navigate = useNavigate();
   
@@ -136,9 +136,14 @@ const ParentProfileForm = () => {
   };
 
   const handleNotificationClick = (notificationId: string) => {
-    markNotificationAsRead(notificationId);
+    markNotificationAsRead(currentUser._id);
   };
-
+  const handleClearAll = () => {
+    if (currentUser) {
+      clearAllNotifications(currentUser._id);
+    }
+  };
+  
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-indigo-50">
       <div className="container mx-auto px-4 py-8">
@@ -369,8 +374,20 @@ const ParentProfileForm = () => {
                 <CardDescription>
                   Stay updated with your children's booking requests and tutor responses
                 </CardDescription>
+                <div className="text-right mt-2">
+    <Button
+      variant="outline"
+      size="sm"
+      className="text-purple-600 hover:text-purple-700 border-purple-300"
+      onClick={handleClearAll}
+    >
+      Clear All
+    </Button>
+  </div>
+
               </CardHeader>
               <CardContent>
+                
                 <ScrollArea className="h-80">
                   {notifications.length === 0 ? (
                     <div className="text-center py-16 text-gray-500">

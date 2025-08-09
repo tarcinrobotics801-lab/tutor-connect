@@ -203,9 +203,6 @@ const StudentDashboard = () => {
                         <h4 className="font-semibold text-gray-800">{course}</h4>
                         <p className="text-sm text-gray-600">Course {index + 1}</p>
                       </div>
-                      <Badge variant="secondary" className="bg-green-100 text-green-800">
-                        Active
-                      </Badge>
                     </div>
                   </div>
                 ))}

@@ -221,7 +221,7 @@ interface AppContextType {
   acceptBookingRequest: (requestId: string, meetingLink: string) => void;
   rejectBookingRequest: (requestId: string) => void;
   getUserNotifications: (userId: string) => Notification[];
-  markNotificationAsRead: (notificationId: string) => Promise<void>;
+  markNotificationAsRead: (userId: string) => Promise<void>;
   clearAllNotifications: (userId: string) => Promise<void>;
   addResource: (resource: Resource) => void;
   removeTutor: (tutorId: string) => Promise<boolean>;
@@ -252,6 +252,36 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+   useEffect(() => {
+    const storedUser = localStorage.getItem("currentUser");
+    const storedRequests = localStorage.getItem("tutorBookingRequests");
+  
+    if (storedUser) {
+      const parsedUser = JSON.parse(storedUser);
+      setCurrentUser(parsedUser);
+
+  
+      if (parsedUser.role === "tutor" && storedRequests) {
+        setBookingRequests(JSON.parse(storedRequests));
+      }
+  
+      // ✅ Fetch notifications on page reload
+      if (parsedUser.role === "student" || parsedUser.role === "parent") {
+        fetch(`/api/notifications/${parsedUser._id}`)
+          .then(res => res.json())
+          .then(data => {
+            if (data.notifications) {
+              setNotifications(data.notifications);
+            }
+          })
+          .catch(err => {
+            console.error("Failed to fetch notifications on reload", err);
+          });
+      }
+    }
+    
+  }, []);
 
   /* ------------------ user CRUD ------------------ */
   const addUser = (user: User): void => setUsers((p) => [...p, user]);
@@ -709,15 +739,15 @@ const rejectBookingRequest = async (requestId: string) => {
     );
   };
 
-  const markNotificationAsRead = async (notificationId: string): Promise<void> => {
+  const markNotificationAsRead = async (userId: string): Promise<void> => {
   try {
-    await fetch(`/api/notifications/${notificationId}/read`, {
+    await fetch(`/api/notifications/clear/${userId}`, {
       method: "PATCH",
     });
 
     setNotifications((prev) =>
       prev.map((n) =>
-        n.id === notificationId ? { ...n, read: true } : n
+        n.id === userId ? { ...n, read: true } : n
       )
     );
   } catch (err) {
@@ -817,6 +847,9 @@ const rejectBookingRequest = async (requestId: string) => {
   const logoutUser = (): void => {
     setCurrentUser(null);
     setError(null);
+    localStorage.removeItem("user");
+    localStorage.removeItem("currentUser");
+
    
   };
 
@@ -843,36 +876,8 @@ const rejectBookingRequest = async (requestId: string) => {
 
   const clearError = (): void => setError(null);
   
-  useEffect(() => {
-    const storedUser = localStorage.getItem("currentUser");
-    const storedRequests = localStorage.getItem("tutorBookingRequests");
+ 
   
-    if (storedUser) {
-      const parsedUser = JSON.parse(storedUser);
-      setCurrentUser(parsedUser);
-  
-      if (parsedUser.role === "tutor" && storedRequests) {
-        setBookingRequests(JSON.parse(storedRequests));
-      }
-  
-      // ✅ Fetch notifications on page reload
-      if (parsedUser.role === "student" || parsedUser.role === "parent") {
-        fetch(`/api/notifications/${parsedUser._id}`)
-          .then(res => res.json())
-          .then(data => {
-            if (data.notifications) {
-              setNotifications(data.notifications);
-            }
-          })
-          .catch(err => {
-            console.error("Failed to fetch notifications on reload", err);
-          });
-      }
-    }
-  }, []);
-  
-
-
   /* ---------------- provider ----------------------- */
   return (
     <AppContext.Provider

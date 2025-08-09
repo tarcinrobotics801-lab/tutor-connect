@@ -17,7 +17,7 @@ const NotificationsDropdown = () => {
   const unreadCount = notifications.filter(n => !n.read).length;
 
   const handleNotificationClick = (notificationId: string) => {
-    markNotificationAsRead(notificationId);
+    markNotificationAsRead(currentUser._id);
   };
 
   const getNotificationIcon = (type: string) => {
