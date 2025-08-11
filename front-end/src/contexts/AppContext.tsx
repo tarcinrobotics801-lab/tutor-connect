@@ -377,7 +377,19 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   };
 
   /* ------------------ course CRUD ------------------ */
-  const addCourse = (course: Course): void => setCourses((p) => [...p, course]);
+  const addCourse = (course: Course): void => {
+    setCourses((prev) => [...prev, course]);
+  
+    // ✅ If current user is the tutor who added this course, update their courseNames
+    if (currentUser && currentUser.role === "tutor" && currentUser._id === course.tutorId) {
+      const updatedUser = {
+        ...currentUser,
+        courseNames: Array.from(new Set([...(currentUser.courseNames ?? []), course.courseName])),
+      };
+      setCurrentUser(updatedUser);
+      localStorage.setItem("currentUser", JSON.stringify(updatedUser));
+    }
+  };
 
   const updateCourse = (courseId: string, updates: Partial<Course>): void =>
     setCourses((p) => p.map((c) => (c._id === courseId ? { ...c, ...updates } : c)));

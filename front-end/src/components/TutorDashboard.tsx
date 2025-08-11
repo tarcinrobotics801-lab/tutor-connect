@@ -62,7 +62,7 @@ const handleDeleteCourse = async (courseName: string) => {
         localStorage.setItem("currentUser", JSON.stringify(updatedUser));
   
         // Sync with backend so data is updated in DB
-        await updateUser(currentUser._id, { courseNames: updatedCourses });
+        await updateUser(currentUser._id, { ...currentUser,  courseNames: updatedCourses });
   
       } else {
         console.error("❌ Failed to delete course");
