@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { BookOpen, Users, Calendar, Award, GraduationCap, Search, User, Settings, LogOut, UserCheck, BookOpenCheck, Target, Zap, TrendingUp, Heart, Clock, Shield, Star, MapPin, DollarSign, ChevronRight, Filter } from "lucide-react";
@@ -12,22 +12,21 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useApp } from "@/contexts/AppContext";
-import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
-  const { currentUser, setCurrentUser } = useApp();
-  const { toast } = useToast();
-  const navigate = useNavigate();
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
-  
+  const [isVisible, setIsVisible] = useState(false);
+
+  // Mock current user - you can replace this with actual context
+  const currentUser = null; // Set to null to show login/signup buttons
+
+  useEffect(() => {
+    setIsVisible(true);
+  }, []);
+
   const handleLogout = () => {
-    setCurrentUser(null);
-    toast({
-      title: "Logged out successfully",
-      description: "You have been logged out of your account.",
-    });
-    navigate("/");
+    // Mock logout function
+    console.log("Logging out...");
   };
 
   const getInitials = (name: string) => {
@@ -42,53 +41,63 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-800 to-indigo-900 relative overflow-hidden">
       {/* Professional Background Image Overlay */}
-      <div 
+      <div
         className="absolute inset-0 opacity-10 bg-cover bg-center bg-no-repeat transition-opacity duration-1000"
         style={{
           backgroundImage: "url('https://images.unsplash.com/photo-1553877522-43269d4ea984?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')"
         }}
       ></div>
-      {/* Enhanced floating background elements */}
+
+      {/* Enhanced animated floating background elements */}
       <div className="absolute inset-0">
         <div className="absolute top-20 left-20 w-40 h-40 bg-purple-500/30 rounded-full blur-3xl animate-pulse animation-delay-0"></div>
         <div className="absolute top-40 right-32 w-32 h-32 bg-blue-500/25 rounded-full blur-2xl animate-pulse animation-delay-1000"></div>
         <div className="absolute bottom-32 left-1/4 w-48 h-48 bg-indigo-500/20 rounded-full blur-3xl animate-pulse animation-delay-2000"></div>
         <div className="absolute bottom-20 right-20 w-36 h-36 bg-violet-500/25 rounded-full blur-2xl animate-pulse animation-delay-500"></div>
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-purple-400/15 rounded-full blur-3xl animate-pulse animation-delay-3000"></div>
-        
+
         {/* Additional floating orbs */}
         <div className="absolute top-1/4 right-1/4 w-24 h-24 bg-blue-400/20 rounded-full blur-2xl animate-bounce animation-delay-1500"></div>
         <div className="absolute bottom-1/4 left-1/3 w-20 h-20 bg-purple-400/25 rounded-full blur-xl animate-bounce animation-delay-2500"></div>
       </div>
 
-      {/* Promotional Banner */}
-      <div className="bg-purple-600 text-white py-2 text-center text-sm relative z-10">
-        <p className="animate-bounce">
+      {/* Enhanced Promotional Banner with animation */}
+      <div className="bg-purple-600 text-white py-2 text-center text-sm relative z-10 shadow-lg transform translate-y-0 animate-slide-in-down">
+        <p className="animate-bounce font-medium">
           🎓 EXCLUSIVE DEAL: Enroll your courses free now! Limited time offer
         </p>
       </div>
 
-      {/* Header - Updated Navigation */}
-      <header className="bg-black/20 backdrop-blur-md border-b border-white/10 relative z-10">
+      {/* Enhanced Header with animation */}
+      <header className={`bg-black/20 backdrop-blur-md border-b border-white/10 relative z-10 shadow-xl transition-all duration-1000 ${isVisible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'}`}>
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <Link to="/" className="flex items-center space-x-2">
-            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-2">
-              <GraduationCap className="h-8 w-8 text-white" />
+          <Link to="/" className="flex items-center space-x-2 hover:scale-110 transition-all duration-500 group">
+            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-2 group-hover:shadow-2xl group-hover:shadow-purple-500/30 transition-all duration-300">
+              <GraduationCap className="h-8 w-8 text-white group-hover:rotate-12 transition-transform duration-300" />
             </div>
             <div>
-              <span className="text-2xl font-bold text-white">TUTOR</span>
-              <span className="text-xl font-light text-purple-300 ml-1">CONNECT</span>
-              <div className="text-xs text-purple-200">NETWORK</div>
+              <span className="text-2xl font-bold text-white group-hover:text-purple-200 transition-colors duration-300">TUTOR</span>
+              <span className="text-xl font-light text-purple-300 ml-1 group-hover:text-purple-200 transition-colors duration-300">CONNECT</span>
+              <div className="text-xs text-purple-200 group-hover:text-purple-100 transition-colors duration-300">NETWORK</div>
             </div>
           </Link>
-          
+
           <nav className="hidden md:flex space-x-8">
-            <Link to="/" className="text-white hover:text-purple-300 transition-colors font-bold">Home</Link>
-            <Link to="/courses" className="text-white hover:text-purple-300 transition-colors font-bold">Discover Courses & Tutors</Link>
-            <Link to="/resources" className="text-white hover:text-purple-300 transition-colors font-bold">Free Tutor Notes</Link>
+            <Link to="/" className="text-white hover:text-purple-300 transition-all duration-300 hover:scale-105 relative group font-bold">
+              Home
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-purple-400 transition-all duration-300 group-hover:w-full"></span>
+            </Link>
+            <Link to="/courses" className="text-white hover:text-purple-300 transition-all duration-300 hover:scale-105 relative group font-bold">
+              Discover Courses & Tutors
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-purple-400 transition-all duration-300 group-hover:w-full"></span>
+            </Link>
+            <Link to="/resources" className="text-white hover:text-purple-300 transition-all duration-300 hover:scale-105 relative group font-bold">
+              Free Tutor Notes
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-purple-400 transition-all duration-300 group-hover:w-full"></span>
+            </Link>
           </nav>
-          
-          <div className="flex items-center space-x-4">  
+
+          <div className="flex items-center space-x-4">
             {/* Dynamic Authentication Section */}
             {currentUser ? (
               <DropdownMenu>
@@ -148,7 +157,7 @@ const Index = () => {
                     </DropdownMenuItem>
                   )}
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem 
+                  <DropdownMenuItem
                     className="text-red-600 focus:text-red-600 cursor-pointer"
                     onClick={handleLogout}
                   >
@@ -160,12 +169,12 @@ const Index = () => {
             ) : (
               <div className="flex items-center space-x-2">
                 <Link to="/login">
-                  <Button variant="outline" className="bg-purple-600 hover:bg-purple-700 text-white border-purple-500">
+                  <Button variant="outline" className="bg-purple-600 hover:bg-purple-700 text-white border-purple-500 transition-all duration-300 hover:scale-105">
                     Log In
                   </Button>
                 </Link>
                 <Link to="/signup">
-                  <Button className="bg-purple-600 hover:bg-purple-700 text-white">
+                  <Button className="bg-purple-600 hover:bg-purple-700 text-white shadow-lg hover:shadow-2xl hover:shadow-purple-500/30 transition-all duration-300 hover:scale-105">
                     Sign Up
                   </Button>
                 </Link>
@@ -175,32 +184,32 @@ const Index = () => {
         </div>
       </header>
 
-      {/* Hero Section */}
+      {/* Enhanced Hero Section with staggered animations */}
       <section className="container mx-auto px-4 py-20 relative z-10">
-        <div className="text-center max-w-5xl mx-auto">
-          <h1 className="text-6xl md:text-7xl font-bold text-white mb-6 leading-tight">
+        <div className={`text-center max-w-5xl mx-auto transition-all duration-1000 delay-300 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
+          <h1 className="text-6xl md:text-7xl font-bold text-white mb-6 leading-tight animate-fade-in">
             WELCOME TO
             <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-violet-400 to-purple-300">
               Tutor Connect Network
             </span>
           </h1>
-          <p className="text-xl md:text-2xl text-purple-100 mb-4 font-medium">
+          <p className={`text-xl md:text-2xl text-purple-100 mb-4 font-medium transition-all duration-1000 delay-500 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
             "Connecting Minds Worldwide"
           </p>
-          <p className="text-lg text-purple-200 mb-12 max-w-3xl mx-auto leading-relaxed">
-            Experience the power of education with us. We offer a seamless blend of 
-            technology and learning, providing interactive lessons, virtual classrooms, and 
+          <p className={`text-lg text-purple-200 mb-12 max-w-3xl mx-auto leading-relaxed transition-all duration-1000 delay-700 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
+            Experience the power of education with us. We offer a seamless blend of
+            technology and learning, providing interactive lessons, virtual classrooms, and
             personalized feedback.
           </p>
-          <div className="flex flex-col sm:flex-row gap-6 justify-center">
+          <div className={`flex flex-col sm:flex-row gap-6 justify-center transition-all duration-1000 delay-1000 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
             <Link to="/signup">
-              <Button size="lg" className="bg-purple-600 hover:bg-purple-700 px-10 py-4 text-lg font-semibold rounded-lg shadow-2xl">
+              <Button size="lg" className="bg-purple-600 hover:bg-purple-700 px-10 py-4 text-lg font-semibold rounded-lg shadow-2xl hover:shadow-3xl hover:shadow-purple-500/40 transform hover:">
                 Get Started
               </Button>
             </Link>
             <Link to="/courses">
-              <Button size="lg" variant="outline" className="bg-purple-600 hover:bg-purple-700 px-10 py-4 text-lg font-semibold rounded-lg shadow-2xl">
+              <Button size="lg" className="bg-purple-600 hover:bg-purple-700 px-10 py-4 text-lg font-semibold rounded-lg shadow-2xl backdrop-blur-sm transform hover:scale-110 transition-all duration-500">
                 Learn More
               </Button>
             </Link>
@@ -221,10 +230,10 @@ const Index = () => {
                 </linearGradient>
               </defs>
               {/* Network lines */}
-              <path d="M50,50 L150,80 L250,60 L350,90 M80,150 L180,120 L280,140 L380,110" 
-                    stroke="url(#networkGradient)" strokeWidth="2" fill="none" opacity="0.6" />
-              <path d="M50,200 L150,230 L250,210 L350,240 M80,300 L180,270 L280,290 L380,260" 
-                    stroke="url(#networkGradient)" strokeWidth="2" fill="none" opacity="0.6" />
+              <path d="M50,50 L150,80 L250,60 L350,90 M80,150 L180,120 L280,140 L380,110"
+                stroke="url(#networkGradient)" strokeWidth="2" fill="none" opacity="0.6" />
+              <path d="M50,200 L150,230 L250,210 L350,240 M80,300 L180,270 L280,290 L380,260"
+                stroke="url(#networkGradient)" strokeWidth="2" fill="none" opacity="0.6" />
               {/* Network nodes */}
               <circle cx="50" cy="50" r="4" fill="#A855F7" opacity="0.8" />
               <circle cx="150" cy="80" r="4" fill="#7C3AED" opacity="0.8" />
@@ -235,19 +244,19 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Interactive Sections for Tutors and Students */}
+      {/* Interactive Sections for Tutors, Students, and Parents with enhanced animations */}
       <section className="container mx-auto px-4 py-20 relative z-10">
-        <h2 className="text-5xl font-bold text-center text-white mb-4">
+        <h2 className={`text-5xl font-bold text-center text-white mb-4 transition-all duration-1000 delay-300 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
           Choose Your Path
         </h2>
-        <p className="text-xl text-center text-purple-200 mb-16">
+        <p className={`text-xl text-center text-purple-200 mb-16 transition-all duration-1000 delay-500 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
           Whether you're here to learn or teach, we have the perfect solution for you
         </p>
-        
+
         <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-8 max-w-7xl mx-auto">
-          {/* For Students */}
-          <Card 
-            className={`bg-white/90 backdrop-blur-xl border-2 border-blue-200/50 hover:border-blue-300/80 transition-all duration-700 hover:shadow-2xl hover:shadow-blue-500/30 transform hover:scale-105 hover:-translate-y-2 cursor-pointer group ${hoveredCard === 'students' ? 'scale-105 -translate-y-2 shadow-2xl shadow-blue-500/30' : ''}`}
+          {/* For Students - Enhanced with animations */}
+          <Card
+            className={`bg-white/90 backdrop-blur-xl border-2 border-blue-200/50 hover:border-blue-300/80 transition-all duration-700 hover:shadow-2xl hover:shadow-blue-500/30 transform hover:scale-105 hover:-translate-y-2 cursor-pointer group ${hoveredCard === 'students' ? 'scale-105 -translate-y-2 shadow-2xl shadow-blue-500/30' : ''} ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'} transition-all duration-1000 delay-700`}
             onMouseEnter={() => setHoveredCard('students')}
             onMouseLeave={() => setHoveredCard(null)}
           >
@@ -289,9 +298,9 @@ const Index = () => {
             </CardContent>
           </Card>
 
-          {/* For Tutors */}
-          <Card 
-            className={`bg-white/90 backdrop-blur-xl border-2 border-purple-200/50 hover:border-purple-300/80 transition-all duration-700 hover:shadow-2xl hover:shadow-purple-500/30 transform hover:scale-105 hover:-translate-y-2 cursor-pointer group ${hoveredCard === 'tutors' ? 'scale-105 -translate-y-2 shadow-2xl shadow-purple-500/30' : ''}`}
+          {/* For Tutors - Enhanced with animations */}
+          <Card
+            className={`bg-white/90 backdrop-blur-xl border-2 border-purple-200/50 hover:border-purple-300/80 transition-all duration-700 hover:shadow-2xl hover:shadow-purple-500/30 transform hover:scale-105 hover:-translate-y-2 cursor-pointer group ${hoveredCard === 'tutors' ? 'scale-105 -translate-y-2 shadow-2xl shadow-purple-500/30' : ''} ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'} transition-all duration-1000 delay-900`}
             onMouseEnter={() => setHoveredCard('tutors')}
             onMouseLeave={() => setHoveredCard(null)}
           >
@@ -332,10 +341,10 @@ const Index = () => {
               </div>
             </CardContent>
           </Card>
-          
-          {/* For Parents */}
-          <Card 
-            className={`bg-white/90 backdrop-blur-xl border-2 border-green-200/50 hover:border-green-300/80 transition-all duration-700 hover:shadow-2xl hover:shadow-green-500/30 transform hover:scale-105 hover:-translate-y-2 cursor-pointer group ${hoveredCard === 'parents' ? 'scale-105 -translate-y-2 shadow-2xl shadow-green-500/30' : ''}`}
+
+          {/* For Parents - Enhanced with animations */}
+          <Card
+            className={`bg-white/90 backdrop-blur-xl border-2 border-green-200/50 hover:border-green-300/80 transition-all duration-700 hover:shadow-2xl hover:shadow-green-500/30 transform hover:scale-105 hover:-translate-y-2 cursor-pointer group ${hoveredCard === 'parents' ? 'scale-105 -translate-y-2 shadow-2xl shadow-green-500/30' : ''} ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'} transition-all duration-1000 delay-1100`}
             onMouseEnter={() => setHoveredCard('parents')}
             onMouseLeave={() => setHoveredCard(null)}
           >
@@ -379,15 +388,16 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Features Section */}
+      {/* Enhanced Features Section */}
       <section className="container mx-auto px-4 py-20 relative z-10">
-        <h2 className="text-4xl font-bold text-center text-white mb-16">
+        <h2 className={`text-4xl font-bold text-center text-white mb-16 transition-all duration-1000 delay-300 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
           Why Choose Tutor Connect?
         </h2>
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-          <Card className="bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/20 transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/20">
+          {/* Feature cards with staggered animations */}
+          <Card className={`bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/20 transition-all duration-700 hover:shadow-2xl hover:shadow-purple-500/20 transform hover:scale-110 hover:-translate-y-4 group ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'} transition-all duration-1000 delay-1100`}>
             <CardHeader className="text-center">
-              <Users className="h-12 w-12 text-purple-300 mx-auto mb-4" />
+              <Users className="h-12 w-12 text-purple-300 mx-auto mb-4 group-hover:scale-110 transition-transform duration-300" />
               <CardTitle className="text-white">Expert Tutors</CardTitle>
             </CardHeader>
             <CardContent>
@@ -396,9 +406,10 @@ const Index = () => {
               </CardDescription>
             </CardContent>
           </Card>
-          <Card className="bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/20 transition-all duration-300 hover:shadow-2xl hover:shadow-violet-500/20">
+
+          <Card className={`bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/20 transition-all duration-700 hover:shadow-2xl hover:shadow-violet-500/20 transform hover:scale-110 hover:-translate-y-4 group ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'} transition-all duration-1000 delay-1300`}>
             <CardHeader className="text-center">
-              <Calendar className="h-12 w-12 text-violet-300 mx-auto mb-4" />
+              <Calendar className="h-12 w-12 text-violet-300 mx-auto mb-4 group-hover:scale-110 transition-transform duration-300" />
               <CardTitle className="text-white">Flexible Scheduling</CardTitle>
             </CardHeader>
             <CardContent>
@@ -407,9 +418,10 @@ const Index = () => {
               </CardDescription>
             </CardContent>
           </Card>
-          <Card className="bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/20 transition-all duration-300 hover:shadow-2xl hover:shadow-green-500/20">
+
+          <Card className={`bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/20 transition-all duration-700 hover:shadow-2xl hover:shadow-green-500/20 transform hover:scale-110 hover:-translate-y-4 group ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'} transition-all duration-1000 delay-1500`}>
             <CardHeader className="text-center">
-              <BookOpen className="h-12 w-12 text-green-300 mx-auto mb-4" />
+              <BookOpen className="h-12 w-12 text-green-300 mx-auto mb-4 group-hover:scale-110 transition-transform duration-300" />
               <CardTitle className="text-white">Diverse Courses</CardTitle>
             </CardHeader>
             <CardContent>
@@ -419,9 +431,9 @@ const Index = () => {
             </CardContent>
           </Card>
 
-          <Card className="bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/20 transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/20">
+          <Card className={`bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/20 transition-all duration-700 hover:shadow-2xl hover:shadow-purple-500/20 transform hover:scale-110 hover:-translate-y-4 group ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'} transition-all duration-1000 delay-1700`}>
             <CardHeader className="text-center">
-              <Award className="h-12 w-12 text-purple-300 mx-auto mb-4" />
+              <Award className="h-12 w-12 text-purple-300 mx-auto mb-4 group-hover:scale-110 transition-transform duration-300" />
               <CardTitle className="text-white">Track Progress</CardTitle>
             </CardHeader>
             <CardContent>
@@ -433,33 +445,33 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Expert Tutors Section - New Section */}
+      {/* Expert Tutors Section - New Section with animations */}
       <section className="container mx-auto px-4 py-20 relative z-10">
-        
+
         {/* Tutors Display Section */}
-        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20">
+        <div className={`bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20 transition-all duration-1000 delay-1900 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'}`}>
           <div className="text-center py-16">
             <Users className="h-24 w-24 text-purple-300 mx-auto mb-6 opacity-60" />
             <h3 className="text-2xl font-semibold text-white mb-4">
               Discover Amazing Tutors
             </h3>
             <p className="text-lg text-purple-200 mb-8 max-w-2xl mx-auto">
-              Browse through our extensive network of qualified tutors across various subjects. 
+              Browse through our extensive network of qualified tutors across various subjects.
               Find the perfect match for your learning needs and start your educational journey today.
             </p>
             <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-8">
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20">
-                <BookOpen className="h-8 w-8 text-blue-400 mx-auto mb-3" />
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20 hover:bg-white/20 transition-all duration-300 hover:scale-105 group">
+                <BookOpen className="h-8 w-8 text-blue-400 mx-auto mb-3 group-hover:scale-110 transition-transform duration-300" />
                 <h4 className="text-white font-semibold mb-2">All Subjects</h4>
                 <p className="text-purple-200 text-sm">Mathematics, Science, Languages, Arts & more</p>
               </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20">
-                <Star className="h-8 w-8 text-yellow-400 mx-auto mb-3" />
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20 hover:bg-white/20 transition-all duration-300 hover:scale-105 group">
+                <Star className="h-8 w-8 text-yellow-400 mx-auto mb-3 group-hover:scale-110 transition-transform duration-300" />
                 <h4 className="text-white font-semibold mb-2">Verified Experts</h4>
                 <p className="text-purple-200 text-sm">Background-checked & certified professionals</p>
               </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20">
-                <MapPin className="h-8 w-8 text-green-400 mx-auto mb-3" />
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20 hover:bg-white/20 transition-all duration-300 hover:scale-105 group">
+                <MapPin className="h-8 w-8 text-green-400 mx-auto mb-3 group-hover:scale-110 transition-transform duration-300" />
                 <h4 className="text-white font-semibold mb-2">Global Reach</h4>
                 <p className="text-purple-200 text-sm">Connect with tutors from around the world</p>
               </div>
@@ -474,13 +486,13 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="py-20 text-blue-900 text-center">
+      {/* Enhanced Stats Section */}
+      <section className={`py-20 text-blue-900 text-center transition-all duration-1000 delay-2100 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
         <div className="container mx-auto px-6 max-w-3xl text-center">
           <h2 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
-            <span className="inline-block text-white font-bold drop-shadow-sm">Efficiency.</span>{' '}
-            <span className="inline-block text-white font-bold drop-shadow-sm">Security.</span>{' '}
-            <span className="inline-block text-white font-bold drop-shadow-sm">Success.</span>
+            <span className="inline-block text-white font-bold drop-shadow-sm hover:scale-110 transition-transform duration-300">Efficiency.</span>{' '}
+            <span className="inline-block text-white font-bold drop-shadow-sm hover:scale-110 transition-transform duration-300">Security.</span>{' '}
+            <span className="inline-block text-white font-bold drop-shadow-sm hover:scale-110 transition-transform duration-300">Success.</span>
           </h2>
           <div className="w-20 h-1 mx-auto bg-white rounded-full mb-6"></div>
 
@@ -490,14 +502,14 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-black/30 backdrop-blur-md text-white py-16 border-t border-white/10 relative z-10">
+      {/* Enhanced Footer */}
+      <footer className={`bg-black/30 backdrop-blur-md text-white py-16 border-t border-white/10 relative z-10 transition-all duration-1000 delay-2300 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-4 gap-8">
             <div>
-              <div className="flex items-center space-x-2 mb-4">
-                <GraduationCap className="h-6 w-6 text-purple-300" />
-                <span className="text-xl font-bold">Tutor Connect</span>
+              <div className="flex items-center space-x-2 mb-4 hover:scale-105 transition-transform duration-300 group">
+                <GraduationCap className="h-6 w-6 text-purple-300 group-hover:rotate-12 transition-transform duration-300" />
+                <span className="text-xl font-bold group-hover:text-purple-200 transition-colors duration-300">Tutor Connect</span>
               </div>
               <p className="text-purple-200">
                 Connecting students with expert tutors for personalized learning experiences.
@@ -506,24 +518,24 @@ const Index = () => {
             <div>
               <h3 className="font-semibold mb-4 text-purple-300">For Students</h3>
               <ul className="space-y-2 text-purple-100">
-                <li><Link to="/courses" className="hover:text-white transition-colors">Browse Courses</Link></li>
-                <li><Link to="/dashboard" className="hover:text-white transition-colors">Dashboard</Link></li>
-                <li><Link to="/signup" className="hover:text-white transition-colors">Sign Up</Link></li>
+                <li><Link to="/courses" className="hover:text-white transition-colors hover:translate-x-2 inline-block">Browse Courses</Link></li>
+                <li><Link to="/dashboard" className="hover:text-white transition-colors hover:translate-x-2 inline-block">Dashboard</Link></li>
+                <li><Link to="/signup" className="hover:text-white transition-colors hover:translate-x-2 inline-block">Sign Up</Link></li>
               </ul>
             </div>
             <div>
               <h3 className="font-semibold mb-4 text-purple-300">For Tutors</h3>
               <ul className="space-y-2 text-purple-100">
-                <li><Link to="/signup" className="hover:text-white transition-colors">Become a Tutor</Link></li>
-                <li><Link to="/tutor-profile" className="hover:text-white transition-colors">Tutor Dashboard</Link></li>
-                <li><Link to="/Tutors" className="hover:text-white transition-colors">View All Tutors</Link></li>
+                <li><Link to="/signup" className="hover:text-white transition-colors hover:translate-x-2 inline-block">Become a Tutor</Link></li>
+                <li><Link to="/tutor-profile" className="hover:text-white transition-colors hover:translate-x-2 inline-block">Tutor Dashboard</Link></li>
+                <li><Link to="/Tutors" className="hover:text-white transition-colors hover:translate-x-2 inline-block">View All Tutors</Link></li>
               </ul>
             </div>
             <div>
               <h3 className="font-semibold mb-4 text-purple-300">Support</h3>
               <ul className="space-y-2 text-purple-100">
-                <li><Link to="/login" className="hover:text-white transition-colors">Login</Link></li>
-                <li><Link to="/signup" className="hover:text-white transition-colors">Contact Us</Link></li>
+                <li><Link to="/login" className="hover:text-white transition-colors hover:translate-x-2 inline-block">Login</Link></li>
+                <li><Link to="/signup" className="hover:text-white transition-colors hover:translate-x-2 inline-block">Contact Us</Link></li>
               </ul>
             </div>
           </div>
