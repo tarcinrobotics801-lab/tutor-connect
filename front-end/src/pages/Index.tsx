@@ -88,15 +88,7 @@ const Index = () => {
             <Link to="/resources" className="text-white hover:text-purple-300 transition-colors font-bold">Free Tutor Notes</Link>
           </nav>
           
-          <div className="flex items-center space-x-4">
-            <div className="relative hidden md:block">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60 h-4 w-4" />
-              <Input
-                placeholder="Search..."
-                className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/60 backdrop-blur-sm"
-              />
-            </div>
-            
+          <div className="flex items-center space-x-4"> 
             {/* Dynamic Authentication Section */}
             {currentUser ? (
               <DropdownMenu>

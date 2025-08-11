@@ -8,6 +8,7 @@ import Navigation from "@/components/Navigation";
 import { useApp } from "@/contexts/AppContext";
 import { BookOpen, Upload, Search, User, Calendar, ExternalLink, Filter } from "lucide-react";
 import ResourceUpload from "@/components/ResourceUpload";
+import CustomLoader from "@/components/CustomLoader";
 
 const Resources = () => {
   const { currentUser } = useApp(); // Get logged-in user
@@ -16,6 +17,7 @@ const Resources = () => {
   const [selectedSubject, setSelectedSubject] = useState("All");
   const [selectedClass, setSelectedClass] = useState("All");
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -26,6 +28,9 @@ const Resources = () => {
         setResources(data);
       } catch (err) {
         console.error("Failed to fetch resources:", err);
+      }
+      finally {
+        setLoading(false);
       }
     };
 
@@ -155,69 +160,78 @@ const Resources = () => {
 
 
         {/* Resources Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredResources.length > 0 ? (
-            filteredResources.map((resource) => (
-              <Card key={resource._id || resource.id} className="hover:shadow-lg transition-shadow duration-300">
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <CardTitle className="text-lg mb-2">{resource.title}</CardTitle>
-                      <div className="flex gap-2 mb-3">
-                        <Badge variant="secondary">{resource.subject}</Badge>
-                        <Badge variant="outline">{resource.className}</Badge>
-                      </div>
-                    </div>
-                  </div>
-                  <CardDescription className="text-sm">
-                    {resource.description}
-                  </CardDescription>
-                </CardHeader>
-
-                <CardContent>
-                  <div className="space-y-3">
-                    <div className="flex items-center text-sm text-gray-600">
-                      <User className="h-4 w-4 mr-2" />
-                      <span>By {resource.tutorName}</span>
-                    </div>
-
-                    <div className="flex items-center text-sm text-gray-600">
-                      <Calendar className="h-4 w-4 mr-2" />
-                      <span>Uploaded {new Date(resource.uploadedAt).toLocaleDateString()}</span>
-                    </div>
-
-                    {resource.contents && (
-                      <div className="text-sm text-gray-700 mt-2">
-                        <p className="font-semibold">Topics Covered:</p>
-                        <p>{resource.contents}</p>
-                      </div>
-                    )}
-
-                    <div className="pt-2">
-                      <Button
-                        onClick={() => window.open(resource.driveUrl, "_blank")}
-                        className="w-full bg-purple-600 hover:bg-purple-700"
-                        size="sm"
-                      >
-                        <ExternalLink className="h-4 w-4 mr-2" />
-                        Access Notes
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))
-          ) : (
-            <div className="col-span-full text-center py-12">
-              <BookOpen className="h-16 w-16 mx-auto text-gray-300 mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No resources found</h3>
-              <p className="text-gray-600">
-                {searchTerm || selectedSubject !== "All" || selectedClass !== "All"
-                  ? "Try adjusting your search criteria"
-                  : "No resources have been uploaded yet"}
-              </p>
+{loading ? (
+  <CustomLoader />
+) : filteredResources.length > 0 ? (
+  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {filteredResources.map((resource) => (
+      <Card
+        key={resource._id || resource.id}
+        className="hover:shadow-lg transition-shadow duration-300"
+      >
+        <CardHeader>
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <CardTitle className="text-lg mb-2">{resource.title}</CardTitle>
+              <div className="flex gap-2 mb-3">
+                <Badge variant="secondary">{resource.subject}</Badge>
+                <Badge variant="outline">{resource.className}</Badge>
+              </div>
             </div>
-          )}
+          </div>
+          <CardDescription className="text-sm">
+            {resource.description}
+          </CardDescription>
+        </CardHeader>
+
+        <CardContent>
+          <div className="space-y-3">
+            <div className="flex items-center text-sm text-gray-600">
+              <User className="h-4 w-4 mr-2" />
+              <span>By {resource.tutorName}</span>
+            </div>
+
+            <div className="flex items-center text-sm text-gray-600">
+              <Calendar className="h-4 w-4 mr-2" />
+              <span>
+                Uploaded {new Date(resource.uploadedAt).toLocaleDateString()}
+              </span>
+            </div>
+
+            {resource.contents && (
+              <div className="text-sm text-gray-700 mt-2">
+                <p className="font-semibold">Topics Covered:</p>
+                <p>{resource.contents}</p>
+              </div>
+            )}
+
+            <div className="pt-2">
+              <Button
+                onClick={() => window.open(resource.driveUrl, "_blank")}
+                className="w-full bg-purple-600 hover:bg-purple-700"
+                size="sm"
+              >
+                <ExternalLink className="h-4 w-4 mr-2" />
+                Access Notes
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    ))}
+  </div>
+) : (
+  <div className="col-span-full text-center py-12">
+    <BookOpen className="h-16 w-16 mx-auto text-gray-300 mb-4" />
+    <h3 className="text-lg font-medium text-gray-900 mb-2">No resources found</h3>
+    <p className="text-gray-600">
+      {searchTerm || selectedSubject !== "All" || selectedClass !== "All"
+        ? "Try adjusting your search criteria"
+        : "No resources have been uploaded yet"}
+    </p>
+  </div>
+)}
+
         </div>
 
         {/* Upload Modal */}
@@ -239,7 +253,6 @@ const Resources = () => {
           </div>
         )}
       </div>
-    </div>
   );
 };
 
