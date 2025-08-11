@@ -254,7 +254,7 @@ const Signup = () => {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link to="/" className="inline-flex items-center space-x-2 text-2xl font-bold text-gray-900">
-            <BookOpen className="h-8 w-8 text-purple-600" />
+            <BookOpen className="h-8 w-8 text-blue-600" />
             <span>Tutor Connect</span>
           </Link>
           <p className="text-gray-600 mt-2">Join our learning community today!</p>
@@ -350,7 +350,7 @@ const Signup = () => {
                     </div>
                     <Button 
                       type="submit" 
-                      className={`w-full ${tabRole === "tutor" ? "bg-teal-600 hover:bg-teal-700" : tabRole === "parent" ? "bg-purple-600 hover:bg-purple-700" : "bg-purple-600 hover:bg-purple-700"}`} 
+                      className={`w-full ${tabRole === "tutor" ? "bg-teal-600 hover:bg-teal-700" : tabRole === "parent" ? "bg-purple-600 hover:bg-purple-700" : "bg-blue-600 hover:bg-blue-700"}`} 
                       disabled={isLoading || (tabRole === "student" && !canStudentRegister)}
                     >
                       {isLoading ? "Creating Account..." : `Create ${tabRole.charAt(0).toUpperCase() + tabRole.slice(1)} Account`}
@@ -373,7 +373,7 @@ const Signup = () => {
             <div className="mt-6 text-center">
               <p className="text-sm text-gray-600">
                 Already have an account?{" "}
-                <Link to="/login" className="text-purple-600 hover:underline font-medium">
+                <Link to="/login" className="text-blue-600 hover:underline font-medium">
                   Sign in here
                 </Link>
               </p>

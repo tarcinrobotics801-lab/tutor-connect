@@ -98,12 +98,12 @@ const Resources = () => {
           <div>
             <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
               <BookOpen className="h-8 w-8 text-purple-600" />
-              Learning Resources
+              Free Notes Library For Student 
             </h1>
             <p className="text-gray-600 mt-2">
               {isTutor
                 ? "Share your teaching materials with students"
-                : "Access educational resources shared by expert tutors"}
+                : "Access educational Notes and materials shared by expert tutors"}
             </p>
           </div>
 
@@ -153,46 +153,6 @@ const Resources = () => {
           </div>
         </div>
 
-        {/* Statistics */}
-        <div className="grid md:grid-cols-3 gap-6 mb-8">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Total Resources</p>
-                  <p className="text-2xl font-bold text-purple-600">{resources.length}</p>
-                </div>
-                <BookOpen className="h-8 w-8 text-purple-300" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Subjects Covered</p>
-                  <p className="text-2xl font-bold text-green-600">{subjects.length - 1}</p>
-                </div>
-                <Filter className="h-8 w-8 text-green-300" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Contributing Tutors</p>
-                  <p className="text-2xl font-bold text-blue-600">
-                    {new Set(resources.map(r => r.tutorId)).size}
-                  </p>
-                </div>
-                <User className="h-8 w-8 text-blue-300" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
 
         {/* Resources Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -240,7 +200,7 @@ const Resources = () => {
                         size="sm"
                       >
                         <ExternalLink className="h-4 w-4 mr-2" />
-                        Access Resource
+                        Access Notes
                       </Button>
                     </div>
                   </div>

@@ -123,7 +123,7 @@ export interface BookingRequest {
 
 
 interface Notification {
-  id?: string;
+  _id?: string;
   userId: string;
   type: 'booking_request' | 'booking_accepted' | 'booking_rejected';
   title: string;
@@ -253,6 +253,36 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+   useEffect(() => {
+    const storedUser = localStorage.getItem("currentUser");
+    const storedRequests = localStorage.getItem("tutorBookingRequests");
+  
+    if (storedUser) {
+      const parsedUser = JSON.parse(storedUser);
+      setCurrentUser(parsedUser);
+
+  
+      if (parsedUser.role === "tutor" && storedRequests) {
+        setBookingRequests(JSON.parse(storedRequests));
+      }
+  
+      // ✅ Fetch notifications on page reload
+      if (parsedUser.role === "student" || parsedUser.role === "parent") {
+        fetch(`/api/notifications/${parsedUser._id}`)
+          .then(res => res.json())
+          .then(data => {
+            if (data.notifications) {
+              setNotifications(data.notifications);
+            }
+          })
+          .catch(err => {
+            console.error("Failed to fetch notifications on reload", err);
+          });
+      }
+    }
+    
+  }, []);
+
   /* ------------------ user CRUD ------------------ */
   const addUser = (user: User): void => setUsers((p) => [...p, user]);
 
@@ -347,7 +377,19 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   };
 
   /* ------------------ course CRUD ------------------ */
-  const addCourse = (course: Course): void => setCourses((p) => [...p, course]);
+  const addCourse = (course: Course): void => {
+    setCourses((prev) => [...prev, course]);
+  
+    // ✅ If current user is the tutor who added this course, update their courseNames
+    if (currentUser && currentUser.role === "tutor" && currentUser._id === course.tutorId) {
+      const updatedUser = {
+        ...currentUser,
+        courseNames: Array.from(new Set([...(currentUser.courseNames ?? []), course.courseName])),
+      };
+      setCurrentUser(updatedUser);
+      localStorage.setItem("currentUser", JSON.stringify(updatedUser));
+    }
+  };
 
   const updateCourse = (courseId: string, updates: Partial<Course>): void =>
     setCourses((p) => p.map((c) => (c._id === courseId ? { ...c, ...updates } : c)));
@@ -714,10 +756,11 @@ const rejectBookingRequest = async (requestId: string) => {
     await fetch(`/api/notifications/${notificationId}/read`, {
       method: "PATCH",
     });
+    console.log(`✅ Notification ${notificationId} marked as read`);
 
     setNotifications((prev) =>
       prev.map((n) =>
-        n.id === notificationId ? { ...n, read: true } : n
+        n._id === notificationId ? { ...n, read: true } : n
       )
     );
   } catch (err) {
@@ -817,6 +860,9 @@ const rejectBookingRequest = async (requestId: string) => {
   const logoutUser = (): void => {
     setCurrentUser(null);
     setError(null);
+    localStorage.removeItem("user");
+    localStorage.removeItem("currentUser");
+
    
   };
 
@@ -843,36 +889,8 @@ const rejectBookingRequest = async (requestId: string) => {
 
   const clearError = (): void => setError(null);
   
-  useEffect(() => {
-    const storedUser = localStorage.getItem("currentUser");
-    const storedRequests = localStorage.getItem("tutorBookingRequests");
+ 
   
-    if (storedUser) {
-      const parsedUser = JSON.parse(storedUser);
-      setCurrentUser(parsedUser);
-  
-      if (parsedUser.role === "tutor" && storedRequests) {
-        setBookingRequests(JSON.parse(storedRequests));
-      }
-  
-      // ✅ Fetch notifications on page reload
-      if (parsedUser.role === "student" || parsedUser.role === "parent") {
-        fetch(`/api/notifications/${parsedUser._id}`)
-          .then(res => res.json())
-          .then(data => {
-            if (data.notifications) {
-              setNotifications(data.notifications);
-            }
-          })
-          .catch(err => {
-            console.error("Failed to fetch notifications on reload", err);
-          });
-      }
-    }
-  }, []);
-  
-
-
   /* ---------------- provider ----------------------- */
   return (
     <AppContext.Provider

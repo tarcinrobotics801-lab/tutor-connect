@@ -2,7 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { User, Mail, Phone, LinkIcon, Star, Calendar, ArrowLeft } from "lucide-react";
+import { User, LinkIcon, Star, Calendar, ArrowLeft } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import { useApp } from "@/contexts/AppContext";
 import { useToast } from "@/hooks/use-toast";
@@ -15,14 +15,25 @@ const TutorProfileView = () => {
   const { currentUser } = useApp();
   const { toast } = useToast();
   const [tutor, setTutor] = useState<any>(null);
-  const [loading, setLoading] = useState(true); // ⬅️ ADD THIS
+  const [loading, setLoading] = useState(true);
 
+  // Auto-redirect to login if not logged in
+  useEffect(() => {
+    if (!currentUser) {
+      toast({
+        title: "Login Required",
+        description: "Please log in to view tutor profiles.",
+        variant: "destructive",
+      });
+      navigate("/login");
+    }
+  }, [currentUser, navigate, toast]);
 
   useEffect(() => {
     if (!tutorId) return;
 
     const fetchTutor = async () => {
-      setLoading(true); // ✅ start loading
+      setLoading(true);
       try {
         const res = await fetch(`/api/auth/tutor/${tutorId}`);
         const data = await res.json();
@@ -30,7 +41,7 @@ const TutorProfileView = () => {
       } catch (err) {
         console.error("Fetch error:", err);
       } finally {
-        setLoading(false); // ✅ only run this after fetch completes
+        setLoading(false);
       }
     };
 
@@ -38,7 +49,7 @@ const TutorProfileView = () => {
   }, [tutorId]);
 
   if (loading) {
-    return <CustomLoader />; // ✅ Use CustomLoader component
+    return <CustomLoader />;
   }
 
   if (!tutor) {
@@ -49,7 +60,7 @@ const TutorProfileView = () => {
           <div className="text-center">
             <h3 className="text-2xl font-semibold text-gray-900 mb-3">Tutor Not Found</h3>
             <p className="text-gray-600">The tutor profile you're looking for doesn't exist.</p>
-            <Button onClick={() => navigate('/tutors')} className="mt-4">
+            <Button onClick={() => navigate("/ExpertTutors")} className="mt-4">
               Back to Tutors
             </Button>
           </div>
@@ -65,7 +76,7 @@ const TutorProfileView = () => {
       <Navigation />
       <div className="container mx-auto px-4 py-8">
         <Button
-          onClick={() => navigate('/tutors')}
+          onClick={() => navigate("/experttutors")}
           variant="ghost"
           className="mb-6 text-purple-600 hover:text-purple-700"
         >
@@ -106,7 +117,6 @@ const TutorProfileView = () => {
                   <span>{tutor.yearsOfExperience} experience</span>
                 </div>
 
-
                 {tutor.linkedinLink && (
                   <div className="flex items-center space-x-3">
                     <LinkIcon className="h-4 w-4 text-gray-400" />
@@ -124,7 +134,6 @@ const TutorProfileView = () => {
                     </a>
                   </div>
                 )}
-
 
                 <div>
                   <p className="text-sm font-medium text-gray-900 mb-2">Subjects:</p>
@@ -164,15 +173,18 @@ const TutorProfileView = () => {
                   <span>Availability</span>
                 </CardTitle>
               </CardHeader>
-
               <CardContent>
                 <div className="grid md:grid-cols-2 gap-3">
                   {days.map((day) => (
-                    <div key={day} className="flex justify-between items-center p-3 rounded-lg bg-gray-50">
+                    <div
+                      key={day}
+                      className="flex justify-between items-center p-3 rounded-lg bg-gray-50"
+                    >
                       <span className="capitalize font-medium text-gray-900">{day}</span>
                       <span className="text-sm text-gray-600">
                         {tutor.availability?.[day as keyof typeof tutor.availability]?.available
-                          ? tutor.availability?.[day as keyof typeof tutor.availability]?.timeSlots.join(", ") || "Available"
+                          ? tutor.availability?.[day as keyof typeof tutor.availability]?.timeSlots.join(", ") ||
+                            "Available"
                           : "Not Available"}
                       </span>
                     </div>
@@ -180,7 +192,6 @@ const TutorProfileView = () => {
                 </div>
               </CardContent>
             </Card>
-
           </div>
         </div>
       </div>

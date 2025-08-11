@@ -75,11 +75,11 @@ const NotificationsDropdown = () => {
             <div className="divide-y">
               {notifications.map((notification) => (
                 <Card 
-                  key={notification.id}
+                  key={notification._id}
                   className={`border-none rounded-none cursor-pointer hover:bg-gray-50 ${
                     !notification.read ? 'bg-purple-50' : ''
                   }`}
-                  onClick={() => handleNotificationClick(notification.id)}
+                  onClick={() => handleNotificationClick(notification._id)}
                 >
                   <CardContent className="p-4">
                     <div className="flex items-start gap-3">

@@ -8,7 +8,7 @@ import { useEffect } from "react";
 
 
 const TutorDashboard = () => {
-  const { currentUser, setCurrentUser } = useApp();
+  const { currentUser, setCurrentUser ,updateUser } = useApp();
 
   if (!currentUser || currentUser.role !== 'tutor') {
     return (
@@ -39,34 +39,38 @@ const TutorDashboard = () => {
   const tutorCourses = currentUser.courseNames || [];
   const tutorPhoto = currentUser.photo || null;
 
-  const handleDeleteCourse = async (courseName: string) => {
-  try {
-    const confirmed = window.confirm(`Are you sure you want to delete "${courseName}"?`);
-    if (!confirmed) return;
-
-    const cleanName = courseName.trim(); // remove extra whitespace
-    const encodedName = encodeURIComponent(cleanName); // safely encode for URL
-
-    const response = await fetch(`/api/courses/deleteByName/${encodedName}`, {
-      method: "DELETE",
-    });
-
-    if (response.ok) {
-      console.log("✅ Course deleted successfully");
-      // Optional: remove from local state or refetch user data
-    } else {
-      console.error("❌ Failed to delete course");
+const handleDeleteCourse = async (courseName: string) => {
+    try {
+      const confirmed = window.confirm(`Are you sure you want to delete "${courseName}"?`);
+      if (!confirmed) return;
+  
+      const cleanName = courseName.trim();
+      const encodedName = encodeURIComponent(cleanName);
+  
+      const response = await fetch(`/api/courses/deleteByName/${encodedName}`, {
+        method: "DELETE",
+      });
+  
+      if (response.ok && currentUser) {
+        console.log("✅ Course deleted successfully");
+  
+        // Update state locally
+        const updatedCourses = (currentUser.courseNames || []).filter(c => c !== courseName);
+        const updatedUser = { ...currentUser, courseNames: updatedCourses };
+  
+        setCurrentUser(updatedUser);
+        localStorage.setItem("currentUser", JSON.stringify(updatedUser));
+  
+        // Sync with backend so data is updated in DB
+        await updateUser(currentUser._id, { ...currentUser,  courseNames: updatedCourses });
+  
+      } else {
+        console.error("❌ Failed to delete course");
+      }
+    } catch (error) {
+      console.error("❌ Error deleting course", error);
     }
-  } catch (error) {
-    console.error("❌ Error deleting course", error);
-  }
-};
-
-
-
-
-
-
+  };
 
   // Helper function to check if a day is actually available
   const isActuallyAvailable = (dayData: any) => {

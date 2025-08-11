@@ -527,6 +527,7 @@ const TutorProfileForm = () => {
       }
 
       // Add to local state only after backend confirms save
+      addCourse(data.course);
       setAddedCourses(prev => [...prev, data.course]);
 
       // Reset course form

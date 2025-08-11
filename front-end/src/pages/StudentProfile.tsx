@@ -143,11 +143,11 @@ const StudentProfile = () => {
                     <div className="space-y-4">
                       {notifications.map((notification) => (
                         <Card
-                          key={notification.id}
+                          key={notification._id}
                           className={`cursor-pointer hover:bg-gray-50 transition-colors ${
                             !notification.read ? 'border-blue-200 bg-blue-50' : 'border-gray-200'
                           }`}
-                          onClick={() => handleNotificationClick(notification.id)}
+                          onClick={() => handleNotificationClick(notification._id)}
                         >
                           <CardContent className="p-4">
                             <div className="flex items-start gap-3">
