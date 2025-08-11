@@ -136,7 +136,7 @@ const ParentProfileForm = () => {
   };
 
   const handleNotificationClick = (notificationId: string) => {
-    markNotificationAsRead(currentUser._id);
+    markNotificationAsRead(notificationId);
   };
   const handleClearAll = () => {
     if (currentUser) {
@@ -399,11 +399,11 @@ const ParentProfileForm = () => {
                     <div className="space-y-4">
                       {notifications.map((notification) => (
                         <Card 
-                          key={notification.id}
+                          key={notification._id}
                           className={`cursor-pointer hover:bg-gray-50 transition-colors ${
                             !notification.read ? 'border-purple-200 bg-purple-50' : 'border-gray-200'
                           }`}
-                          onClick={() => handleNotificationClick(notification.id)}
+                          onClick={() => handleNotificationClick(notification._id)}
                         >
                           <CardContent className="p-4">
                             <div className="flex items-start gap-3">

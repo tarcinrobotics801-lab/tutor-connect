@@ -123,7 +123,7 @@ export interface BookingRequest {
 
 
 interface Notification {
-  id?: string;
+  _id?: string;
   userId: string;
   type: 'booking_request' | 'booking_accepted' | 'booking_rejected';
   title: string;
@@ -221,7 +221,7 @@ interface AppContextType {
   acceptBookingRequest: (requestId: string, meetingLink: string) => void;
   rejectBookingRequest: (requestId: string) => void;
   getUserNotifications: (userId: string) => Notification[];
-  markNotificationAsRead: (userId: string) => Promise<void>;
+  markNotificationAsRead: (notificationId: string) => Promise<void>;
   clearAllNotifications: (userId: string) => Promise<void>;
   addResource: (resource: Resource) => void;
   removeTutor: (tutorId: string) => Promise<boolean>;
@@ -739,15 +739,16 @@ const rejectBookingRequest = async (requestId: string) => {
     );
   };
 
-  const markNotificationAsRead = async (userId: string): Promise<void> => {
+  const markNotificationAsRead = async (notificationId: string): Promise<void> => {
   try {
-    await fetch(`/api/notifications/clear/${userId}`, {
+    await fetch(`/api/notifications/${notificationId}/read`, {
       method: "PATCH",
     });
+    console.log(`✅ Notification ${notificationId} marked as read`);
 
     setNotifications((prev) =>
       prev.map((n) =>
-        n.id === userId ? { ...n, read: true } : n
+        n._id === notificationId ? { ...n, read: true } : n
       )
     );
   } catch (err) {

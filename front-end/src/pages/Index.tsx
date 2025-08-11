@@ -85,7 +85,7 @@ const Index = () => {
           <nav className="hidden md:flex space-x-8">
             <Link to="/" className="text-white hover:text-purple-300 transition-colors font-bold">Home</Link>
             <Link to="/courses" className="text-white hover:text-purple-300 transition-colors font-bold">Discover Courses & Tutors</Link>
-            <Link to="/resources" className="text-white hover:text-purple-300 transition-colors font-bold">Resources</Link>
+            <Link to="/resources" className="text-white hover:text-purple-300 transition-colors font-bold">Free Tutor Notes</Link>
           </nav>
           
           <div className="flex items-center space-x-4">

@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface INotification extends Document {
+  _id: string;
   userId: string;
   type: 'booking_request' | 'booking_accepted' | 'booking_rejected';
   title: string;
@@ -11,6 +12,7 @@ export interface INotification extends Document {
 }
 
 const NotificationSchema = new Schema<INotification>({
+  _id: { type: String, default: () => new mongoose.Types.ObjectId().toString() },
   userId: { type: String, required: true },
   type: { type: String, required: true, enum: ['booking_request', 'booking_accepted', 'booking_rejected'] },
   title: { type: String, required: true },
