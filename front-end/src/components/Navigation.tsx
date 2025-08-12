@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { BookOpen, User, LogOut } from "lucide-react";
+import { BookOpen, User, LogOut,GraduationCap } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   DropdownMenu,
@@ -36,33 +36,39 @@ const Navigation = () => {
   };
 
   return (
-    <nav className="bg-gradient-to-r from-blue-600 to-purple-600 shadow-lg border-b sticky top-0 z-50">
+    <nav className="bg-gradient-to-r from-violet-600 to-violet-600 shadow-lg border-b sticky top-0 z-50">
       <div className="container mx-auto px-4">
-        <div className="flex flex-wrap justify-between items-center h-16 gap-4">
+        <div className="py-3 grid grid-cols-3 items-center">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
-            <BookOpen className="h-8 w-8 text-white" />
-            <span className="text-xl font-bold text-white">Tutor Connect</span>
+          <div className="bg-white/20 backdrop-blur-sm rounded-lg p-2 group-hover:shadow-2xl group-hover:shadow-purple-500/30 transition-all duration-300">
+              <GraduationCap className="h-8 w-8 text-white group-hover:rotate-12 transition-transform duration-300" />
+            </div>
+          <div>
+              <span className="text-2xl font-bold text-white group-hover:text-purple-200 transition-colors duration-300">TUTOR</span>
+              <span className="text-xl font-light text-purple-300 ml-1 group-hover:text-purple-200 transition-colors duration-300">CONNECT</span>
+              <div className="text-xs text-purple-200 group-hover:text-purple-100 transition-colors duration-300">NETWORK</div>
+            </div>
           </Link>
 
           {/* Main Navigation (always visible) */}
           <div className="flex items-center space-x-8">
-            {(!currentUser || currentUser.role === "student" || currentUser.role === "parent") && (
+            {(!currentUser || currentUser.role === "student" || currentUser.role === "parent" || currentUser.role === "tutor" ) && (
               <>
-                <Link to="/" className="text-white hover:text-white transition-colors font-bold">
+                <Link to="/" className="text-white hover:text-purple-300 transition-colors font-bold">
                   Home
                 </Link>
-                <Link to="/courses" className="text-white hover:text-white transition-colors font-bold">
-                  Courses
+                <Link to="/courses" className="text-white hover:text-purple-300 transition-colors font-bold">
+                  Discover Courses & Tutors
                 </Link>
-                <Link to="/resources" className="text-white hover:text-white transition-colors font-bold">
-                  Resources
+                <Link to="/resources" className="text-white hover:text-purple-300 transition-colors font-bold">
+                  Free Tutor Notes
                 </Link>
               </>
             )}
           </div>
           {/* User Menu or Auth Links */}
-          <div className="flex items-center space-x-4">
+          <div className="flex justify-end items-center space-x-4">
             {currentUser ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>

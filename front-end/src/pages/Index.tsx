@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { BookOpen, Users, Calendar, Award, GraduationCap, Search, User, Settings, LogOut, UserCheck, BookOpenCheck, Target, Zap, TrendingUp, Heart, Clock, Shield, Star, MapPin, DollarSign, ChevronRight, Filter } from "lucide-react";
+import { BookOpen, Users, Calendar, Award, GraduationCap, User, Settings, LogOut, UserCheck, BookOpenCheck, Target, Zap, TrendingUp, Heart, Clock, Shield, Star, MapPin, DollarSign, ChevronRight, Filter } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import {
@@ -11,22 +11,28 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useApp } from "@/contexts/AppContext";
+import { useToast } from "@/hooks/use-toast";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const Index = () => {
+  const { currentUser, setCurrentUser } = useApp();
+  const { toast } = useToast();
+  const navigate = useNavigate();
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
   const [isVisible, setIsVisible] = useState(false);
 
-  // Mock current user - you can replace this with actual context
-  const currentUser = null; // Set to null to show login/signup buttons
-  
   useEffect(() => {
     setIsVisible(true);
   }, []);
 
   const handleLogout = () => {
-    // Mock logout function
-    console.log("Logging out...");
+    setCurrentUser(null);
+    toast({
+      title: "Logged out successfully",
+      description: "You have been logged out of your account.",
+    });
+    navigate("/");
   };
 
   const getInitials = (name: string) => {
@@ -70,7 +76,7 @@ const Index = () => {
 
       {/* Enhanced Header with animation */}
       <header className={`bg-black/20 backdrop-blur-md border-b border-white/10 relative z-10 shadow-xl transition-all duration-1000 ${isVisible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'}`}>
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+        <div className="container mx-auto px-4 py-4 grid grid-cols-3 items-center">
           <Link to="/" className="flex items-center space-x-2 hover:scale-110 transition-all duration-500 group">
             <div className="bg-white/20 backdrop-blur-sm rounded-lg p-2 group-hover:shadow-2xl group-hover:shadow-purple-500/30 transition-all duration-300">
               <GraduationCap className="h-8 w-8 text-white group-hover:rotate-12 transition-transform duration-300" />
@@ -82,7 +88,7 @@ const Index = () => {
             </div>
           </Link>
           
-          <nav className="hidden md:flex space-x-8">
+          <nav className="hidden md:flex justify-center space-x-8">
             <Link to="/" className="text-white hover:text-purple-300 transition-all duration-300 hover:scale-105 relative group font-bold">
               Home
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-purple-400 transition-all duration-300 group-hover:w-full"></span>
@@ -97,7 +103,7 @@ const Index = () => {
             </Link>
           </nav>
           
-          <div className="flex items-center space-x-4">
+          <div className="flex justify-end items-center space-x-4">
             {/* Dynamic Authentication Section */}
             {currentUser ? (
               <DropdownMenu>
@@ -194,8 +200,8 @@ const Index = () => {
               Tutor Connect Network
             </span>
           </h1>
-          <p className={`text-xl md:text-2xl text-purple-100 mb-4 font-medium transition-all duration-1000 delay-500 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
-            "Connecting Minds Worldwide"
+          <p className={`text-xl md:text-2xl text-purple-100 mb-4 font-bold transition-all duration-1000 delay-500 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
+            Connecting Minds Worldwide
           </p>
           <p className={`text-lg text-purple-200 mb-12 max-w-3xl mx-auto leading-relaxed transition-all duration-1000 delay-700 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
             Experience the power of education with us. We offer a seamless blend of 
@@ -344,41 +350,41 @@ const Index = () => {
           
           {/* For Parents - Enhanced with animations */}
           <Card 
-            className={`bg-white/90 backdrop-blur-xl border-2 border-green-200/50 hover:border-green-300/80 transition-all duration-700 hover:shadow-2xl hover:shadow-green-500/30 transform hover:scale-105 hover:-translate-y-2 cursor-pointer group ${hoveredCard === 'parents' ? 'scale-105 -translate-y-2 shadow-2xl shadow-green-500/30' : ''} ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'} transition-all duration-1000 delay-1100`}
+            className={`bg-white/90 backdrop-blur-xl border-2 border-blue-200/50 hover:border-blue-300/80 transition-all duration-700 hover:shadow-2xl hover:shadow-blue-500/30 transform hover:scale-105 hover:-translate-y-2 cursor-pointer group ${hoveredCard === 'parents' ? 'scale-105 -translate-y-2 shadow-2xl shadow-green-500/30' : ''} ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'} transition-all duration-1000 delay-1100`}
             onMouseEnter={() => setHoveredCard('parents')}
             onMouseLeave={() => setHoveredCard(null)}
           >
             <CardHeader className="text-center pb-6">
-              <div className="mx-auto mb-4 p-3 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl w-fit shadow-lg group-hover:shadow-2xl group-hover:shadow-green-500/40 transition-all duration-500 group-hover:rotate-6">
+              <div className="mx-auto mb-4 p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl w-fit shadow-lg group-hover:shadow-2xl group-hover:shadow-blue-500/40 transition-all duration-500 group-hover:rotate-6">
                 <Heart className="h-12 w-12 text-white group-hover:scale-110 transition-transform duration-300" />
               </div>
-              <CardTitle className="text-2xl text-gray-800 mb-3 font-bold group-hover:text-green-700 transition-colors duration-300">For Parents</CardTitle>
+              <CardTitle className="text-2xl text-gray-800 mb-3 font-bold group-hover:text-blue-700 transition-colors duration-300">For Parents</CardTitle>
               <CardDescription className="text-gray-600 text-sm font-medium group-hover:text-gray-700 transition-colors duration-300">
                 Support your child's educational journey with confidence
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-3">
-                <div className="flex items-center space-x-3 text-gray-700 hover:text-green-600 transition-all duration-300 hover:translate-x-2 group/item">
-                  <TrendingUp className="h-5 w-5 text-green-500 group-hover/item:scale-110 transition-transform duration-300" />
+                <div className="flex items-center space-x-3 text-gray-700 hover:text-blue-600 transition-all duration-300 hover:translate-x-2 group/item">
+                  <TrendingUp className="h-5 w-5 text-blue-500 group-hover/item:scale-110 transition-transform duration-300" />
                   <span className="text-sm font-semibold">Track Learning Progress</span>
                 </div>
-                <div className="flex items-center space-x-3 text-gray-700 hover:text-green-600 transition-all duration-300 hover:translate-x-2 group/item">
-                  <Shield className="h-5 w-5 text-green-500 group-hover/item:scale-110 transition-transform duration-300" />
+                <div className="flex items-center space-x-3 text-gray-700 hover:text-blue-600 transition-all duration-300 hover:translate-x-2 group/item">
+                  <Shield className="h-5 w-5 text-blue-500 group-hover/item:scale-110 transition-transform duration-300" />
                   <span className="text-sm font-semibold">Verified Tutor Profiles</span>
                 </div>
-                <div className="flex items-center space-x-3 text-gray-700 hover:text-green-600 transition-all duration-300 hover:translate-x-2 group/item">
-                  <Clock className="h-5 w-5 text-green-500 group-hover/item:scale-110 transition-transform duration-300" />
+                <div className="flex items-center space-x-3 text-gray-700 hover:text-blue-600 transition-all duration-300 hover:translate-x-2 group/item">
+                  <Clock className="h-5 w-5 text-blue-500 group-hover/item:scale-110 transition-transform duration-300" />
                   <span className="text-sm font-semibold">Flexible Scheduling</span>
                 </div>
-                <div className="flex items-center space-x-3 text-gray-700 hover:text-green-600 transition-all duration-300 hover:translate-x-2 group/item">
-                  <Star className="h-5 w-5 text-green-500 group-hover/item:scale-110 transition-transform duration-300" />
+                <div className="flex items-center space-x-3 text-gray-700 hover:text-blue-600 transition-all duration-300 hover:translate-x-2 group/item">
+                  <Star className="h-5 w-5 text-blue-500 group-hover/item:scale-110 transition-transform duration-300" />
                   <span className="text-sm font-semibold">Safety & Security</span>
                 </div>
               </div>
               <div className="pt-4">
                 <Link to="/signup" className="block">
-                  <Button className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white py-2.5 text-base font-semibold rounded-lg shadow-lg hover:shadow-2xl hover:shadow-green-500/30 transition-all duration-500 hover:scale-105">
+                  <Button className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-2.5 text-base font-semibold rounded-lg shadow-lg hover:shadow-2xl hover:shadow-blue-500/30 transition-all duration-500 hover:scale-105">
                     Get Started
                   </Button>
                 </Link>
@@ -419,9 +425,9 @@ const Index = () => {
             </CardContent>
           </Card>
 
-          <Card className={`bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/20 transition-all duration-700 hover:shadow-2xl hover:shadow-green-500/20 transform hover:scale-110 hover:-translate-y-4 group ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'} transition-all duration-1000 delay-1500`}>
+          <Card className={`bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/20 transition-all duration-700 hover:shadow-2xl hover:shadow-violet-500/20 transform hover:scale-110 hover:-translate-y-4 group ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'} transition-all duration-1000 delay-1500`}>
             <CardHeader className="text-center">
-              <BookOpen className="h-12 w-12 text-green-300 mx-auto mb-4 group-hover:scale-110 transition-transform duration-300" />
+              <BookOpen className="h-12 w-12 text-violet-300 mx-auto mb-4 group-hover:scale-110 transition-transform duration-300" />
               <CardTitle className="text-white">Diverse Courses</CardTitle>
             </CardHeader>
             <CardContent>

@@ -1,7 +1,5 @@
 import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { User, Mail, Phone, MapPin, GraduationCap, BookOpen, Calendar, Building2 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { useApp } from "@/contexts/AppContext";
@@ -9,8 +7,6 @@ import { useApp } from "@/contexts/AppContext";
 const StudentDashboard = () => {
   const { currentUser } = useApp();
   console.log("Student enrolledCourses:", currentUser?.enrolledCourses);
-
-  
 
   if (!currentUser || currentUser.role !== 'student') {
     return (
@@ -42,24 +38,7 @@ const StudentDashboard = () => {
   const studentDepartment = currentUser.department || "";
   const studentYear = currentUser.yearOfStudent || 0;
   const enrolledCourses = currentUser.enrolledCourses || [];
-  const profilePhoto = currentUser.photo || null;
-  // Create charts data based on student information
-  const profileCompletionData = [
-    { name: 'Completed', value: 100, color: '#10B981' }
-  ];
-
-  const courseProgressData = [
-    { name: 'Enrolled', courses: enrolledCourses.length },
-    { name: 'Available', courses: Math.max(0, 10 - enrolledCourses.length) }
-  ];
-
-  const yearProgressData = [
-    { year: 'Year 1', completed: studentYear >= 1 ? 100 : 0 },
-    { year: 'Year 2', completed: studentYear >= 2 ? 100 : studentYear === 1 ? 50 : 0 },
-    { year: 'Year 3', completed: studentYear >= 3 ? 100 : studentYear === 2 ? 50 : 0 },
-    { year: 'Year 4', completed: studentYear >= 4 ? 100 : studentYear === 3 ? 25 : 0 }
-  ];
-
+  
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -221,30 +200,6 @@ const StudentDashboard = () => {
           </CardContent>
         </Card>
       </div>
-
-      {/* Profile Photo Display - if exists */}
-      {profilePhoto && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <User className="h-5 w-5 text-indigo-600" />
-              <span>Profile Photo</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex justify-center">
-              <img 
-                src={profilePhoto} 
-                alt="Profile" 
-                className="w-32 h-32 rounded-full object-cover border-4 border-gray-200"
-              />
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Account Details */}
-      
     </div>
   );
 };

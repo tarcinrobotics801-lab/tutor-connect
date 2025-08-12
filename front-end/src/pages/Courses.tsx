@@ -188,9 +188,9 @@ const Courses = () => {
 
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+          <span className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
             Discover Amazing Courses
-          </h1>
+          </span>
           <p className="text-gray-600">
             Learn from expert tutors and advance your knowledge in various subjects.
           </p>

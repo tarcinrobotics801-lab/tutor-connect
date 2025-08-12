@@ -94,16 +94,16 @@ const Resources = () => {
   const isTutor = currentUser?.role === "tutor";
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-indigo-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       <Navigation />
 
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
+            <h1 className="flex items-center gap-2 text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               <BookOpen className="h-8 w-8 text-purple-600" />
-              Free Notes Library For Student 
+              Free Notes Library For Student
             </h1>
             <p className="text-gray-600 mt-2">
               {isTutor
