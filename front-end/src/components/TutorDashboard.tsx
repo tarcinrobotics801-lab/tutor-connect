@@ -37,8 +37,7 @@ const TutorDashboard = () => {
   const tutorAvailability = currentUser.availability || {};
   const tutorLinkedIn = currentUser.linkedinLink || "";
   const tutorCourses = currentUser.courseNames || [];
-  const tutorPhoto = currentUser.photo || null;
-
+  
 const handleDeleteCourse = async (courseName: string) => {
     try {
       const confirmed = window.confirm(`Are you sure you want to delete "${courseName}"?`);
@@ -89,25 +88,7 @@ const handleDeleteCourse = async (courseName: string) => {
   const experienceYears = parseInt(tutorExperience) || 0;
   const experienceLevel = experienceYears >= 5 ? 'Expert' : experienceYears >= 2 ? 'Intermediate' : 'Beginner';
 
-  // Create course levels based on subjects (mock data based on experience)
-  const courseLevelData = tutorSubjects.length > 0 ? [
-    {
-      name: 'Beginner',
-      value: experienceYears >= 1 ? Math.ceil(tutorSubjects.length * 0.4) : tutorSubjects.length,
-      color: '#10B981'
-    },
-    {
-      name: 'Intermediate',
-      value: experienceYears >= 2 ? Math.ceil(tutorSubjects.length * 0.4) : 0,
-      color: '#3B82F6'
-    },
-    {
-      name: 'Advanced',
-      value: experienceYears >= 5 ? Math.ceil(tutorSubjects.length * 0.2) : 0,
-      color: '#F59E0B'
-    }
-  ].filter(item => item.value > 0) : [];
-
+  
   // Calculate availability (count only actually available days)
   const availabilityEntries = Object.keys(tutorAvailability).filter(day =>
     isActuallyAvailable(tutorAvailability[day])
@@ -381,27 +362,6 @@ const handleDeleteCourse = async (courseName: string) => {
               );
             })}
 
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Profile Photo Display - if exists */}
-      {tutorPhoto && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <User className="h-5 w-5 text-indigo-600" />
-              <span>Profile Photo</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex justify-center">
-              <img
-                src={tutorPhoto}
-                alt="Profile"
-                className="w-32 h-32 rounded-full object-cover border-4 border-gray-200"
-              />
             </div>
           </CardContent>
         </Card>
