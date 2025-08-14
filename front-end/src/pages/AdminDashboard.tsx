@@ -32,6 +32,8 @@ import {
   Shield,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { X, Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import { useApp } from "@/contexts/AppContext";
@@ -40,30 +42,36 @@ import { useToast } from "@/hooks/use-toast";
 const AdminDashboard = () => {
   const { currentUser, removeTutor } = useApp();
   const [tutors, setTutors] = useState([]);
+  const [pendingTutors, setPendingTutors] = useState([]);
   const [students, setStudents] = useState([]);
   const [parents, setParents] = useState([]);
   const [courses, setCourses] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
+  const [selectedTutor, setSelectedTutor] = useState<any>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [tutorRes, studentRes, parentRes, courseRes] = await Promise.all([
+        const [tutorRes, pendingTutorRes, studentRes, parentRes, courseRes] = await Promise.all([
           fetch("/api/admin/tutors"),
+          fetch("/api/admin/pending-tutors"),
           fetch("/api/admin/students"),
           fetch("/api/admin/parents"),
           fetch("/api/admin/courses"),
         ]);
 
         const tutorsData = await tutorRes.json();
+        const pendingTutorsData = await pendingTutorRes.json();
         const studentsData = await studentRes.json();
         const parentsData = await parentRes.json();
         const coursesData = await courseRes.json();
 
         setTutors(tutorsData.tutors || []);
+        setPendingTutors(pendingTutorsData.tutors || []);
         setStudents(studentsData.students || []);
         setParents(parentsData.parents || []);
         setCourses(coursesData.courses || []);
@@ -76,6 +84,50 @@ const AdminDashboard = () => {
 
     fetchData();
   }, []);
+  // Approve tutor handler
+  const openReviewModal = (tutor: any) => {
+    setSelectedTutor(tutor);
+    setReviewModalOpen(true);
+  };
+  const closeReviewModal = () => {
+    setReviewModalOpen(false);
+    setSelectedTutor(null);
+  };
+  const handleApproveTutor = async (tutorId: string) => {
+    try {
+      const res = await fetch(`/api/admin/approve-tutor/${tutorId}`, { method: "PATCH" });
+      if (res.ok) {
+        setPendingTutors((prev) => prev.filter((t) => t._id !== tutorId));
+        toast({ title: "Tutor Approved", description: "Tutor has been approved." });
+        // Optionally, refetch tutors to update the main list
+      } else {
+        toast({ title: "Error", description: "Failed to approve tutor.", variant: "destructive" });
+      }
+    } catch {
+      toast({ title: "Error", description: "Failed to approve tutor.", variant: "destructive" });
+    }
+  };
+
+  // Reject tutor handler (no delete, PATCH with optional reason)
+  const handleRejectTutor = async (tutorId: string) => {
+    const rejectionReason = window.prompt("Are you sure you want to reject this tutor? Optionally, enter a rejection reason:");
+    if (rejectionReason === null) return; // Cancelled
+    try {
+      const res = await fetch(`/api/admin/reject-tutor/${tutorId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ rejectionReason }),
+      });
+      if (res.ok) {
+        setPendingTutors((prev) => prev.filter((t) => t._id !== tutorId));
+        toast({ title: "Tutor Rejected", description: "Tutor has been rejected.", variant: "destructive" });
+      } else {
+        toast({ title: "Error", description: "Failed to reject tutor.", variant: "destructive" });
+      }
+    } catch {
+      toast({ title: "Error", description: "Failed to reject tutor.", variant: "destructive" });
+    }
+  };
 
   if (!currentUser || currentUser.role !== "admin") {
     return (
@@ -221,13 +273,166 @@ const AdminDashboard = () => {
           </div>
         </div>
 
+
         <Tabs defaultValue="tutors" className="space-y-6">
-          <TabsList className="grid grid-cols-4 w-full max-w-md">
+          <TabsList className="grid grid-cols-5 w-full max-w-xl">
             <TabsTrigger value="tutors">Tutors</TabsTrigger>
+            <TabsTrigger value="tutor-requests">Tutor Requests</TabsTrigger>
             <TabsTrigger value="courses">Courses</TabsTrigger>
             <TabsTrigger value="students">Students</TabsTrigger>
             <TabsTrigger value="parents">Parents</TabsTrigger>
           </TabsList>
+          <TabsContent value="tutor-requests" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Pending Tutor Requests</CardTitle>
+                <CardDescription>Approve or reject tutors before they can add courses</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Qualification</TableHead>
+                      <TableHead>Experience</TableHead>
+                      <TableHead>Subjects</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Action</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {pendingTutors.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={7} className="text-center text-gray-400">No pending tutor requests.</TableCell>
+                      </TableRow>
+                    ) : (
+                      pendingTutors.map((tutor) => (
+                        <TableRow key={tutor._id}>
+                          <TableCell className="font-medium">{tutor.name}</TableCell>
+                          <TableCell>{tutor.email}</TableCell>
+                          <TableCell>{tutor.educationalQualification || "-"}</TableCell>
+                          <TableCell>{tutor.yearsOfExperience || "-"}</TableCell>
+                          <TableCell>
+                            <div className="flex flex-wrap gap-1">
+                              {(tutor.subjects || []).map((subject) => (
+                                <Badge key={subject} variant="secondary" className="text-xs">
+                                  {subject}
+                                </Badge>
+                              ))}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={tutor.approvalStatus === "pending" ? "secondary" : tutor.approvalStatus === "approved" ? "default" : "destructive"}>
+                              {tutor.approvalStatus ? tutor.approvalStatus.charAt(0).toUpperCase() + tutor.approvalStatus.slice(1) : "Pending"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="flex gap-2">
+                            <Button size="sm" variant="outline" onClick={() => openReviewModal(tutor)}>
+                              <Eye className="h-4 w-4 mr-1" /> Review
+                            </Button>
+                            <Button size="sm" variant="default" onClick={() => handleApproveTutor(tutor._id)}>
+                              Approve
+                            </Button>
+                            <Button size="sm" variant="destructive" onClick={() => handleRejectTutor(tutor._id)}>
+                              Reject
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+                {/* Review Modal */}
+                <Dialog open={reviewModalOpen} onOpenChange={closeReviewModal}>
+                  <DialogContent className="max-w-3xl">
+                    <DialogHeader>
+                      <DialogTitle>Tutor Profile Review</DialogTitle>
+                      <Button variant="ghost" className="absolute top-2 right-2" onClick={closeReviewModal}><X /></Button>
+                    </DialogHeader>
+                    {selectedTutor && (
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {/* Left: Profile Card */}
+                        <div className="col-span-1 flex flex-col items-center border rounded-lg p-4 bg-gray-50">
+                          <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center mb-2">
+                            {/* Profile photo if available */}
+                            <span className="text-4xl text-gray-400">{selectedTutor.name?.charAt(0).toUpperCase()}</span>
+                          </div>
+                          <div className="font-bold text-lg">{selectedTutor.name}</div>
+                          <div className="text-sm text-gray-500 mb-1">{selectedTutor.educationalQualification}</div>
+                          <Badge variant="secondary" className="mb-2">{selectedTutor.approvalStatus ? selectedTutor.approvalStatus.charAt(0).toUpperCase() + selectedTutor.approvalStatus.slice(1) : "Pending"}</Badge>
+                          <div className="text-xs text-gray-600">{selectedTutor.email}</div>
+                          <div className="text-xs text-gray-600">{selectedTutor.phoneNumber}</div>
+                          <div className="text-xs text-gray-600">{selectedTutor.yearsOfExperience} years of exp.</div>
+                          {selectedTutor.linkedinLink && <div className="text-xs text-blue-600"><a href={selectedTutor.linkedinLink} target="_blank" rel="noopener noreferrer">Meeting Link Available</a></div>}
+                        </div>
+                        {/* Middle: Details */}
+                        <div className="col-span-2 grid gap-4">
+                          <div className="border rounded-lg p-3">
+                            <div className="font-semibold mb-1">Biography</div>
+                            <div className="text-gray-700 text-sm">{selectedTutor.bio || "-"}</div>
+                          </div>
+                          <div className="border rounded-lg p-3">
+                            <div className="font-semibold mb-1">Subjects</div>
+                            <div className="flex flex-wrap gap-2">
+                              {(selectedTutor.subjects || []).map((subject: string) => (
+                                <Badge key={subject} variant="secondary">{subject}</Badge>
+                              ))}
+                            </div>
+                          </div>
+                          <div className="border rounded-lg p-3">
+                            <div className="font-semibold mb-1">Availability</div>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                              {selectedTutor.availability && Object.entries(selectedTutor.availability).map(([day, info]: any) => (
+                                <div key={day}>
+                                  <span className="font-semibold capitalize">{day}:</span> {info.available ? info.timeSlots?.join(", ") : "unavailable"}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                          {selectedTutor.linkedinLink && (
+                            <div className="border rounded-lg p-3">
+                              <div className="font-semibold mb-1">Meeting Information</div>
+                              <div className="text-blue-600 text-xs"><a href={selectedTutor.linkedinLink} target="_blank" rel="noopener noreferrer">{selectedTutor.linkedinLink}</a></div>
+                            </div>
+                          )}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="border rounded-lg p-3">
+                              <div className="font-semibold mb-1">Degree Certificates ({selectedTutor.certificates?.length || 0})</div>
+                              <ul className="text-xs text-gray-700">
+                                {(selectedTutor.certificates || []).map((cert: any, idx: number) => (
+                                  <li key={idx} className="flex items-center gap-2 mb-1">
+                                    <span>{cert.name}</span>
+                                    <a href={cert.url} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">View</a>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                            <div className="border rounded-lg p-3">
+                              <div className="font-semibold mb-1">Achievement Certificates ({selectedTutor.achievements?.length || 0})</div>
+                              <ul className="text-xs text-gray-700">
+                                {(selectedTutor.achievements || []).map((ach: any, idx: number) => (
+                                  <li key={idx} className="flex items-center gap-2 mb-1">
+                                    <span>{ach.name}</span>
+                                    <a href={ach.url} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">View</a>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    <DialogFooter className="flex justify-end gap-2 mt-4">
+                      <Button variant="secondary" onClick={closeReviewModal}>Cancel</Button>
+                      {selectedTutor && <Button variant="destructive" onClick={() => { handleRejectTutor(selectedTutor._id); closeReviewModal(); }}>Reject</Button>}
+                      {selectedTutor && <Button variant="default" onClick={() => { handleApproveTutor(selectedTutor._id); closeReviewModal(); }}>Approve</Button>}
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
           <TabsContent value="tutors" className="space-y-4">
             <Card>

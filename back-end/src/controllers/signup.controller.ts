@@ -70,16 +70,18 @@ export const tutorSignup = async (
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        const tutor = new Tutor({
-            name,
-            email,
-            password: hashedPassword,
-            phoneNumber,
-            role: "tutor",
-            profileCompleted: false,
-        });
 
-        await tutor.save();
+    const tutor = new Tutor({
+        name,
+        email,
+        password: hashedPassword,
+        phoneNumber,
+        role: "tutor",
+        profileCompleted: false,
+        isApproved: false, // Not approved by default
+    });
+
+    await tutor.save();
 
         // Normalize response for frontend
         const tutorResponse = normalizeDocument(tutor);

@@ -3,7 +3,7 @@ import { Request, Response } from "express";
 
 export const getCompletedTutors = async (req: Request, res: Response) => {
   try {
-    const tutors = await Tutor.find({ role: "tutor", profileCompleted: true });
+    const tutors = await Tutor.find({ role: "tutor", profileCompleted: true, isApproved: true });
     res.status(200).json({ tutors });
   } catch (error) {
     console.error("Error fetching tutors:", error);

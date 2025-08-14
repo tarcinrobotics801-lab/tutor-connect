@@ -4,6 +4,70 @@ import { Student } from "../models/Student.model";
 import { Parent } from "../models/Parent.model";
 import { Course } from "../models/Course.model";
 
+// List all pending tutor approval requests
+export const getPendingTutors = async (_: Request, res: Response) => {
+  try {
+    const tutors = await Tutor.find({ role: 'tutor', isApproved: false,approvalStatus:'pending', profileCompleted: true }).lean();
+    res.status(200).json({ tutors });
+  } catch (error) {
+    console.error('Error fetching pending tutors:', error);
+    res.status(500).json({ message: 'Failed to fetch pending tutors' });
+  }
+};
+
+// Approve a tutor
+export const approveTutor = async (req: Request, res: Response) => {
+  const { tutorId } = req.params;
+  try {
+    const tutor = await Tutor.findByIdAndUpdate(tutorId, { isApproved: true }, { new: true });
+    if (!tutor) {
+      return res.status(404).json({ message: 'Tutor not found' });
+    }
+    // Use the same normalization as signup.controller.ts
+    const normalizeDocument = (doc: any) => ({
+      _id: doc._id,
+      name: doc.name,
+      email: doc.email,
+      role: doc.role,
+      profileCompleted: doc.profileCompleted,
+      phoneNumber: doc.phoneNumber,
+      isApproved: doc.isApproved,
+      createdAt: doc.createdAt,
+      updatedAt: doc.updatedAt
+    });
+    const user = normalizeDocument(tutor);
+    res.status(200).json({ message: 'Tutor approved successfully', user });
+  } catch (error) {
+    console.error('Error approving tutor:', error);
+    res.status(500).json({ message: 'Failed to approve tutor' });
+  }
+};
+
+// Reject a tutor (set approvalStatus to 'rejected', do not delete)
+export const rejectTutor = async (req: Request, res: Response) => {
+  const { tutorId } = req.params;
+  const { rejectionReason } = req.body;
+  try {
+    const tutor = await Tutor.findByIdAndUpdate(
+      tutorId,
+      {
+        isApproved: false, // Always set to false on rejection
+        approvalStatus: 'rejected',
+        rejectionReason: rejectionReason || 'Your profile was rejected by the admin.'
+      },
+      { new: true }
+    );
+    if (!tutor) {
+      return res.status(404).json({ message: 'Tutor not found' });
+    }
+    res.status(200).json({ message: 'Tutor rejected successfully', tutor });
+  } catch (error) {
+    console.error('Error rejecting tutor:', error);
+    res.status(500).json({ message: 'Failed to reject tutor' });
+  }
+};
+
+
 // ✅ Fetch all tutors
 export const getAllTutors = async (_: Request, res: Response) => {
   try {

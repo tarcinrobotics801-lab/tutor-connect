@@ -117,6 +117,18 @@ const TutorProfileView = () => {
                   <span>{tutor.yearsOfExperience} experience</span>
                 </div>
 
+                {tutor.gradeOrYear && (
+                  <div className="text-center text-sm text-gray-700">
+                    <strong>Grade/Year:</strong> {tutor.gradeOrYear}
+                  </div>
+                )}
+
+                {tutor.educationBoard && (
+                  <div className="text-center text-sm text-gray-700">
+                    <strong>Education Board:</strong> {tutor.educationBoard}
+                  </div>
+                )}
+
                 {tutor.linkedinLink && (
                   <div className="flex items-center space-x-3">
                     <LinkIcon className="h-4 w-4 text-gray-400" />

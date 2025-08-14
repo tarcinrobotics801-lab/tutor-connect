@@ -23,6 +23,9 @@ export interface ITutor extends Document {
   password: string;
   role: 'tutor';
   profileCompleted: boolean;
+  isApproved: boolean; // Admin approval status
+  approvalStatus?: 'pending' | 'approved' | 'rejected';
+  rejectionReason?: string;
   educationalQualification?: string;
   yearsOfExperience?: string;
   educationBoard?: "State" | "CBSE" | "ICSE" | "College";
@@ -47,6 +50,7 @@ export interface ITutor extends Document {
   updatedAt: Date;
 }
 
+
 const tutorSchema = new Schema<ITutor>(
   {
     name: { type: String, required: true },
@@ -56,6 +60,9 @@ const tutorSchema = new Schema<ITutor>(
     role: { type: String, default: 'tutor' },
 
     profileCompleted: { type: Boolean, default: false },
+  isApproved: { type: Boolean, default: false }, // Admin approval status
+  approvalStatus: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' },
+  rejectionReason: { type: String },
     educationalQualification: { type: String },
     yearsOfExperience: { type: String },
 
