@@ -109,7 +109,7 @@ const StudentProfileForm = () => {
       return;
     }
 
-    if (!profileData.yearOfStudent  || !profileData.collegeName || !profileData.city || !profileData.state) {
+    if (!profileData.yearOfStudent  || !profileData.department|| !profileData.collegeName || !profileData.city || !profileData.state) {
       toast({
         title: "Validation Error",
         description: "All fields marked with * are required.",
@@ -122,7 +122,7 @@ const StudentProfileForm = () => {
     const payload = {
       phoneNumber: profileData.phoneNumber,
       yearOfStudent: profileData.yearOfStudent,
-      department: profileData.department || "", // Optional field
+      department: profileData.department, 
       collegeName: profileData.collegeName,
       city: profileData.city,
       state: profileData.state,
@@ -388,7 +388,7 @@ const StudentProfileForm = () => {
                         />
                       </div>
                       <div>
-                        <Label htmlFor="department">Department (Only for College Students)</Label>
+                        <Label htmlFor="department">Department / Interested Subjects (separated by commas) *</Label>
                         <Input
                           id="department"
                           value={profileData.department}
@@ -595,7 +595,7 @@ const StudentProfileForm = () => {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="department">Department (Only for College Students)</Label>
+                    <Label htmlFor="department">Department / Interested Subjects (separated by commas) *</Label>
                     <Input
                       id="department"
                       value={profileData.department}

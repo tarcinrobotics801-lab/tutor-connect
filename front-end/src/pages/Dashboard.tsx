@@ -59,51 +59,53 @@ const StudentDashboard = () => {
       
       {/* Key Metrics */}
       <div className="grid md:grid-cols-4 gap-6">
-        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-blue-800">Enrolled Courses</CardTitle>
-            <BookOpen className="h-4 w-4 text-blue-600" />
-           
+  {/* Enrolled Courses */}
+  <Card className="bg-gradient-to-br from-[#A855F7] to-[#7C3AED] border-[#7A1CAC] rounded-2xl shadow-lg hover:shadow-xl hover:scale-105 transition-transform duration-300">
+    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+      <CardTitle className="text-sm font-medium text-white">Enrolled Courses</CardTitle>
+      <BookOpen className="h-4 w-4 text-white" />
+    </CardHeader>
+    <CardContent>
+      <div className="text-2xl font-bold text-white">{enrolledCourses.length}</div>
+      <p className="text-xs text-white/90">Active courses</p>
+    </CardContent>
+  </Card>
 
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-blue-900">{enrolledCourses.length}</div>
-            <p className="text-xs text-blue-600">Active courses</p>
-          </CardContent>
-        </Card>
+  {/* Academic Year/Grade */}
+  <Card className="bg-gradient-to-br from-[#6366F1] to-[#8B5CF6] border-[#7A1CAC] rounded-2xl shadow-lg hover:shadow-xl hover:scale-105 transition-transform duration-300">
+    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+      <CardTitle className="text-sm font-medium text-white">Academic Year/Grade</CardTitle>
+      <GraduationCap className="h-4 w-4 text-white" />
+    </CardHeader>
+    <CardContent>
+      <div className="text-2xl font-bold text-white">{studentYear}</div>
+    </CardContent>
+  </Card>
 
-        <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-green-800">Academic Year/Grade</CardTitle>
-            <GraduationCap className="h-4 w-4 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-900">{studentYear}</div>
-          </CardContent>
-        </Card>
+  {/* Department */}
+  <Card className="bg-gradient-to-br from-[#9333EA] to-[#6366F1] border-[#7A1CAC] rounded-2xl shadow-lg hover:shadow-xl hover:scale-105 transition-transform duration-300">
+    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+      <CardTitle className="text-sm font-medium text-white">Department / Interested Subjects</CardTitle>
+      <Building2 className="h-4 w-4 text-white" />
+    </CardHeader>
+    <CardContent>
+      <div className="text-lg font-bold text-white">{studentDepartment}</div>
+      <p className="text-xs text-white/90">Study program</p>
+    </CardContent>
+  </Card>
 
-        <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-purple-800">Department</CardTitle>
-            <Building2 className="h-4 w-4 text-purple-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-lg font-bold text-purple-900">{studentDepartment || 'N/A'}  </div>
-            <p className="text-xs text-purple-600">Study program</p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-yellow-50 to-yellow-100 border-yellow-200">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-yellow-800">Profile Status</CardTitle>
-            <User className="h-4 w-4 text-yellow-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-lg font-bold text-yellow-900">Complete</div>
-            <p className="text-xs text-yellow-600">All fields filled</p>
-          </CardContent>
-        </Card>
-      </div>
+  {/* Profile Status */}
+  <Card className="bg-gradient-to-br from-[#C084FC] to-[#A855F7] border-[#7A1CAC] rounded-2xl shadow-lg hover:shadow-xl hover:scale-105 transition-transform duration-300">
+    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+      <CardTitle className="text-sm font-medium text-white">Profile Status</CardTitle>
+      <User className="h-4 w-4 text-white" />
+    </CardHeader>
+    <CardContent>
+      <div className="text-lg font-bold text-white">Complete</div>
+      <p className="text-xs text-white/90">All fields filled</p>
+    </CardContent>
+  </Card>
+</div>
 
       {/* Profile Information */}
       <div className="grid lg:grid-cols-3 gap-8">
