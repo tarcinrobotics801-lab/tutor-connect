@@ -364,14 +364,17 @@ const TutorProfileForm = () => {
       updateUser(userId, data.user);
 
       setIsEditing(false);
-
-      toast({
-        title: "Profile Updated",
-        description: "Your profile has been successfully updated.",
-      });
-
-      if (!currentUser.profileCompleted) {
-        setTimeout(() => navigate("/tutor-profile"), 1000);
+      if (!currentUser?.profileCompleted && isProfileComplete()) {
+        toast({
+          title: "Profile Under Review",
+          description: "Your profile is being reviewed by our admin team. You'll be able to add courses once approved.",
+          variant: "default",
+        });
+      } else {
+        toast({
+          title: "Profile Updated",
+          description: "Your profile has been successfully updated.",
+        });
       }
 
     } catch (err: unknown) {
@@ -1153,8 +1156,23 @@ const TutorProfileForm = () => {
           </Card>
 
 
-          {/* Add Course Section */}
-          {isProfileComplete() && (
+          {/* Show rejection message if tutor is rejected */}
+          {currentUser?.approvalStatus === 'rejected' && (
+            <Card className="bg-red-50 border-red-300 mb-8">
+              <CardHeader>
+                <CardTitle className="text-red-700 flex items-center gap-2">
+                  <AlertCircle className="h-5 w-5 text-red-500" />
+                  Profile Rejected
+                </CardTitle>
+                <CardDescription className="text-red-600">
+                  {currentUser.rejectionReason || 'Your profile was rejected by the admin. Please contact support or update your details.'}
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          )}
+
+          {/* Add Course Section - Only show if profile is completed AND tutor is approved */}
+          {isProfileComplete() && currentUser?.profileCompleted && currentUser?.isApproved && (
             <Card>
               <CardHeader>
                 <CardTitle>Add New Course</CardTitle>
@@ -1210,7 +1228,7 @@ const TutorProfileForm = () => {
                     <Label htmlFor="course-price">Price per Session</Label>
                     <Input
                       id="course-price"
-                      type="number"                            // 👈
+                      type="number"
                       min={0}
                       value={newCourse.pricePerSession}
                       onChange={(e) => setNewCourse(prev => ({ ...prev, pricePerSession: Number(e.target.value), }))}
@@ -1314,6 +1332,19 @@ const TutorProfileForm = () => {
                 </Button>
               </CardContent>
             </Card>
+          )}
+
+          {/* Show Profile Under Review if not completed */}
+          {!currentUser?.profileCompleted && (
+            <div className="flex flex-col items-center justify-center py-12">
+              <div className="flex items-center justify-center mb-4">
+                <span className="text-5xl text-yellow-500 mr-2">⏰</span>
+              </div>
+              <h2 className="text-xl font-semibold text-yellow-700 mb-2">Profile Under Review</h2>
+              <p className="text-gray-600 text-center max-w-md">
+                Your profile is being reviewed by our admin team. You'll be able to add courses once approved.
+              </p>
+            </div>
           )}
         </div>
       </div>

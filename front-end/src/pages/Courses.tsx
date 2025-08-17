@@ -19,6 +19,7 @@ import {
   Clock,
   PlayCircle,
   Star,
+  Lock,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useApp } from "@/contexts/AppContext";
@@ -30,7 +31,12 @@ const normalizeGrade = (value: string): string => {
   if (!value) return "";
   const lower = value.toLowerCase().trim();
 
-  // Normalize school grades (6–12)
+  // Normalize school grades (1–12)
+  if (lower.includes("1")) return "grade 1";
+  if (lower.includes("2")) return "grade 2";
+  if (lower.includes("3")) return "grade 3";
+  if (lower.includes("4")) return "grade 4";
+  if (lower.includes("5")) return "grade 5";
   if (lower.includes("6")) return "grade 6";
   if (lower.includes("7")) return "grade 7";
   if (lower.includes("8")) return "grade 8";
@@ -52,14 +58,15 @@ const getYouTubeEmbedUrl = (url: string): string => {
   const match = url.match(
     /(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})/
   );
-  return match ? `https://www.youtube.com/embed/${match[1]}` : "";
+  if (!match) return "";
+  const videoId = match[1];
+  return `https://www.youtube-nocookie.com/embed/${videoId}?enablejsapi=1&modestbranding=1&rel=0`;
 };
 
 const Courses = () => {
   const { currentUser } = useApp();
   const { toast } = useToast();
   const navigate = useNavigate();
-
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSubject, setSelectedSubject] = useState("All");
   const [selectedBoard, setSelectedBoard] = useState("All");
@@ -68,50 +75,6 @@ const Courses = () => {
   const [bookingDialogOpen, setBookingDialogOpen] = useState(false);
   const [courses, setCourses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-
-  if (!currentUser) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-        <Navigation />
-        <div className="container mx-auto px-4 py-16 text-center">
-          <div className="w-24 h-24 bg-gradient-to-br from-red-100 to-orange-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <User className="h-12 w-12 text-red-500" />
-          </div>
-          <h3 className="text-2xl font-semibold text-gray-900 mb-3">Please Login</h3>
-          <p className="text-gray-600">You need to be logged in to view and book courses.</p>
-          <Button
-            onClick={() => navigate("/login")}
-            className="mt-4 bg-gradient-to-r from-blue-600 to-purple-600"
-          >
-            Login Now
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  if (currentUser.role === 'student' && !currentUser.profileCompleted) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-        <Navigation />
-        <div className="container mx-auto px-4 py-16 text-center">
-          <div className="w-24 h-24 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <User className="h-12 w-12 text-blue-600" />
-          </div>
-          <h3 className="text-2xl font-semibold text-gray-900 mb-3">Complete Your Profile</h3>
-          <p className="text-gray-600 mb-4">
-            Please complete your student profile to browse and book courses.
-          </p>
-          <Button
-            onClick={() => navigate("/student-profile")}
-            className="bg-gradient-to-r from-blue-600 to-purple-600"
-          >
-            Complete Profile
-          </Button>
-        </div>
-      </div>
-    );
-  }
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -128,6 +91,14 @@ const Courses = () => {
     };
     fetchCourses();
   }, []);
+
+  // Check if user can book sessions
+  const canBookSession = () => {
+    if (!currentUser) return false;
+    if (currentUser.role !== "student" && currentUser.role !== "parent") return false;
+    if ((currentUser.role === 'student' || currentUser.role === 'parent') && !currentUser.profileCompleted) return false;
+    return true;
+  };
 
   const allSubjects = ["All", ...Array.from(new Set(courses.map(course => course.sub || "General")))];
 
@@ -160,8 +131,10 @@ const Courses = () => {
         description: "Please login to book a session.",
         variant: "destructive",
       });
+      navigate("/login");
       return;
     }
+    
     if (currentUser.role !== "student" && currentUser.role !== "parent") {
       toast({
         title: "Access Denied",
@@ -170,16 +143,35 @@ const Courses = () => {
       });
       return;
     }
+    
     if ((currentUser.role === 'parent' || currentUser.role === 'student') && !currentUser.profileCompleted) {
       toast({
         title: "Complete Profile",
         description: "Please complete your profile before booking sessions.",
         variant: "destructive",
       });
+      if (currentUser.role === 'student') {
+        navigate("/student-profile");
+      } else {
+        navigate("/parent-profile");
+      }
       return;
     }
+    
     setSelectedCourse(course);
     setBookingDialogOpen(true);
+  };
+
+  const getBookButtonText = () => {
+    if (!currentUser) return "Login to Book Session";
+    if (currentUser.role !== "student" && currentUser.role !== "parent") return "Students/Parents Only";
+    if ((currentUser.role === 'student' || currentUser.role === 'parent') && !currentUser.profileCompleted) return "Complete Profile to Book";
+    return "Book Session";
+  };
+
+  const getBookButtonIcon = () => {
+    if (!currentUser || !canBookSession()) return <Lock className="h-4 w-4 mr-2" />;
+    return null;
   };
 
   return (
@@ -194,6 +186,20 @@ const Courses = () => {
           <p className="text-gray-600">
             Learn from expert tutors and advance your knowledge in various subjects.
           </p>
+          {!currentUser && (
+            <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-blue-700 text-sm">
+                <strong>Browse freely!</strong> You can view all available courses. To book a session, please{" "}
+                <Link to="/login" className="underline font-semibold hover:text-blue-800">
+                  login
+                </Link>{" "}
+                or{" "}
+                <Link to="/signup" className="underline font-semibold hover:text-blue-800">
+                  sign up
+                </Link>.
+              </p>
+            </div>
+          )}
         </div>
 
         {loading ? (
@@ -399,10 +405,15 @@ const Courses = () => {
                     <div className="pt-2">
                       <Button
                         onClick={() => handleBookSession(course)}
-                        className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white mb-2"
-                        disabled={currentUser.role !== 'student' && currentUser.role !== 'parent'}
+                        className={`w-full mb-2 ${
+                          canBookSession()
+                            ? "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+                            : "bg-gray-300 text-gray-500 cursor-not-allowed hover:bg-gray-300"
+                        }`}
+                        disabled={!canBookSession()}
                       >
-                        {(currentUser.role === 'student' || currentUser.role === 'parent') ? 'Book Session' : 'Students/Parents Only'}
+                        {getBookButtonIcon()}
+                        {getBookButtonText()}
                       </Button>
                       <Link to={`/tutor/${course.tutorId._id}`}>
                         <Button

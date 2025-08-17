@@ -17,6 +17,17 @@ const TutorProfileView = () => {
   const [tutor, setTutor] = useState<any>(null);
   const [loading, setLoading] = useState(true); // ⬅️ ADD THIS
 
+  useEffect(() => {
+    if (!currentUser) {
+      toast({
+        title: "Login Required",
+        description: "Please log in to view tutor profiles.",
+        variant: "destructive",
+      });
+      navigate("/login");
+    }
+  }, [currentUser, navigate, toast]);
+
 
   useEffect(() => {
     if (!tutorId) return;
@@ -41,6 +52,7 @@ const TutorProfileView = () => {
     return <CustomLoader />; // ✅ Use CustomLoader component
   }
 
+
   if (!tutor) {
     return (
       <div className="bg-purple-600 text-white py-2 text-center text-sm relative z-10">
@@ -49,6 +61,23 @@ const TutorProfileView = () => {
           <div className="text-center">
             <h3 className="text-2xl font-semibold text-gray-900 mb-3">Tutor Not Found</h3>
             <p className="text-gray-600">The tutor profile you're looking for doesn't exist.</p>
+            <Button onClick={() => navigate('/tutors')} className="mt-4">
+              Back to Tutors
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!tutor.isApproved) {
+    return (
+      <div className="bg-purple-600 text-white py-2 text-center text-sm relative z-10">
+        <Navigation />
+        <div className="container mx-auto px-4 py-16">
+          <div className="text-center">
+            <h3 className="text-2xl font-semibold text-gray-900 mb-3">Tutor Not Approved</h3>
+            <p className="text-gray-600">This tutor profile is not approved by admin yet.</p>
             <Button onClick={() => navigate('/tutors')} className="mt-4">
               Back to Tutors
             </Button>
@@ -107,16 +136,16 @@ const TutorProfileView = () => {
                 </div>
 
                 {tutor.gradeOrYear && (
-    <div className="text-center text-sm text-gray-700">
-      <strong>Grade/Year:</strong> {tutor.gradeOrYear}
-    </div>
-  )}
+                  <div className="text-center text-sm text-gray-700">
+                    <strong>Grade/Year:</strong> {tutor.gradeOrYear}
+                  </div>
+                )}
 
-  {tutor.educationBoard && (
-    <div className="text-center text-sm text-gray-700">
-      <strong>Education Board:</strong> {tutor.educationBoard}
-    </div>
-  )}
+                {tutor.educationBoard && (
+                  <div className="text-center text-sm text-gray-700">
+                    <strong>Education Board:</strong> {tutor.educationBoard}
+                  </div>
+                )}
 
 
                 {tutor.linkedinLink && (

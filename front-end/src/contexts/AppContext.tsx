@@ -32,6 +32,9 @@ export interface User {
   phoneNumber?: string;
 
   // Tutor‑specific --------------------------------------------
+  isApproved?: boolean;
+  approvalStatus?: "pending" | "approved" | "rejected";
+  rejectionReason?: string;
   bio?: string;
   educationalQualification?: string;
   yearsOfExperience?: string;

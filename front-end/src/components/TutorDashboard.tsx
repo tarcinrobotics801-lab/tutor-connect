@@ -105,51 +105,58 @@ const handleDeleteCourse = async (courseName: string) => {
       </div>
 
       {/* Key Metrics */}
-      <div className="grid md:grid-cols-4 gap-6">
-        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-blue-800">Teaching Subjects</CardTitle>
-            <BookOpen className="h-4 w-4 text-blue-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-blue-900">{tutorSubjects.length}</div>
-            <p className="text-xs text-blue-600">Subject areas</p>
-          </CardContent>
-        </Card>
+<div className="grid md:grid-cols-4 gap-6">
+  {/* Teaching Subjects */}
+  <Card className="bg-gradient-to-br from-[#A855F7] to-[#7C3AED] border-[#7A1CAC] rounded-2xl shadow-lg hover:shadow-xl hover:scale-105 transition-transform duration-300">
+    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+      <CardTitle className="text-sm font-medium text-white">Teaching Subjects</CardTitle>
+      <BookOpen className="h-5 w-5 text-white" />
+    </CardHeader>
+    <CardContent>
+      <div className="text-2xl font-bold text-white">{tutorSubjects.length}</div>
+      <p className="text-xs text-white/90">Subject areas</p>
+    </CardContent>
+  </Card>
 
-        <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-green-800">Experience</CardTitle>
-            <Award className="h-4 w-4 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-900">{tutorExperience}</div>
-            <p className="text-xs text-green-600">Years experience</p>
-          </CardContent>
-        </Card>
+  {/* Experience */}
+  <Card className="bg-gradient-to-br from-[#6366F1] to-[#8B5CF6] border-[#7A1CAC] rounded-2xl shadow-lg hover:shadow-xl hover:scale-105 transition-transform duration-300">
+    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+      <CardTitle className="text-sm font-medium text-white">Experience</CardTitle>
+      <Award className="h-5 w-5 text-white" />
+    </CardHeader>
+    <CardContent>
+      <div className="text-2xl font-bold text-white">{tutorExperience}</div>
+      <p className="text-xs text-white/90">Years experience</p>
+    </CardContent>
+  </Card>
 
-        <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-purple-800">Availability</CardTitle>
-            <Calendar className="h-4 w-4 text-purple-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-purple-900">{availabilityEntries}</div>
-            <p className="text-xs text-purple-600">Days available</p>
-          </CardContent>
-        </Card>
+  {/* Availability */}
+  <Card className="bg-gradient-to-br from-[#9333EA] to-[#6366F1] border-[#7A1CAC] rounded-2xl shadow-md hover:shadow-lg hover:scale-105 transition">
+    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+      <CardTitle className="text-sm font-medium text-white">Availability</CardTitle>
+      <Calendar className="h-5 w-5 text-white" />
+    </CardHeader>
+    <CardContent>
+      <div className="text-2xl font-bold text-white">{availabilityEntries}</div>
+      <p className="text-xs text-white/90">Days available</p>
+    </CardContent>
+  </Card>
 
-        <Card className="bg-gradient-to-br from-yellow-50 to-yellow-100 border-yellow-200">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-yellow-800">Teaching Level</CardTitle>
-            <Star className="h-4 w-4 text-yellow-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-lg font-bold text-yellow-900">{experienceLevel}</div>
-            <p className="text-xs text-yellow-600">Based on experience</p>
-          </CardContent>
-        </Card>
-      </div>
+  {/* Teaching Level */}
+  <Card className="bg-gradient-to-br from-[#C084FC] to-[#A855F7] border-[#7A1CAC] rounded-2xl shadow-lg hover:shadow-xl hover:scale-105 transition-transform duration-300 text-white">
+    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+      <CardTitle className="text-sm font-medium text-white">Teaching Level</CardTitle>
+      <Star className="h-5 w-5 text-white" />
+    </CardHeader>
+    <CardContent>
+      <div className="text-lg font-bold text-white">{experienceLevel}</div>
+      <p className="text-xs text-white/90">Based on experience</p>
+    </CardContent>
+  </Card>
+</div>
+
+
+
 
       {/* Profile Information */}
       <div className="grid lg:grid-cols-3 gap-8">

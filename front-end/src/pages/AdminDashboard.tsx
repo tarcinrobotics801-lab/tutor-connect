@@ -32,6 +32,8 @@ import {
   Shield,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { X, Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import { useApp } from "@/contexts/AppContext";
@@ -40,30 +42,36 @@ import { useToast } from "@/hooks/use-toast";
 const AdminDashboard = () => {
   const { currentUser, removeTutor } = useApp();
   const [tutors, setTutors] = useState([]);
+  const [pendingTutors, setPendingTutors] = useState([]);
   const [students, setStudents] = useState([]);
   const [parents, setParents] = useState([]);
   const [courses, setCourses] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
+  const [selectedTutor, setSelectedTutor] = useState(null);
   const { toast } = useToast();
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [tutorRes, studentRes, parentRes, courseRes] = await Promise.all([
+        const [tutorRes, pendingTutorRes, studentRes, parentRes, courseRes] = await Promise.all([
           fetch("/api/admin/tutors"),
+          fetch("/api/admin/pending-tutors"),
           fetch("/api/admin/students"),
           fetch("/api/admin/parents"),
           fetch("/api/admin/courses"),
         ]);
 
         const tutorsData = await tutorRes.json();
+        const pendingTutorsData = await pendingTutorRes.json();
         const studentsData = await studentRes.json();
         const parentsData = await parentRes.json();
         const coursesData = await courseRes.json();
 
         setTutors(tutorsData.tutors || []);
+        setPendingTutors(pendingTutorsData.tutors || []);
         setStudents(studentsData.students || []);
         setParents(parentsData.parents || []);
         setCourses(coursesData.courses || []);
@@ -76,6 +84,52 @@ const AdminDashboard = () => {
 
     fetchData();
   }, []);
+  
+  // Approve tutor handler
+  const openReviewModal = (tutor) => {
+    setSelectedTutor(tutor);
+    setReviewModalOpen(true);
+  };
+  
+  const closeReviewModal = () => {
+    setReviewModalOpen(false);
+    setSelectedTutor(null);
+  };
+  
+  const handleApproveTutor = async (tutorId) => {
+    try {
+      const res = await fetch(`/api/admin/approve-tutor/${tutorId}`, { method: "PATCH" });
+      if (res.ok) {
+        setPendingTutors((prev) => prev.filter((t) => t._id !== tutorId));
+        toast({ title: "Tutor Approved", description: "Tutor has been approved." });
+      } else {
+        toast({ title: "Error", description: "Failed to approve tutor.", variant: "destructive" });
+      }
+    } catch {
+      toast({ title: "Error", description: "Failed to approve tutor.", variant: "destructive" });
+    }
+  };
+
+  // Reject tutor handler (no delete, PATCH with optional reason)
+  const handleRejectTutor = async (tutorId) => {
+    const rejectionReason = window.prompt("Are you sure you want to reject this tutor? Optionally, enter a rejection reason:");
+    if (rejectionReason === null) return; // Cancelled
+    try {
+      const res = await fetch(`/api/admin/reject-tutor/${tutorId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ rejectionReason }),
+      });
+      if (res.ok) {
+        setPendingTutors((prev) => prev.filter((t) => t._id !== tutorId));
+        toast({ title: "Tutor Rejected", description: "Tutor has been rejected.", variant: "destructive" });
+      } else {
+        toast({ title: "Error", description: "Failed to reject tutor.", variant: "destructive" });
+      }
+    } catch {
+      toast({ title: "Error", description: "Failed to reject tutor.", variant: "destructive" });
+    }
+  };
 
   if (!currentUser || currentUser.role !== "admin") {
     return (
@@ -128,7 +182,7 @@ const AdminDashboard = () => {
   );
 
   // make the handler async so we can await
-  const handleRemoveTutor = async (tutorId: string, tutorName: string) => {
+  const handleRemoveTutor = async (tutorId, tutorName) => {
     const confirmDelete = window.confirm(
       `Are you sure you want to remove tutor "${tutorName}"? This will also remove all their courses.`
     );
@@ -150,11 +204,7 @@ const AdminDashboard = () => {
         variant: "destructive",
       });
     }
-  
-  
-};
-
-  
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-indigo-50">
@@ -222,12 +272,352 @@ const AdminDashboard = () => {
         </div>
 
         <Tabs defaultValue="tutors" className="space-y-6">
-          <TabsList className="grid grid-cols-4 w-full max-w-md">
+          <TabsList className="grid grid-cols-5 w-full max-w-xl">
             <TabsTrigger value="tutors">Tutors</TabsTrigger>
+            <TabsTrigger value="tutor-requests">Tutor Requests</TabsTrigger>
             <TabsTrigger value="courses">Courses</TabsTrigger>
             <TabsTrigger value="students">Students</TabsTrigger>
             <TabsTrigger value="parents">Parents</TabsTrigger>
           </TabsList>
+          
+          <TabsContent value="tutor-requests" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Pending Tutor Requests</CardTitle>
+                <CardDescription>Approve or reject tutors before they can add courses</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Qualification</TableHead>
+                      <TableHead>Experience</TableHead>
+                      <TableHead>Subjects</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Action</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {pendingTutors.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={7} className="text-center text-gray-400">No pending tutor requests.</TableCell>
+                      </TableRow>
+                    ) : (
+                      pendingTutors.map((tutor) => (
+                        <TableRow key={tutor._id}>
+                          <TableCell className="font-medium">{tutor.name}</TableCell>
+                          <TableCell>{tutor.email}</TableCell>
+                          <TableCell>{tutor.educationalQualification || "-"}</TableCell>
+                          <TableCell>{tutor.yearsOfExperience || "-"}</TableCell>
+                          <TableCell>
+                            <div className="flex flex-wrap gap-1">
+                              {(tutor.subjects || []).map((subject) => (
+                                <Badge key={subject} variant="secondary" className="text-xs">
+                                  {subject}
+                                </Badge>
+                              ))}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={tutor.approvalStatus === "pending" ? "secondary" : tutor.approvalStatus === "approved" ? "default" : "destructive"}>
+                              {tutor.approvalStatus ? tutor.approvalStatus.charAt(0).toUpperCase() + tutor.approvalStatus.slice(1) : "Pending"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="flex gap-2">
+                            <Button size="sm" variant="outline" onClick={() => openReviewModal(tutor)}>
+                              <Eye className="h-4 w-4 mr-1" /> Review
+                            </Button>
+                            <Button size="sm" variant="default" onClick={() => handleApproveTutor(tutor._id)}>
+                              Approve
+                            </Button>
+                            <Button size="sm" variant="destructive" onClick={() => handleRejectTutor(tutor._id)}>
+                              Reject
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+
+                {/* Enhanced Scrollable Review Modal */}
+                <Dialog open={reviewModalOpen} onOpenChange={closeReviewModal}>
+                  <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0">
+                    <DialogHeader className="p-6 pb-4 border-b flex-shrink-0">
+                      <div className="flex items-center justify-between">
+                        <DialogTitle className="text-xl font-semibold">Tutor Profile Review</DialogTitle>
+                        <Button variant="ghost" size="sm" onClick={closeReviewModal}>
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </DialogHeader>
+                    
+                    {selectedTutor && (
+                      <div className="flex-1 overflow-hidden">
+                        <div className="h-full overflow-y-auto px-6 pb-6">
+                          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-4">
+                            {/* Left: Profile Card - Fixed */}
+                            <div className="lg:col-span-1">
+                              <div className="sticky top-0 bg-white">
+                                <div className="border rounded-lg p-6 bg-gradient-to-br from-gray-50 to-white shadow-sm">
+                                  <div className="text-center">
+                                    <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-100 to-indigo-100 flex items-center justify-center mx-auto mb-4">
+                                      <span className="text-2xl font-bold text-purple-600">
+                                        {selectedTutor.name?.charAt(0).toUpperCase()}
+                                      </span>
+                                    </div>
+                                    <h3 className="font-bold text-lg text-gray-900 mb-2">{selectedTutor.name}</h3>
+                                    <p className="text-sm text-gray-600 mb-3">{selectedTutor.educationalQualification}</p>
+                                    <Badge 
+                                      variant={selectedTutor.approvalStatus === "pending" ? "secondary" : selectedTutor.approvalStatus === "approved" ? "default" : "destructive"}
+                                      className="mb-4"
+                                    >
+                                      {selectedTutor.approvalStatus ? selectedTutor.approvalStatus.charAt(0).toUpperCase() + selectedTutor.approvalStatus.slice(1) : "Pending"}
+                                    </Badge>
+                                    
+                                    <div className="space-y-2 text-sm text-gray-600">
+                                      <div className="flex items-center justify-center gap-2">
+                                        <span>📧</span>
+                                        <span className="truncate">{selectedTutor.email}</span>
+                                      </div>
+                                      {selectedTutor.phoneNumber && (
+                                        <div className="flex items-center justify-center gap-2">
+                                          <span>📱</span>
+                                          <span>{selectedTutor.phoneNumber}</span>
+                                        </div>
+                                      )}
+                                      <div className="flex items-center justify-center gap-2">
+                                        <span>🎓</span>
+                                        <span>{selectedTutor.yearsOfExperience} years experience</span>
+                                      </div>
+                                      {selectedTutor.linkedinLink && (
+                                        <div className="mt-3">
+                                          <a 
+                                            href={selectedTutor.linkedinLink} 
+                                            target="_blank" 
+                                            rel="noopener noreferrer" 
+                                            className="text-blue-600 hover:text-blue-800 text-xs underline"
+                                          >
+                                            🔗 LinkedIn Link Available
+                                          </a>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Right: Scrollable Details */}
+                            <div className="lg:col-span-2 space-y-6">
+                              {/* Biography */}
+                              <div className="border rounded-lg p-4 bg-white shadow-sm">
+                                <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                                  <span>📝</span>
+                                  Biography
+                                </h4>
+                                <p className="text-gray-700 text-sm leading-relaxed">
+                                  {selectedTutor.bio || "No biography provided."}
+                                </p>
+                              </div>
+
+                              {/* Subjects */}
+                              <div className="border rounded-lg p-4 bg-white shadow-sm">
+                                <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                                  <span>📚</span>
+                                  Subjects
+                                </h4>
+                                <div className="flex flex-wrap gap-2">
+                                  {(selectedTutor.subjects || []).map((subject) => (
+                                    <Badge key={subject} variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
+                                      {subject}
+                                    </Badge>
+                                  ))}
+                                  {(!selectedTutor.subjects || selectedTutor.subjects.length === 0) && (
+                                    <span className="text-gray-400 text-sm">No subjects specified</span>
+                                  )}
+                                </div>
+                              </div>
+
+                              {/* Availability */}
+                              <div className="border rounded-lg p-4 bg-white shadow-sm">
+                                <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                                  <span>📅</span>
+                                  Availability
+                                </h4>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                  {selectedTutor.availability && Object.entries(selectedTutor.availability).map(([day, info]) => (
+                                    <div key={day} className="bg-gray-50 p-3 rounded-md">
+                                      <div className="font-medium text-sm text-gray-900 capitalize mb-1">{day}</div>
+                                      <div className="text-xs text-gray-600">
+                                        {(info as { available: boolean; timeSlots?: string[] }).available ? (
+                                          (info as { available: boolean; timeSlots?: string[] }).timeSlots?.length > 0 ? (
+                                            <div className="space-y-1">
+                                              {(info as { available: boolean; timeSlots?: string[] }).timeSlots.map((slot, idx) => (
+                                                <div key={idx} className="bg-white px-2 py-1 rounded text-xs">
+                                                  {slot}
+                                                </div>
+                                              ))}
+                                            </div>
+                                          ) : (
+                                            "Available (no time slots specified)"
+                                          )
+                                        ) : (
+                                          <span className="text-gray-400">Unavailable</span>
+                                        )}
+                                      </div>
+                                    </div>
+                                  ))}
+                                  {(!selectedTutor.availability || Object.keys(selectedTutor.availability).length === 0) && (
+                                    <span className="text-gray-400 text-sm col-span-2">No availability information provided</span>
+                                  )}
+                                </div>
+                              </div>
+
+                              {/* Meeting Information */}
+                              {selectedTutor.linkedinLink && (
+                                <div className="border rounded-lg p-4 bg-white shadow-sm">
+                                  <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                                    <span>🔗</span>
+                                    LinkedIn Profile
+                                  </h4>
+                                  <div className="bg-blue-50 p-3 rounded-md">
+                                    <a 
+                                      href={selectedTutor.linkedinLink} 
+                                      target="_blank" 
+                                      rel="noopener noreferrer" 
+                                      className="text-blue-600 hover:text-blue-800 text-sm underline break-all"
+                                    >
+                                      {selectedTutor.linkedinLink}
+                                    </a>
+                                  </div>
+                                </div>
+                              )}
+
+
+                              {/* Certificates and Achievements */}
+                              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                {/* Degree Certificates */}
+                                <div className="border rounded-lg p-4 bg-white shadow-sm">
+                                  <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                                    <span>🎓</span>
+                                    Degree Certificates ({selectedTutor.certificates?.length || 0})
+                                  </h4>
+                                  <div className="space-y-2 max-h-40 overflow-y-auto">
+                                    {(selectedTutor.certificates || []).map((cert, idx) => (
+                                      <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                        <div className="flex items-center space-x-3">
+                                          <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                            <span className="text-sm font-medium text-blue-600">📄</span>
+                                          </div>
+                                          <div>
+                                            <p className="text-sm font-medium text-gray-900">{cert.name}</p>
+                                            <p className="text-xs text-gray-500 mt-1">
+                                              Uploaded on {new Date(cert.uploadedAt || Date.now()).toLocaleDateString()}
+                                            </p>
+                                          </div>
+                                        </div>
+                                        <Button
+                                          size="sm"
+                                          variant="outline"
+                                          onClick={() => window.open(cert.url, '_blank')}
+                                          className="p-2"
+                                        >
+                                          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                          </svg>
+                                        </Button>
+                                      </div>
+                                    ))}
+                                    {(!selectedTutor.certificates || selectedTutor.certificates.length === 0) && (
+                                      <span className="text-gray-400 text-sm">No certificates uploaded</span>
+                                    )}
+                                  </div>
+                                </div>
+
+                                {/* Achievement Certificates */}
+                                <div className="border rounded-lg p-4 bg-white shadow-sm">
+                                  <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                                    <span>🏆</span>
+                                    Achievement Certificates ({selectedTutor.achievements?.length || 0})
+                                  </h4>
+                                  <div className="space-y-2 max-h-40 overflow-y-auto">
+                                    {(selectedTutor.achievements || []).map((ach, idx) => (
+                                      <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                        <div className="flex items-center space-x-3">
+                                          <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
+                                            <span className="text-sm font-medium text-yellow-600">🏆</span>
+                                          </div>
+                                          <div>
+                                            <p className="text-sm font-medium text-gray-900">{ach.name}</p>
+                                            <Badge variant="secondary" className="text-xs mt-1">
+                                              {ach.type || 'Achievement'}
+                                            </Badge>
+                                            <p className="text-xs text-gray-500 mt-1">
+                                              Uploaded on {new Date(ach.uploadedAt || Date.now()).toLocaleDateString()}
+                                            </p>
+                                          </div>
+                                        </div>
+                                        <Button
+                                          size="sm"
+                                          variant="outline"
+                                          onClick={() => window.open(ach.url, '_blank')}
+                                          className="p-2"
+                                        >
+                                          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                          </svg>
+                                        </Button>
+                                      </div>
+                                    ))}
+                                    {(!selectedTutor.achievements || selectedTutor.achievements.length === 0) && (
+                                      <span className="text-gray-400 text-sm">No achievements uploaded</span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    <DialogFooter className="p-6 pt-4 border-t bg-gray-50 flex-shrink-0">
+                      <div className="flex justify-end gap-3 w-full">
+                        <Button variant="outline" onClick={closeReviewModal}>
+                          Cancel
+                        </Button>
+                        {selectedTutor && (
+                          <>
+                            <Button 
+                              variant="destructive" 
+                              onClick={() => { 
+                                handleRejectTutor(selectedTutor._id); 
+                                closeReviewModal(); 
+                              }}
+                            >
+                              Reject
+                            </Button>
+                            <Button 
+                              variant="default" 
+                              onClick={() => { 
+                                handleApproveTutor(selectedTutor._id); 
+                                closeReviewModal(); 
+                              }}
+                            >
+                              Approve
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
           <TabsContent value="tutors" className="space-y-4">
             <Card>
@@ -342,7 +732,6 @@ const AdminDashboard = () => {
                       <TableHead>Email</TableHead>
                       <TableHead>College</TableHead>
                       <TableHead>Status</TableHead>
-                     
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -356,7 +745,6 @@ const AdminDashboard = () => {
                             {student.profileCompleted ? "Complete" : "Incomplete"}
                           </Badge>
                         </TableCell>
-                      
                       </TableRow>
                     ))}
                   </TableBody>
@@ -394,7 +782,6 @@ const AdminDashboard = () => {
                             {parent.profileCompleted ? "Complete" : "Incomplete"}
                           </Badge>
                         </TableCell>
-                        
                       </TableRow>
                     ))}
                   </TableBody>

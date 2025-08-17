@@ -22,6 +22,18 @@ export const createCourse: RequestHandler = async (req, res) => {
       educationBoard,    // NEW FIELD
     } = req.body;
 
+
+    // Check if tutor is approved
+    const tutor = await Tutor.findById(tutorId);
+    if (!tutor) {
+      res.status(404).json({ message: "Tutor not found" });
+      return;
+    }
+    if (!tutor.isApproved) {
+      res.status(403).json({ message: "Tutor is not approved by admin." });
+      return;
+    }
+
     // Validate required fields
     if (
       !tutorId ||
