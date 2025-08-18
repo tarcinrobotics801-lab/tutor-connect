@@ -302,8 +302,11 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       setUsers((prev) =>
         prev.map((u) => (u._id === userId ? { ...u, ...updates } : u))
       );
-      if (currentUser && currentUser._id === userId)
-        setCurrentUser({ ...currentUser, ...updates });
+      if (currentUser && currentUser._id === userId) {
+        const newUser = { ...currentUser, ...updates };
+        setCurrentUser(newUser);
+        localStorage.setItem("currentUser", JSON.stringify(newUser));
+      }
 
       if (opts.sendToServer) {
         const endpoint =
@@ -329,7 +332,10 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setUsers((prev) =>
           prev.map((u) => (u._id === userId ? updatedUser : u))
         );
-        if (currentUser && currentUser._id === userId) setCurrentUser(updatedUser);
+        if (currentUser && currentUser._id === userId) {
+          setCurrentUser(updatedUser);
+          localStorage.setItem("currentUser", JSON.stringify(updatedUser));
+        }
       }
 
       return true;
@@ -341,6 +347,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       setLoading(false);
     }
   };
+    
   const removeTutor = async (tutorId: string): Promise<boolean> => {
     try {
       const res = await fetch(`/api/admin/tutors/${tutorId}`, {

@@ -57,7 +57,7 @@ const AdminDashboard = () => {
     const fetchData = async () => {
       try {
         const [tutorRes, pendingTutorRes, studentRes, parentRes, courseRes] = await Promise.all([
-          fetch("/api/admin/tutors"),
+          fetch("/api/auth/completed-tutors"),
           fetch("/api/admin/pending-tutors"),
           fetch("/api/admin/students"),
           fetch("/api/admin/parents"),
