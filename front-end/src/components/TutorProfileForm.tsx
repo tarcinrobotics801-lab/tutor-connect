@@ -40,6 +40,26 @@ const uploadImageToBackend = async (file: File, tutorId: string): Promise<string
   }
 };
 const TutorProfileForm = () => {
+  // General instructions for new tutors
+  const instructionCard = (
+    <Card className="fixed top-24 right-8 w-72 shadow-lg bg-blue-50 border-blue-300 z-50">
+      <CardHeader className="py-2 px-3">
+        <CardTitle className="text-blue-800 flex items-center text-base">
+          <AlertCircle className="h-4 w-4 mr-2 text-blue-600" />
+          Tutor Instructions
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="text-blue-900 text-xs space-y-2 px-3 pb-3">
+        <ul className="list-disc pl-4">
+          <li>Complete your profile with all required details and documents.</li>
+          <li>Click <b>Save Changes</b> to submit for admin review.</li>
+          <li>Wait for admin approval.</li>
+          <li>Once approved, you can add courses and start teaching.</li>
+          <li>If rejected, you will receive a message with the reason.</li>
+        </ul>
+      </CardContent>
+    </Card>
+  );
   const { currentUser, updateUser, addCourse } = useApp();
   const [addedCourses, setAddedCourses] = useState<unknown[]>([]);
   const [isEditing, setIsEditing] = useState(!currentUser?.profileCompleted);
@@ -264,7 +284,7 @@ const TutorProfileForm = () => {
 
     if (err.response?.status === 400) {
       return {
-        message: 'Invalid data provided. Please check your inputs.',
+        message: 'Bad request. Please check your input.',
         type: 'validation',
         code: '400',
         details: err.response.data
@@ -289,7 +309,6 @@ const TutorProfileForm = () => {
       details: error
     };
   };
-
   // Fixed: Use only _id property consistently
   const handleSave = async () => {
     if (!currentUser) {
@@ -599,6 +618,7 @@ const TutorProfileForm = () => {
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
+  {(!currentUser?.profileCompleted) && instructionCard}
       {/* Network Status Warning */}
       {!isOnline && (
         <div className="bg-red-50 border border-red-200 p-4 rounded-lg">
