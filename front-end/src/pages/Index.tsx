@@ -1,557 +1,565 @@
-import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { BookOpen, Users, Calendar, Award, GraduationCap, User, Settings, LogOut, UserCheck, BookOpenCheck, Target, Zap, TrendingUp, Heart, Clock, Shield, Star, MapPin, DollarSign, ChevronRight, Filter } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
-import { Input } from "@/components/ui/input";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card";
+import {
+	BookOpen,
+	Users,
+	Calendar,
+	Award,
+	GraduationCap,
+	User,
+	LogOut,
+	UserCheck,
+	BookOpenCheck,
+	Target,
+	Zap,
+	TrendingUp,
+	Heart,
+	Clock,
+	Shield,
+	Star,
+	ChevronRight,
+} from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useApp } from "@/contexts/AppContext";
 import { useToast } from "@/hooks/use-toast";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+	NavigationMenu,
+	NavigationMenuItem,
+	NavigationMenuLink,
+	NavigationMenuList,
+	navigationMenuTriggerStyle,
+} from "@/components/ui/navigation-menu";
 
 const Index = () => {
-  const { currentUser, setCurrentUser } = useApp();
-  const { toast } = useToast();
-  const navigate = useNavigate();
-  const [hoveredCard, setHoveredCard] = useState<string | null>(null);
-  const [isVisible, setIsVisible] = useState(false);
+	const { currentUser, setCurrentUser } = useApp();
+	const { toast } = useToast();
+	const navigate = useNavigate();
 
-  useEffect(() => {
-    setIsVisible(true);
-  }, []);
+	const handleLogout = () => {
+		setCurrentUser(null);
+		toast({
+			title: "Logged out successfully",
+			description: "You have been logged out of your account.",
+		});
+		navigate("/");
+	};
 
-  const handleLogout = () => {
-    setCurrentUser(null);
-    toast({
-      title: "Logged out successfully",
-      description: "You have been logged out of your account.",
-    });
-    navigate("/");
-  };
+	const getInitials = (name: string) => {
+		return name
+			.split(" ")
+			.map((word) => word.charAt(0))
+			.join("")
+			.toUpperCase()
+			.slice(0, 2);
+	};
 
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(word => word.charAt(0))
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
-  };
+	return (
+		<div className="min-h-screen bg-background">
+			<header className="border-b">
+				<div className="container mx-auto px-4 py-4 flex justify-between items-center">
+					<Link to="/" className="flex items-center space-x-2">
+						<GraduationCap className="h-8 w-8 text-primary" />
+						<div>
+							<span className="text-2xl font-bold">TUTOR</span>
+							<span className="text-xl font-light text-primary ml-1">
+								CONNECT
+							</span>
+							<div className="text-xs text-muted-foreground">NETWORK</div>
+						</div>
+					</Link>
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-800 to-indigo-900 relative overflow-hidden">
-      {/* Professional Background Image Overlay */}
-      <div 
-        className="absolute inset-0 opacity-10 bg-cover bg-center bg-no-repeat transition-opacity duration-1000"
-        style={{
-          backgroundImage: "url('https://images.unsplash.com/photo-1553877522-43269d4ea984?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')"
-        }}
-      ></div>
-      
-      {/* Enhanced animated floating background elements */}
-      <div className="absolute inset-0">
-        <div className="absolute top-20 left-20 w-40 h-40 bg-purple-500/30 rounded-full blur-3xl animate-pulse animation-delay-0"></div>
-        <div className="absolute top-40 right-32 w-32 h-32 bg-blue-500/25 rounded-full blur-2xl animate-pulse animation-delay-1000"></div>
-        <div className="absolute bottom-32 left-1/4 w-48 h-48 bg-indigo-500/20 rounded-full blur-3xl animate-pulse animation-delay-2000"></div>
-        <div className="absolute bottom-20 right-20 w-36 h-36 bg-violet-500/25 rounded-full blur-2xl animate-pulse animation-delay-500"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-purple-400/15 rounded-full blur-3xl animate-pulse animation-delay-3000"></div>
-        
-        {/* Additional floating orbs */}
-        <div className="absolute top-1/4 right-1/4 w-24 h-24 bg-blue-400/20 rounded-full blur-2xl animate-bounce animation-delay-1500"></div>
-        <div className="absolute bottom-1/4 left-1/3 w-20 h-20 bg-purple-400/25 rounded-full blur-xl animate-bounce animation-delay-2500"></div>
-      </div>
+					<NavigationMenu>
+						<NavigationMenuList>
+							<NavigationMenuItem>
+								<Link to="/" legacyBehavior passHref>
+									<NavigationMenuLink className={navigationMenuTriggerStyle()}>
+										Home
+									</NavigationMenuLink>
+								</Link>
+							</NavigationMenuItem>
+							<NavigationMenuItem>
+								<Link to="/courses" legacyBehavior passHref>
+									<NavigationMenuLink className={navigationMenuTriggerStyle()}>
+										Discover Courses & Tutors
+									</NavigationMenuLink>
+								</Link>
+							</NavigationMenuItem>
+							<NavigationMenuItem>
+								<Link to="/resources" legacyBehavior passHref>
+									<NavigationMenuLink className={navigationMenuTriggerStyle()}>
+										Free Tutor Notes
+									</NavigationMenuLink>
+								</Link>
+							</NavigationMenuItem>
+						</NavigationMenuList>
+					</NavigationMenu>
 
-      {/* Enhanced Promotional Banner with animation */}
-      <div className="bg-purple-600 text-white py-2 text-center text-sm relative z-10 shadow-lg transform translate-y-0 animate-slide-in-down">
-        <p className="animate-bounce font-medium">
-          🎓 EXCLUSIVE DEAL: Enroll your courses free now! Limited time offer
-        </p>
-      </div>
+					<div className="flex justify-end items-center space-x-4">
+						{currentUser ? (
+							<DropdownMenu>
+								<DropdownMenuTrigger asChild>
+									<Button
+										variant="ghost"
+										className="relative h-8 w-8 rounded-full"
+									>
+										<Avatar className="h-8 w-8">
+											{currentUser.photo ? (
+												<AvatarImage
+													src={currentUser.photo}
+													alt={currentUser.name}
+												/>
+											) : (
+												<AvatarFallback>
+													{getInitials(currentUser.name)}
+												</AvatarFallback>
+											)}
+										</Avatar>
+									</Button>
+								</DropdownMenuTrigger>
+								<DropdownMenuContent className="w-56" align="end" forceMount>
+									<div className="flex items-center justify-start gap-2 p-2">
+										<div className="flex flex-col space-y-1 leading-none">
+											<p className="font-medium">{currentUser.name}</p>
+											<p className="w-[200px] truncate text-sm text-muted-foreground capitalize">
+												{currentUser.role}
+											</p>
+										</div>
+									</div>
+									<DropdownMenuSeparator />
+									{currentUser.role === "tutor" && (
+										<DropdownMenuItem asChild>
+											<Link to="/tutor-profile" className="flex items-center">
+												<User className="mr-2 h-4 w-4" />
+												<span>Profile & Dashboard</span>
+											</Link>
+										</DropdownMenuItem>
+									)}
+									{currentUser.role === "student" && (
+										<DropdownMenuItem asChild>
+											<Link
+												to="/student-profile"
+												className="flex items-center"
+											>
+												<User className="mr-2 h-4 w-4" />
+												<span>Profile & Dashboard</span>
+											</Link>
+										</DropdownMenuItem>
+									)}
+									{currentUser.role === "parent" && (
+										<DropdownMenuItem asChild>
+											<Link to="/parent-profile" className="flex items-center">
+												<User className="mr-2 h-4 w-4" />
+												<span>My Account</span>
+											</Link>
+										</DropdownMenuItem>
+									)}
+									{currentUser.role === "admin" && (
+										<DropdownMenuItem asChild>
+											<Link to="/admin" className="flex items-center">
+												<User className="mr-2 h-4 w-4" />
+												<span>Dashboard</span>
+											</Link>
+										</DropdownMenuItem>
+									)}
+									<DropdownMenuSeparator />
+									<DropdownMenuItem
+										className="text-red-600 focus:text-red-600 cursor-pointer"
+										onClick={handleLogout}
+									>
+										<LogOut className="mr-2 h-4 w-4" />
+										<span>Log out</span>
+									</DropdownMenuItem>
+								</DropdownMenuContent>
+							</DropdownMenu>
+						) : (
+							<div className="flex items-center space-x-2">
+								<Link to="/login">
+									<Button variant="outline">Log In</Button>
+								</Link>
+								<Link to="/signup">
+									<Button>Sign Up</Button>
+								</Link>
+							</div>
+						)}
+					</div>
+				</div>
+			</header>
 
-      {/* Enhanced Header with animation */}
-      <header className={`bg-black/20 backdrop-blur-md border-b border-white/10 relative z-10 shadow-xl transition-all duration-1000 ${isVisible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'}`}>
-        <div className="container mx-auto px-4 py-4 grid grid-cols-3 items-center">
-          <Link to="/" className="flex items-center space-x-2 hover:scale-110 transition-all duration-500 group">
-            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-2 group-hover:shadow-2xl group-hover:shadow-purple-500/30 transition-all duration-300">
-              <GraduationCap className="h-8 w-8 text-white group-hover:rotate-12 transition-transform duration-300" />
-            </div>
-            <div>
-              <span className="text-2xl font-bold text-white group-hover:text-purple-200 transition-colors duration-300">TUTOR</span>
-              <span className="text-xl font-light text-purple-300 ml-1 group-hover:text-purple-200 transition-colors duration-300">CONNECT</span>
-              <div className="text-xs text-purple-200 group-hover:text-purple-100 transition-colors duration-300">NETWORK</div>
-            </div>
-          </Link>
-          
-          <nav className="hidden md:flex justify-center space-x-8">
-            <Link to="/" className="text-white hover:text-purple-300 transition-all duration-300 hover:scale-105 relative group font-bold">
-              Home
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-purple-400 transition-all duration-300 group-hover:w-full"></span>
-            </Link>
-            <Link to="/courses" className="text-white hover:text-purple-300 transition-all duration-300 hover:scale-105 relative group font-bold">
-              Discover Courses & Tutors
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-purple-400 transition-all duration-300 group-hover:w-full"></span>
-            </Link>
-            <Link to="/resources" className="text-white hover:text-purple-300 transition-all duration-300 hover:scale-105 relative group font-bold">
-              Free Tutor Notes
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-purple-400 transition-all duration-300 group-hover:w-full"></span>
-            </Link>
-          </nav>
-          
-          <div className="flex justify-end items-center space-x-4">
-            {/* Dynamic Authentication Section */}
-            {currentUser ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-8 w-8 rounded-full hover:bg-white/20">
-                    <Avatar className="h-8 w-8">
-                      {currentUser.photo ? (
-                        <AvatarImage src={currentUser.photo} alt={currentUser.name} />
-                      ) : (
-                        <AvatarFallback className="bg-white/20 text-white border-0">
-                          {getInitials(currentUser.name)}
-                        </AvatarFallback>
-                      )}
-                    </Avatar>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56 bg-white" align="end" forceMount>
-                  <div className="flex items-center justify-start gap-2 p-2">
-                    <div className="flex flex-col space-y-1 leading-none">
-                      <p className="font-medium">{currentUser.name}</p>
-                      <p className="w-[200px] truncate text-sm text-muted-foreground capitalize">
-                        {currentUser.role}
-                      </p>
-                    </div>
-                  </div>
-                  <DropdownMenuSeparator />
-                  {currentUser.role === 'tutor' && (
-                    <DropdownMenuItem asChild>
-                      <Link to="/tutor-profile" className="flex items-center">
-                        <User className="mr-2 h-4 w-4" />
-                        <span>Profile & Dashboard</span>
-                      </Link>
-                    </DropdownMenuItem>
-                  )}
-                  {currentUser.role === 'student' && (
-                    <DropdownMenuItem asChild>
-                      <Link to="/student-profile" className="flex items-center">
-                        <User className="mr-2 h-4 w-4" />
-                        <span>Profile & Dashboard</span>
-                      </Link>
-                    </DropdownMenuItem>
-                  )}
-                  {currentUser.role === 'parent' && (
-                    <DropdownMenuItem asChild>
-                      <Link to="/parent-profile" className="flex items-center">
-                        <User className="mr-2 h-4 w-4" />
-                        <span>My Account</span>
-                      </Link>
-                    </DropdownMenuItem>
-                  )}
-                  {currentUser.role === 'admin' && (
-                    <DropdownMenuItem asChild>
-                      <Link to="/admin" className="flex items-center">
-                        <User className="mr-2 h-4 w-4" />
-                        <span>Dashboard</span>
-                      </Link>
-                    </DropdownMenuItem>
-                  )}
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem 
-                    className="text-red-600 focus:text-red-600 cursor-pointer"
-                    onClick={handleLogout}
-                  >
-                    <LogOut className="mr-2 h-4 w-4" />
-                    <span>Log out</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <div className="flex items-center space-x-2">
-                <Link to="/login">
-                  <Button variant="outline" className="bg-purple-600 hover:bg-purple-700 text-white border-purple-500 transition-all duration-300 hover:scale-105">
-                    Log In
-                  </Button>
-                </Link>
-                <Link to="/signup">
-                  <Button className="bg-purple-600 hover:bg-purple-700 text-white shadow-lg hover:shadow-2xl hover:shadow-purple-500/30 transition-all duration-300 hover:scale-105">
-                    Sign Up
-                  </Button>
-                </Link>
-              </div>
-            )}
-          </div>
-        </div>
-      </header>
+			<section className="container mx-auto px-4 py-20">
+				<div className="text-center max-w-5xl mx-auto">
+					<h1 className="text-6xl md:text-7xl font-bold mb-6 leading-tight">
+						WELCOME TO
+						<br />
+						<span className="text-primary">Tutor Connect Network</span>
+					</h1>
+					<p className="text-xl md:text-2xl text-muted-foreground mb-4 font-bold">
+						Connecting Minds Worldwide
+					</p>
+					<p className="text-lg text-muted-foreground mb-12 max-w-3xl mx-auto leading-relaxed">
+						Experience the power of education with us. We offer a seamless blend
+						of technology and learning, providing interactive lessons, virtual
+						classrooms, and personalized feedback.
+					</p>
+					<div className="flex flex-col sm:flex-row gap-6 justify-center">
+						<Link to="/signup">
+							<Button size="lg">Get Started</Button>
+						</Link>
+						<Link to="/courses">
+							<Button size="lg" variant="outline">
+								Learn More
+							</Button>
+						</Link>
+					</div>
+				</div>
+			</section>
 
-      {/* Enhanced Hero Section with staggered animations */}
-      <section className="container mx-auto px-4 py-20 relative z-10">
-        <div className={`text-center max-w-5xl mx-auto transition-all duration-1000 delay-300 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
-          <h1 className="text-6xl md:text-7xl font-bold text-white mb-6 leading-tight animate-fade-in">
-            WELCOME TO
-            <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-violet-400 to-purple-300">
-              Tutor Connect Network
-            </span>
-          </h1>
-          <p className={`text-xl md:text-2xl text-purple-100 mb-4 font-bold transition-all duration-1000 delay-500 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
-            Connecting Minds Worldwide
-          </p>
-          <p className={`text-lg text-purple-200 mb-12 max-w-3xl mx-auto leading-relaxed transition-all duration-1000 delay-700 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
-            Experience the power of education with us. We offer a seamless blend of 
-            technology and learning, providing interactive lessons, virtual classrooms, and 
-            personalized feedback.
-          </p>
-          <div className={`flex flex-col sm:flex-row gap-6 justify-center transition-all duration-1000 delay-1000 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
-            <Link to="/signup">
-              <Button size="lg" className="bg-purple-600 hover:bg-purple-700 px-10 py-4 text-lg font-semibold rounded-lg shadow-2xl hover:shadow-3xl hover:shadow-purple-500/40 transform hover:">
-                Get Started
-              </Button>
-            </Link>
-            <Link to="/courses">
-              <Button size="lg" className="bg-purple-600 hover:bg-purple-700 px-10 py-4 text-lg font-semibold rounded-lg shadow-2xl backdrop-blur-sm transform hover:scale-110 transition-all duration-500">
-                Learn More
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
+			<section className="container mx-auto px-4 py-20">
+				<h2 className="text-5xl font-bold text-center mb-4">
+					Choose Your Path
+				</h2>
+				<p className="text-xl text-center text-muted-foreground mb-16">
+					Whether you're here to learn or teach, we have the perfect solution
+					for you
+				</p>
 
-      {/* Network Visualization Effect */}
-      <div className="absolute right-0 top-1/2 transform -translate-y-1/2 opacity-30">
-        <div className="relative w-96 h-96">
-          {/* Geometric network pattern */}
-          <div className="absolute inset-0">
-            <svg viewBox="0 0 400 400" className="w-full h-full">
-              <defs>
-                <linearGradient id="networkGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#A855F7" />
-                  <stop offset="100%" stopColor="#7C3AED" />
-                </linearGradient>
-              </defs>
-              {/* Network lines */}
-              <path d="M50,50 L150,80 L250,60 L350,90 M80,150 L180,120 L280,140 L380,110" 
-                    stroke="url(#networkGradient)" strokeWidth="2" fill="none" opacity="0.6" />
-              <path d="M50,200 L150,230 L250,210 L350,240 M80,300 L180,270 L280,290 L380,260" 
-                    stroke="url(#networkGradient)" strokeWidth="2" fill="none" opacity="0.6" />
-              {/* Network nodes */}
-              <circle cx="50" cy="50" r="4" fill="#A855F7" opacity="0.8" />
-              <circle cx="150" cy="80" r="4" fill="#7C3AED" opacity="0.8" />
-              <circle cx="250" cy="60" r="4" fill="#A855F7" opacity="0.8" />
-              <circle cx="350" cy="90" r="4" fill="#7C3AED" opacity="0.8" />
-            </svg>
-          </div>
-        </div>
-      </div>
+				<div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-8 max-w-7xl mx-auto">
+					<Card>
+						<CardHeader className="text-center pb-6">
+							<div className="mx-auto mb-4 p-3 bg-primary rounded-2xl w-fit">
+								<BookOpenCheck className="h-12 w-12 text-primary-foreground" />
+							</div>
+							<CardTitle className="text-2xl mb-3 font-bold">
+								For Students
+							</CardTitle>
+							<CardDescription className="text-sm font-medium">
+								Unlock your potential with personalized learning experiences
+							</CardDescription>
+						</CardHeader>
+						<CardContent className="space-y-4">
+							<div className="space-y-3">
+								<div className="flex items-center space-x-3">
+									<Target className="h-5 w-5 text-primary" />
+									<span className="text-sm font-semibold">
+										Personalized Learning Paths
+									</span>
+								</div>
+								<div className="flex items-center space-x-3">
+									<Users className="h-5 w-5 text-primary" />
+									<span className="text-sm font-semibold">
+										Expert Tutors Worldwide
+									</span>
+								</div>
+								<div className="flex items-center space-x-3">
+									<Zap className="h-5 w-5 text-primary" />
+									<span className="text-sm font-semibold">
+										Interactive Learning Tools
+									</span>
+								</div>
+								<div className="flex items-center space-x-3">
+									<Award className="h-5 w-5 text-primary" />
+									<span className="text-sm font-semibold">
+										Certified Achievements
+									</span>
+								</div>
+							</div>
+							<div className="pt-4">
+								<Link to="/signup" className="block">
+									<Button className="w-full">Start Learning Today</Button>
+								</Link>
+							</div>
+						</CardContent>
+					</Card>
 
-      {/* Interactive Sections for Tutors, Students, and Parents with enhanced animations */}
-      <section className="container mx-auto px-4 py-20 relative z-10">
-        <h2 className={`text-5xl font-bold text-center text-white mb-4 transition-all duration-1000 delay-300 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
-          Choose Your Path
-        </h2>
-        <p className={`text-xl text-center text-purple-200 mb-16 transition-all duration-1000 delay-500 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
-          Whether you're here to learn or teach, we have the perfect solution for you
-        </p>
-        
-        <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-8 max-w-7xl mx-auto">
-          {/* For Students - Enhanced with animations */}
-          <Card 
-            className={`bg-white/90 backdrop-blur-xl border-2 border-blue-200/50 hover:border-blue-300/80 transition-all duration-700 hover:shadow-2xl hover:shadow-blue-500/30 transform hover:scale-105 hover:-translate-y-2 cursor-pointer group ${hoveredCard === 'students' ? 'scale-105 -translate-y-2 shadow-2xl shadow-blue-500/30' : ''} ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'} transition-all duration-1000 delay-700`}
-            onMouseEnter={() => setHoveredCard('students')}
-            onMouseLeave={() => setHoveredCard(null)}
-          >
-            <CardHeader className="text-center pb-6">
-              <div className="mx-auto mb-4 p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl w-fit shadow-lg group-hover:shadow-2xl group-hover:shadow-blue-500/40 transition-all duration-500 group-hover:rotate-6">
-                <BookOpenCheck className="h-12 w-12 text-white group-hover:scale-110 transition-transform duration-300" />
-              </div>
-              <CardTitle className="text-2xl text-gray-800 mb-3 font-bold group-hover:text-blue-700 transition-colors duration-300">For Students</CardTitle>
-              <CardDescription className="text-gray-600 text-sm font-medium group-hover:text-gray-700 transition-colors duration-300">
-                Unlock your potential with personalized learning experiences
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-3">
-                <div className="flex items-center space-x-3 text-gray-700 hover:text-blue-600 transition-all duration-300 hover:translate-x-2 group/item">
-                  <Target className="h-5 w-5 text-blue-500 group-hover/item:scale-110 transition-transform duration-300" />
-                  <span className="text-sm font-semibold">Personalized Learning Paths</span>
-                </div>
-                <div className="flex items-center space-x-3 text-gray-700 hover:text-blue-600 transition-all duration-300 hover:translate-x-2 group/item">
-                  <Users className="h-5 w-5 text-blue-500 group-hover/item:scale-110 transition-transform duration-300" />
-                  <span className="text-sm font-semibold">Expert Tutors Worldwide</span>
-                </div>
-                <div className="flex items-center space-x-3 text-gray-700 hover:text-blue-600 transition-all duration-300 hover:translate-x-2 group/item">
-                  <Zap className="h-5 w-5 text-blue-500 group-hover/item:scale-110 transition-transform duration-300" />
-                  <span className="text-sm font-semibold">Interactive Learning Tools</span>
-                </div>
-                <div className="flex items-center space-x-3 text-gray-700 hover:text-blue-600 transition-all duration-300 hover:translate-x-2 group/item">
-                  <Award className="h-5 w-5 text-blue-500 group-hover/item:scale-110 transition-transform duration-300" />
-                  <span className="text-sm font-semibold">Certified Achievements</span>
-                </div>
-              </div>
-              <div className="pt-4">
-                <Link to="/signup" className="block">
-                  <Button className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-2.5 text-base font-semibold rounded-lg shadow-lg hover:shadow-2xl hover:shadow-blue-500/30 transition-all duration-500 hover:scale-105">
-                    Start Learning Today
-                  </Button>
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
+					<Card>
+						<CardHeader className="text-center pb-6">
+							<div className="mx-auto mb-4 p-3 bg-primary rounded-2xl w-fit">
+								<UserCheck className="h-12 w-12 text-primary-foreground" />
+							</div>
+							<CardTitle className="text-2xl mb-3 font-bold">
+								For Tutors
+							</CardTitle>
+							<CardDescription className="text-sm font-medium">
+								Share your expertise and build a thriving teaching career
+							</CardDescription>
+						</CardHeader>
+						<CardContent className="space-y-4">
+							<div className="space-y-3">
+								<div className="flex items-center space-x-3">
+									<TrendingUp className="h-5 w-5 text-primary" />
+									<span className="text-sm font-semibold">
+										Grow Your Income
+									</span>
+								</div>
+								<div className="flex items-center space-x-3">
+									<Calendar className="h-5 w-5 text-primary" />
+									<span className="text-sm font-semibold">
+										Flexible Schedule
+									</span>
+								</div>
+								<div className="flex items-center space-x-3">
+									<BookOpen className="h-5 w-5 text-primary" />
+									<span className="text-sm font-semibold">
+										Create Custom Courses
+									</span>
+								</div>
+								<div className="flex items-center space-x-3">
+									<Star className="h-5 w-5 text-primary" />
+									<span className="text-sm font-semibold">
+										Build Your Reputation
+									</span>
+								</div>
+							</div>
+							<div className="pt-4">
+								<Link to="/signup" className="block">
+									<Button className="w-full">Become a Tutor</Button>
+								</Link>
+							</div>
+						</CardContent>
+					</Card>
 
-          {/* For Tutors - Enhanced with animations */}
-          <Card 
-            className={`bg-white/90 backdrop-blur-xl border-2 border-purple-200/50 hover:border-purple-300/80 transition-all duration-700 hover:shadow-2xl hover:shadow-purple-500/30 transform hover:scale-105 hover:-translate-y-2 cursor-pointer group ${hoveredCard === 'tutors' ? 'scale-105 -translate-y-2 shadow-2xl shadow-purple-500/30' : ''} ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'} transition-all duration-1000 delay-900`}
-            onMouseEnter={() => setHoveredCard('tutors')}
-            onMouseLeave={() => setHoveredCard(null)}
-          >
-            <CardHeader className="text-center pb-6">
-              <div className="mx-auto mb-4 p-3 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl w-fit shadow-lg group-hover:shadow-2xl group-hover:shadow-purple-500/40 transition-all duration-500 group-hover:rotate-6">
-                <UserCheck className="h-12 w-12 text-white group-hover:scale-110 transition-transform duration-300" />
-              </div>
-              <CardTitle className="text-2xl text-gray-800 mb-3 font-bold group-hover:text-purple-700 transition-colors duration-300">For Tutors</CardTitle>
-              <CardDescription className="text-gray-600 text-sm font-medium group-hover:text-gray-700 transition-colors duration-300">
-                Share your expertise and build a thriving teaching career
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-3">
-                <div className="flex items-center space-x-3 text-gray-700 hover:text-purple-600 transition-all duration-300 hover:translate-x-2 group/item">
-                  <TrendingUp className="h-5 w-5 text-purple-500 group-hover/item:scale-110 transition-transform duration-300" />
-                  <span className="text-sm font-semibold">Grow Your Income</span>
-                </div>
-                <div className="flex items-center space-x-3 text-gray-700 hover:text-purple-600 transition-all duration-300 hover:translate-x-2 group/item">
-                  <Calendar className="h-5 w-5 text-purple-500 group-hover/item:scale-110 transition-transform duration-300" />
-                  <span className="text-sm font-semibold">Flexible Schedule</span>
-                </div>
-                <div className="flex items-center space-x-3 text-gray-700 hover:text-purple-600 transition-all duration-300 hover:translate-x-2 group/item">
-                  <BookOpen className="h-5 w-5 text-purple-500 group-hover/item:scale-110 transition-transform duration-300" />
-                  <span className="text-sm font-semibold">Create Custom Courses</span>
-                </div>
-                <div className="flex items-center space-x-3 text-gray-700 hover:text-purple-600 transition-all duration-300 hover:translate-x-2 group/item">
-                  <Star className="h-5 w-5 text-purple-500 group-hover/item:scale-110 transition-transform duration-300" />
-                  <span className="text-sm font-semibold">Build Your Reputation</span>
-                </div>
-              </div>
-              <div className="pt-4">
-                <Link to="/signup" className="block">
-                  <Button className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white py-2.5 text-base font-semibold rounded-lg shadow-lg hover:shadow-2xl hover:shadow-purple-500/30 transition-all duration-500 hover:scale-105">
-                    Become a Tutor
-                  </Button>
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
-          
-          {/* For Parents - Enhanced with animations */}
-          <Card 
-            className={`bg-white/90 backdrop-blur-xl border-2 border-blue-200/50 hover:border-blue-300/80 transition-all duration-700 hover:shadow-2xl hover:shadow-blue-500/30 transform hover:scale-105 hover:-translate-y-2 cursor-pointer group ${hoveredCard === 'parents' ? 'scale-105 -translate-y-2 shadow-2xl shadow-green-500/30' : ''} ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'} transition-all duration-1000 delay-1100`}
-            onMouseEnter={() => setHoveredCard('parents')}
-            onMouseLeave={() => setHoveredCard(null)}
-          >
-            <CardHeader className="text-center pb-6">
-              <div className="mx-auto mb-4 p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl w-fit shadow-lg group-hover:shadow-2xl group-hover:shadow-blue-500/40 transition-all duration-500 group-hover:rotate-6">
-                <Heart className="h-12 w-12 text-white group-hover:scale-110 transition-transform duration-300" />
-              </div>
-              <CardTitle className="text-2xl text-gray-800 mb-3 font-bold group-hover:text-blue-700 transition-colors duration-300">For Parents</CardTitle>
-              <CardDescription className="text-gray-600 text-sm font-medium group-hover:text-gray-700 transition-colors duration-300">
-                Support your child's educational journey with confidence
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-3">
-                <div className="flex items-center space-x-3 text-gray-700 hover:text-blue-600 transition-all duration-300 hover:translate-x-2 group/item">
-                  <TrendingUp className="h-5 w-5 text-blue-500 group-hover/item:scale-110 transition-transform duration-300" />
-                  <span className="text-sm font-semibold">Track Learning Progress</span>
-                </div>
-                <div className="flex items-center space-x-3 text-gray-700 hover:text-blue-600 transition-all duration-300 hover:translate-x-2 group/item">
-                  <Shield className="h-5 w-5 text-blue-500 group-hover/item:scale-110 transition-transform duration-300" />
-                  <span className="text-sm font-semibold">Verified Tutor Profiles</span>
-                </div>
-                <div className="flex items-center space-x-3 text-gray-700 hover:text-blue-600 transition-all duration-300 hover:translate-x-2 group/item">
-                  <Clock className="h-5 w-5 text-blue-500 group-hover/item:scale-110 transition-transform duration-300" />
-                  <span className="text-sm font-semibold">Flexible Scheduling</span>
-                </div>
-                <div className="flex items-center space-x-3 text-gray-700 hover:text-blue-600 transition-all duration-300 hover:translate-x-2 group/item">
-                  <Star className="h-5 w-5 text-blue-500 group-hover/item:scale-110 transition-transform duration-300" />
-                  <span className="text-sm font-semibold">Safety & Security</span>
-                </div>
-              </div>
-              <div className="pt-4">
-                <Link to="/signup" className="block">
-                  <Button className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-2.5 text-base font-semibold rounded-lg shadow-lg hover:shadow-2xl hover:shadow-blue-500/30 transition-all duration-500 hover:scale-105">
-                    Get Started
-                  </Button>
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </section>
+					<Card>
+						<CardHeader className="text-center pb-6">
+							<div className="mx-auto mb-4 p-3 bg-primary rounded-2xl w-fit">
+								<Heart className="h-12 w-12 text-primary-foreground" />
+							</div>
+							<CardTitle className="text-2xl mb-3 font-bold">
+								For Parents
+							</CardTitle>
+							<CardDescription className="text-sm font-medium">
+								Support your child's educational journey with confidence
+							</CardDescription>
+						</CardHeader>
+						<CardContent className="space-y-4">
+							<div className="space-y-3">
+								<div className="flex items-center space-x-3">
+									<TrendingUp className="h-5 w-5 text-primary" />
+									<span className="text-sm font-semibold">
+										Track Learning Progress
+									</span>
+								</div>
+								<div className="flex items-center space-x-3">
+									<Shield className="h-5 w-5 text-primary" />
+									<span className="text-sm font-semibold">
+										Verified Tutor Profiles
+									</span>
+								</div>
+								<div className="flex items-center space-x-3">
+									<Clock className="h-5 w-5 text-primary" />
+									<span className="text-sm font-semibold">
+										Flexible Scheduling
+									</span>
+								</div>
+								<div className="flex items-center space-x-3">
+									<Star className="h-5 w-5 text-primary" />
+									<span className="text-sm font-semibold">
+										Safety & Security
+									</span>
+								</div>
+							</div>
+							<div className="pt-4">
+								<Link to="/signup" className="block">
+									<Button className="w-full">Get Started</Button>
+								</Link>
+							</div>
+						</CardContent>
+					</Card>
+				</div>
+			</section>
 
-      {/* Enhanced Features Section */}
-      <section className="container mx-auto px-4 py-20 relative z-10">
-        <h2 className={`text-4xl font-bold text-center text-white mb-16 transition-all duration-1000 delay-300 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
-          Why Choose Tutor Connect?
-        </h2>
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {/* Feature cards with staggered animations */}
-          <Card className={`bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/20 transition-all duration-700 hover:shadow-2xl hover:shadow-purple-500/20 transform hover:scale-110 hover:-translate-y-4 group ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'} transition-all duration-1000 delay-1100`}>
-            <CardHeader className="text-center">
-              <Users className="h-12 w-12 text-purple-300 mx-auto mb-4 group-hover:scale-110 transition-transform duration-300" />
-              <CardTitle className="text-white">Expert Tutors</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <CardDescription className="text-purple-100">
-                Learn from qualified professionals with proven track records in their fields.
-              </CardDescription>
-            </CardContent>
-          </Card>
+			<section className="container mx-auto px-4 py-20">
+				<h2 className="text-4xl font-bold text-center mb-16">
+					Why Choose Tutor Connect?
+				</h2>
+				<div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+					<Card>
+						<CardHeader className="text-center">
+							<Users className="h-12 w-12 text-primary mx-auto mb-4" />
+							<CardTitle>Expert Tutors</CardTitle>
+						</CardHeader>
+						<CardContent>
+							<CardDescription>
+								Learn from qualified professionals with proven track records in
+								their fields.
+							</CardDescription>
+						</CardContent>
+					</Card>
 
-          <Card className={`bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/20 transition-all duration-700 hover:shadow-2xl hover:shadow-violet-500/20 transform hover:scale-110 hover:-translate-y-4 group ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'} transition-all duration-1000 delay-1300`}>
-            <CardHeader className="text-center">
-              <Calendar className="h-12 w-12 text-violet-300 mx-auto mb-4 group-hover:scale-110 transition-transform duration-300" />
-              <CardTitle className="text-white">Flexible Scheduling</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <CardDescription className="text-purple-100">
-                Book sessions that fit your schedule with our easy-to-use booking system.
-              </CardDescription>
-            </CardContent>
-          </Card>
+					<Card>
+						<CardHeader className="text-center">
+							<Calendar className="h-12 w-12 text-primary mx-auto mb-4" />
+							<CardTitle>Flexible Scheduling</CardTitle>
+						</CardHeader>
+						<CardContent>
+							<CardDescription>
+								Book sessions that fit your schedule with our easy-to-use
+								booking system.
+							</CardDescription>
+						</CardContent>
+					</Card>
 
-          <Card className={`bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/20 transition-all duration-700 hover:shadow-2xl hover:shadow-violet-500/20 transform hover:scale-110 hover:-translate-y-4 group ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'} transition-all duration-1000 delay-1500`}>
-            <CardHeader className="text-center">
-              <BookOpen className="h-12 w-12 text-violet-300 mx-auto mb-4 group-hover:scale-110 transition-transform duration-300" />
-              <CardTitle className="text-white">Diverse Courses</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <CardDescription className="text-purple-100">
-                Access a wide range of subjects from mathematics to languages and beyond.
-              </CardDescription>
-            </CardContent>
-          </Card>
+					<Card>
+						<CardHeader className="text-center">
+							<BookOpen className="h-12 w-12 text-primary mx-auto mb-4" />
+							<CardTitle>Diverse Courses</CardTitle>
+						</CardHeader>
+						<CardContent>
+							<CardDescription>
+								Access a wide range of subjects from mathematics to languages
+								and beyond.
+							</CardDescription>
+						</CardContent>
+					</Card>
 
-          <Card className={`bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/20 transition-all duration-700 hover:shadow-2xl hover:shadow-purple-500/20 transform hover:scale-110 hover:-translate-y-4 group ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'} transition-all duration-1000 delay-1700`}>
-            <CardHeader className="text-center">
-              <Award className="h-12 w-12 text-purple-300 mx-auto mb-4 group-hover:scale-110 transition-transform duration-300" />
-              <CardTitle className="text-white">Track Progress</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <CardDescription className="text-purple-100">
-                Monitor your learning journey with detailed analytics and progress reports.
-              </CardDescription>
-            </CardContent>
-          </Card>
-        </div>
-      </section>
+					<Card>
+						<CardHeader className="text-center">
+							<Award className="h-12 w-12 text-primary mx-auto mb-4" />
+							<CardTitle>Track Progress</CardTitle>
+						</CardHeader>
+						<CardContent>
+							<CardDescription>
+								Monitor your learning journey with detailed analytics and
+								progress reports.
+							</CardDescription>
+						</CardContent>
+					</Card>
+				</div>
+			</section>
 
-      {/* Expert Tutors Section - New Section with animations */}
-      <section className="container mx-auto px-4 py-20 relative z-10">
-        
-        {/* Tutors Display Section */}
-        <div className={`bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20 transition-all duration-1000 delay-1900 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'}`}>
-          <div className="text-center py-16">
-            <Users className="h-24 w-24 text-purple-300 mx-auto mb-6 opacity-60" />
-            <h3 className="text-2xl font-semibold text-white mb-4">
-              Discover Amazing Tutors
-            </h3>
-            <p className="text-lg text-purple-200 mb-8 max-w-2xl mx-auto">
-              Browse through our extensive network of qualified tutors across various subjects. 
-              Find the perfect match for your learning needs and start your educational journey today.
-            </p>
-            <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-8">
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20 hover:bg-white/20 transition-all duration-300 hover:scale-105 group">
-                <BookOpen className="h-8 w-8 text-blue-400 mx-auto mb-3 group-hover:scale-110 transition-transform duration-300" />
-                <h4 className="text-white font-semibold mb-2">All Subjects</h4>
-                <p className="text-purple-200 text-sm">Mathematics, Science, Languages, Arts & more</p>
-              </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20 hover:bg-white/20 transition-all duration-300 hover:scale-105 group">
-                <Star className="h-8 w-8 text-yellow-400 mx-auto mb-3 group-hover:scale-110 transition-transform duration-300" />
-                <h4 className="text-white font-semibold mb-2">Verified Experts</h4>
-                <p className="text-purple-200 text-sm">Background-checked & certified professionals</p>
-              </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20 hover:bg-white/20 transition-all duration-300 hover:scale-105 group">
-                <MapPin className="h-8 w-8 text-green-400 mx-auto mb-3 group-hover:scale-110 transition-transform duration-300" />
-                <h4 className="text-white font-semibold mb-2">Global Reach</h4>
-                <p className="text-purple-200 text-sm">Connect with tutors from around the world</p>
-              </div>
-            </div>
-            <Link to="/ExpertTutors" >
-              <Button size="lg" className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white px-8 py-3 text-lg font-semibold rounded-lg shadow-lg hover:shadow-2xl hover:shadow-purple-500/30 transition-all duration-500 hover:scale-105">
-                View All Tutors
-                <ChevronRight className="ml-2 h-5 w-5" />
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
+			<section className="container mx-auto px-4 py-20">
+				<div className="bg-muted rounded-2xl p-8">
+					<div className="text-center py-16">
+						<Users className="h-24 w-24 text-primary mx-auto mb-6 opacity-60" />
+						<h3 className="text-2xl font-semibold mb-4">
+							Discover Amazing Tutors
+						</h3>
+						<p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
+							Browse through our extensive network of qualified tutors across
+							various subjects. Find the perfect match for your learning needs
+							and start your educational journey today.
+						</p>
+						<div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-8">
+							<div className="bg-background rounded-lg p-6">
+								<BookOpen className="h-8 w-8 text-primary mx-auto mb-3" />
+								<h4 className="font-semibold mb-2">All Subjects</h4>
+								<p className="text-muted-foreground text-sm">
+									Mathematics, Science, Languages, Arts & more
+								</p>
+							</div>
+							<div className="bg-background rounded-lg p-6">
+								<Star className="h-8 w-8 text-primary mx-auto mb-3" />
+								<h4 className="font-semibold mb-2">Verified Experts</h4>
+								<p className="text-muted-foreground text-sm">
+									Background-checked & certified professionals
+								</p>
+							</div>
+							<div className="bg-background rounded-lg p-6">
+								<Shield className="h-8 w-8 text-primary mx-auto mb-3" />
+								<h4 className="font-semibold mb-2">Global Reach</h4>
+								<p className="text-muted-foreground text-sm">
+									Connect with tutors from around the world
+								</p>
+							</div>
+						</div>
+						<Link to="/ExpertTutors">
+							<Button size="lg">
+								View All Tutors
+								<ChevronRight className="ml-2 h-5 w-5" />
+							</Button>
+						</Link>
+					</div>
+				</div>
+			</section>
 
-      {/* Enhanced Stats Section */}
-      <section className={`py-20 text-blue-900 text-center transition-all duration-1000 delay-2100 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
-        <div className="container mx-auto px-6 max-w-3xl text-center">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
-            <span className="inline-block text-white font-bold drop-shadow-sm hover:scale-110 transition-transform duration-300">Efficiency.</span>{' '}
-            <span className="inline-block text-white font-bold drop-shadow-sm hover:scale-110 transition-transform duration-300">Security.</span>{' '}
-            <span className="inline-block text-white font-bold drop-shadow-sm hover:scale-110 transition-transform duration-300">Success.</span>
-          </h2>
-          <div className="w-20 h-1 mx-auto bg-white rounded-full mb-6"></div>
-
-          <p className="text-lg md:text-xl text-white/80 font-light">
-            That's what you get with <span className="font-semibold">Connect Education</span>.
-          </p>
-        </div>
-      </section>
-
-      {/* Enhanced Footer */}
-      <footer className={`bg-black/30 backdrop-blur-md text-white py-16 border-t border-white/10 relative z-10 transition-all duration-1000 delay-2300 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-4 gap-8">
-            <div>
-              <div className="flex items-center space-x-2 mb-4 hover:scale-105 transition-transform duration-300 group">
-                <GraduationCap className="h-6 w-6 text-purple-300 group-hover:rotate-12 transition-transform duration-300" />
-                <span className="text-xl font-bold group-hover:text-purple-200 transition-colors duration-300">Tutor Connect</span>
-              </div>
-              <p className="text-purple-200">
-                Connecting students with expert tutors for personalized learning experiences.
-              </p>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-4 text-purple-300">For Students</h3>
-              <ul className="space-y-2 text-purple-100">
-                <li><Link to="/courses" className="hover:text-white transition-colors hover:translate-x-2 inline-block">Browse Courses</Link></li>
-                <li><Link to="/dashboard" className="hover:text-white transition-colors hover:translate-x-2 inline-block">Dashboard</Link></li>
-                <li><Link to="/signup" className="hover:text-white transition-colors hover:translate-x-2 inline-block">Sign Up</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-4 text-purple-300">For Tutors</h3>
-              <ul className="space-y-2 text-purple-100">
-                <li><Link to="/signup" className="hover:text-white transition-colors hover:translate-x-2 inline-block">Become a Tutor</Link></li>
-                <li><Link to="/tutor-profile" className="hover:text-white transition-colors hover:translate-x-2 inline-block">Tutor Dashboard</Link></li>
-                <li><Link to="/Tutors" className="hover:text-white transition-colors hover:translate-x-2 inline-block">View All Tutors</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-4 text-purple-300">Support</h3>
-              <ul className="space-y-2 text-purple-100">
-                <li><Link to="/login" className="hover:text-white transition-colors hover:translate-x-2 inline-block">Login</Link></li>
-                <li><Link to="/signup" className="hover:text-white transition-colors hover:translate-x-2 inline-block">Contact Us</Link></li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t border-white/10 mt-12 pt-8 text-center text-purple-200">
-            <p>&copy; 2025 Tutor Connect. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
-    </div>
-  );
+			<footer className="bg-muted py-16">
+				<div className="container mx-auto px-4">
+					<div className="grid md:grid-cols-4 gap-8">
+						<div>
+							<div className="flex items-center space-x-2 mb-4">
+								<GraduationCap className="h-6 w-6 text-primary" />
+								<span className="text-xl font-bold">Tutor Connect</span>
+							</div>
+							<p className="text-muted-foreground">
+								Connecting students with expert tutors for personalized learning
+								experiences.
+							</p>
+						</div>
+						<div>
+							<h3 className="font-semibold mb-4">For Students</h3>
+							<ul className="space-y-2">
+								<li>
+									<Link to="/courses" className="hover:text-primary">
+										Browse Courses
+									</Link>
+								</li>
+								<li>
+									<Link to="/dashboard" className="hover:text-primary">
+										Dashboard
+									</Link>
+								</li>
+								<li>
+									<Link to="/signup" className="hover:text-primary">
+										Sign Up
+									</Link>
+								</li>
+							</ul>
+						</div>
+						<div>
+							<h3 className="font-semibold mb-4">For Tutors</h3>
+							<ul className="space-y-2">
+								<li>
+									<Link to="/signup" className="hover:text-primary">
+										Become a Tutor
+									</Link>
+								</li>
+								<li>
+									<Link to="/tutor-profile" className="hover:text-primary">
+										Tutor Dashboard
+									</Link>
+								</li>
+								<li>
+									<Link to="/Tutors" className="hover:text-primary">
+										View All Tutors
+									</Link>
+								</li>
+							</ul>
+						</div>
+						<div>
+							<h3 className="font-semibold mb-4">Support</h3>
+							<ul className="space-y-2">
+								<li>
+									<Link to="/login" className="hover:text-primary">
+										Login
+									</Link>
+								</li>
+								<li>
+									<Link to="/signup" className="hover:text-primary">
+										Contact Us
+									</Link>
+								</li>
+							</ul>
+						</div>
+					</div>
+					<div className="border-t mt-12 pt-8 text-center text-muted-foreground">
+						<p>&copy; 2025 Tutor Connect. All rights reserved.</p>
+					</div>
+				</div>
+			</footer>
+		</div>
+	);
 };
 
 export default Index;
