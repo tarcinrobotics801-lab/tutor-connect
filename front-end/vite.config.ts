@@ -4,12 +4,12 @@ import path from "path";
 
 export default defineConfig({
   server: {
-    host: "::",
-    port: 8080,
+    host: "127.0.0.1",
+    port: 5173,
     proxy: {
       // ✅ Forward all /api calls to your backend
       "/api": {
-        target: "http://backend:5000",
+        target: "http://localhost:5000",
         changeOrigin: true,
         secure: false,
       },

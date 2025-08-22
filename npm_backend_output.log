@@ -1,0 +1,6 @@
+
+> back-end@1.0.0 dev
+> ts-node-dev --respawn --transpile-only server.ts
+
+[INFO] 14:02:47 ts-node-dev ver. 2.0.0 (using ts-node ver. 10.9.2, typescript ver. 5.9.2)
+[dotenv@17.2.0] injecting env (5) from .env (tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] })
