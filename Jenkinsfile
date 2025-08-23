@@ -4,7 +4,7 @@ pipeline {
     COMPOSE_PROJECT_NAME = "tutorconnect-jules-ai"
     REMOTE_USER = "${env.REMOTE_USER}"
     REMOTE_HOST = "${env.REMOTE_HOST}"
-    REMOTE_DIR  = "${env.REMOTE_DIR_TC}"
+    REMOTE_DIR  = "${env.REMOTE_DIR_TC_JULES}"
   }
 
   triggers {
@@ -14,9 +14,9 @@ pipeline {
   stages {
     stage('Checkout Code') {
       steps {
-        git branch: 'prod',
+        git branch: 'redesign-ui',
             credentialsId: 'github-pat',
-            url: 'https://github.com/tarcinrobotics/tutor-connect.git'
+            url: 'https://github.com/tarcinrobotics801-lab/tutor-connect.git'
       }
     }
 
