@@ -3,7 +3,7 @@ services:
   backend:
     build: ./back-end
     ports:
-      - "5000:5000"
+      - "5002:5000"
     environment:
       - PORT=5000
     restart: always  
@@ -12,7 +12,7 @@ services:
     build:
       context: ./front-end
     ports:
-      - "7000:80"
+      - "7002:80"
     depends_on:
       - backend
     restart: always  
