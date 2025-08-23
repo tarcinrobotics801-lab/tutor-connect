@@ -1,7 +1,7 @@
 pipeline {
   agent { label 'ci-only' }
   environment {
-    COMPOSE_PROJECT_NAME = "tutorconnect"
+    COMPOSE_PROJECT_NAME = "tutorconnect-jules-ai"
     REMOTE_USER = "${env.REMOTE_USER}"
     REMOTE_HOST = "${env.REMOTE_HOST}"
     REMOTE_DIR  = "${env.REMOTE_DIR_TC}"
