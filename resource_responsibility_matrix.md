@@ -249,6 +249,149 @@ Date: [DATE]
 
 ---
 
+## Daily Campaign Operating Rhythm
+
+This section defines how the campaign should run every working day. The goal is to prevent missed follow-ups, unclear ownership, and end-of-day confusion.
+
+### Morning Planning - 10 to 15 Minutes
+
+**Time:** Start of working day  
+**Owner:** Campaign Owner  
+**Participants:** College Outreach Lead, Student Acquisition Coordinator, CRM / Tracker Owner
+
+| Question | Owner | Output |
+|---|---|---|
+| Which colleges are planned for today? | College Outreach Lead | Today's college action list |
+| Which calls must be attempted today? | College Outreach Lead | Call list with priority order |
+| Which students need follow-up today? | Student Acquisition Coordinator | Student follow-up list |
+| Which links/assets are pending? | Content & Collateral Owner | Asset blocker list |
+| Which follow-ups are overdue? | CRM / Tracker Owner | Overdue follow-up list |
+| Which decisions are needed from leadership? | Campaign Owner | Decision list |
+
+**Morning output format:**
+
+```text
+Today Plan - [DATE]
+
+College actions:
+1. [College Name] - [Call / Email / WhatsApp] - Owner: [Name]
+2. [College Name] - [Call / Email / WhatsApp] - Owner: [Name]
+
+Student actions:
+1. [Student / Group] - [Action] - Owner: [Name]
+
+Asset blockers:
+1. [Asset / Link] - [Owner] - [Expected completion]
+
+Leadership decisions needed:
+1. [Decision]
+```
+
+---
+
+### During the Day - Live Update Rules
+
+| Rule | Responsible Role | Expected Action |
+|---|---|---|
+| After every TPO call | College Outreach Lead | Update call result in tracker immediately |
+| After every WhatsApp message | College Outreach Lead | Mark WhatsApp sent and add date |
+| After every positive call | College Outreach Lead | Send post-call email within 30 minutes |
+| After every student application | Student Acquisition Coordinator | Contact or classify student within 24 hours |
+| After every asset change | Content & Collateral Owner | Share only the final approved link/file |
+| Before end of day | CRM / Tracker Owner | Check that all actions are updated in tracker |
+
+---
+
+### Evening Review - 15 Minutes
+
+**Time:** End of working day  
+**Owner:** CRM / Tracker Owner  
+**Reviewed by:** Campaign Owner
+
+| Question | Owner | Output |
+|---|---|---|
+| What was completed today? | CRM / Tracker Owner | Completed action list |
+| Which colleges moved forward? | College Outreach Lead | Active college list |
+| Which colleges need follow-up tomorrow? | College Outreach Lead | Tomorrow follow-up list |
+| How many student applications came in? | Student Acquisition Coordinator | Application count and quality notes |
+| What is blocked? | All owners | Blocker list |
+| What should be escalated or parked? | Campaign Owner | Escalation / parking decision |
+
+**Evening output format:**
+
+```text
+Daily Review - [DATE]
+
+Completed today:
+- Intro emails sent: [Number]
+- Calls attempted: [Number]
+- Calls connected: [Number]
+- WhatsApps sent: [Number]
+- Post-call emails sent: [Number]
+- Student applications received: [Number]
+
+Positive movement:
+- [College Name] - [Status] - [Next step]
+
+Follow-ups due tomorrow:
+- [College Name] - [Action] - Owner: [Name]
+
+Student follow-ups:
+- [Count] students pending contact
+- [Count] students qualified
+
+Blockers:
+- [Blocker] - Owner: [Name] - Support needed: [Yes / No]
+
+Decisions needed:
+- [Decision]
+```
+
+---
+
+## Weekly Review Rhythm
+
+**Frequency:** Once per week  
+**Owner:** Campaign Owner  
+**Participants:** All role owners
+
+| Review Area | Questions to Ask | Decision |
+|---|---|---|
+| College progress | Which colleges are active, interested, or unresponsive? | Continue / Visit / Park |
+| Student pipeline | How many students applied, qualified, and are ready for onboarding? | Follow up / Reject / Hold |
+| Resource load | Is one person overloaded? Are calls delayed? | Reassign work |
+| Asset readiness | Are PDF, form, links, and QR codes working? | Fix / Approve |
+| Conversion quality | Which colleges are producing real student interest? | Prioritize |
+| Next week plan | Which colleges should be targeted next? | Assign owners |
+
+**Weekly success indicators:**
+
+| Metric | Healthy Signal |
+|---|---|
+| TPO calls attempted | 10+ per week |
+| TPOs connected | 3+ per week |
+| Positive college responses | 2+ per week |
+| Student applications | 10+ per week |
+| Follow-ups overdue | 0 or minimal |
+| Tracker update discipline | Updated daily |
+
+---
+
+## Escalation and Parking Rules
+
+| Situation | Action | Owner |
+|---|---|---|
+| TPO shows strong interest | Send post-call email same day and schedule follow-up | College Outreach Lead |
+| TPO asks for visit | Confirm interest first, then schedule visit | Visit / Partnership Coordinator |
+| No response after intro email and call | Send WhatsApp follow-up | College Outreach Lead |
+| No response after WhatsApp | Send event invite or park | Campaign Owner |
+| College gives vague response twice | Set one clear follow-up date, then park | Campaign Owner |
+| Student applies but does not respond | One WhatsApp + one call, then hold | Student Acquisition Coordinator |
+| Google Form / QR / AICTE link fails | Pause sharing until fixed | Content & Collateral Owner |
+| Tracker not updated same day | CRM / Tracker Owner flags to Campaign Owner | CRM / Tracker Owner |
+
+---
+
 ## Daily Ownership Rules
 
 | Rule | Owner | Why It Matters |
