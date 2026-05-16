@@ -137,6 +137,20 @@ Use this section before assigning people to roles. Fill one row per available pe
 
 ---
 
+## Sample Resource Planning Data
+
+Use this as a discussion example. Replace placeholder names with actual team members after review.
+
+| Person | Availability per Day | Tamil Communication | English Communication | College Calling | WhatsApp Follow-Up | Student Handling | Excel / Tracker | Content / Design | College Visit Ready | Notes |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Resource A | 2-3 hours | High | Medium | Yes | Yes | Medium | No | No | Yes | Strong fit for TPO calls and local follow-up |
+| Resource B | 2 hours | Medium | High | Maybe | Yes | Yes | Medium | Yes | No | Good for student coordination and form follow-up |
+| Resource C | 1-2 hours | Medium | Medium | No | Medium | No | Yes | No | No | Best for tracker, daily report, and data cleanup |
+| Resource D | Flexible / as needed | High | High | Yes | Yes | Yes | Medium | No | Yes | Senior person for visits, escalations, and closures |
+| Resource E | 1 hour | Low | High | No | No | No | Medium | Yes | No | Good for collateral review, copy, form, and flyer text |
+
+---
+
 ## Role Fit Guide
 
 Use this guide to match people to roles based on strengths, not convenience.
@@ -167,6 +181,71 @@ Score each person from 1 to 5 for each role.
 |  |  |  |  |  |  |  |  |  |
 |  |  |  |  |  |  |  |  |  |
 |  |  |  |  |  |  |  |  |  |
+
+---
+
+## Sample Role Assignment Decision Matrix
+
+Use this as a starting point for discussion. Scores are only illustrative.
+
+| Person | Campaign Owner | College Outreach Lead | Student Acquisition Coordinator | Content & Collateral Owner | CRM / Tracker Owner | Visit / Partnership Coordinator | Best Role | Notes |
+|---|---:|---:|---:|---:|---:|---:|---|---|
+| Resource A | 2 | 5 | 3 | 1 | 2 | 4 | College Outreach Lead | Strong caller; can also support visits |
+| Resource B | 2 | 3 | 5 | 3 | 3 | 2 | Student Acquisition Coordinator | Good with students and WhatsApp follow-up |
+| Resource C | 2 | 1 | 2 | 2 | 5 | 1 | CRM / Tracker Owner | Best for structured tracking and daily status |
+| Resource D | 5 | 4 | 3 | 2 | 3 | 5 | Campaign Owner / Visit Coordinator | Senior resource; should handle decisions and closures |
+| Resource E | 2 | 1 | 2 | 5 | 3 | 1 | Content & Collateral Owner | Best for form, flyer, and one-page overview |
+
+---
+
+## Sample Final Role Assignment
+
+This is an example operating model for a small campaign team.
+
+| Role | Assigned Person | Backup Person | Start Date | Notes |
+|---|---|---|---|---|
+| Campaign Owner | Resource D | Resource A | [DATE] | Reviews daily progress and approves escalations |
+| College Outreach Lead | Resource A | Resource D | [DATE] | Owns TPO calls, WhatsApp follow-up, and post-call emails |
+| Student Acquisition Coordinator | Resource B | Resource A | [DATE] | Owns Google Form applications and student follow-up |
+| Content & Collateral Owner | Resource E | Resource B | [DATE] | Owns one-page PDF, flyer copy, Google Form text, QR/link checks |
+| CRM / Tracker Owner | Resource C | Resource B | [DATE] | Owns tracker updates, daily dashboard, next follow-up dates |
+| Visit / Partnership Coordinator | Resource D | Resource A | [DATE] | Owns college visits, formal meetings, and next-step closure |
+
+---
+
+## Sample Daily Reporting Format
+
+Use this format in WhatsApp or email at the end of each day.
+
+```text
+MBA Internship Campaign - Daily Update
+Date: [DATE]
+
+1. Colleges touched today:
+- [College 1] - [Action] - [Status]
+- [College 2] - [Action] - [Status]
+
+2. Calls:
+- Attempted: [Number]
+- Connected: [Number]
+- Positive responses: [Number]
+
+3. WhatsApp / Emails:
+- Intro emails sent: [Number]
+- WhatsApp follow-ups sent: [Number]
+- Post-call emails sent: [Number]
+
+4. Student applications:
+- New applications today: [Number]
+- Qualified students: [Number]
+- Students pending follow-up: [Number]
+
+5. Tomorrow's follow-ups:
+- [College / Student] - [Owner] - [Action]
+
+6. Blockers:
+- [Blocker] - [Owner] - [Support needed]
+```
 
 ---
 
