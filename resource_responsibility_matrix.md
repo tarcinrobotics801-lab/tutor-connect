@@ -123,6 +123,66 @@ Use this format at the end of every working day:
 
 ---
 
+## Resource Planning Template
+
+Use this section before assigning people to roles. Fill one row per available person.
+
+| Person | Availability per Day | Tamil Communication | English Communication | College Calling | WhatsApp Follow-Up | Student Handling | Excel / Tracker | Content / Design | College Visit Ready | Notes |
+|---|---|---|---|---|---|---|---|---|---|---|
+|  |  | High / Medium / Low | High / Medium / Low | Yes / No | Yes / No | Yes / No | Yes / No | Yes / No | Yes / No |  |
+|  |  | High / Medium / Low | High / Medium / Low | Yes / No | Yes / No | Yes / No | Yes / No | Yes / No | Yes / No |  |
+|  |  | High / Medium / Low | High / Medium / Low | Yes / No | Yes / No | Yes / No | Yes / No | Yes / No | Yes / No |  |
+|  |  | High / Medium / Low | High / Medium / Low | Yes / No | Yes / No | Yes / No | Yes / No | Yes / No | Yes / No |  |
+|  |  | High / Medium / Low | High / Medium / Low | Yes / No | Yes / No | Yes / No | Yes / No | Yes / No | Yes / No |  |
+
+---
+
+## Role Fit Guide
+
+Use this guide to match people to roles based on strengths, not convenience.
+
+| Role | Must-Have Strengths | Good-to-Have Strengths | Avoid Assigning If |
+|---|---|---|---|
+| Campaign Owner | Decision-making, authority, daily availability for review | College relationship experience, ability to unblock quickly | Cannot review progress daily |
+| College Outreach Lead | Confident calling, Tamil + English, follow-up discipline | Prior TPO/college interaction experience | Hesitant on calls or poor follow-up habits |
+| Student Acquisition Coordinator | Fast WhatsApp response, student-friendly tone, patience | Can explain internship pathways clearly | Slow response or poor student communication |
+| Content & Collateral Owner | Writing clarity, design sense, attention to detail | Canva/Figma/Google Form comfort | Creates unapproved versions or misses details |
+| CRM / Tracker Owner | Excel accuracy, daily discipline, structured thinking | Zoho CRM comfort | Does not update daily or mixes statuses |
+| Visit / Partnership Coordinator | Professional presence, clear communication, reliability | Can handle MOU or formal discussion | Cannot represent Tarcin confidently in person |
+
+---
+
+## Role Assignment Decision Matrix
+
+Score each person from 1 to 5 for each role.
+
+1 = Not suitable  
+3 = Can handle with guidance  
+5 = Strong fit
+
+| Person | Campaign Owner | College Outreach Lead | Student Acquisition Coordinator | Content & Collateral Owner | CRM / Tracker Owner | Visit / Partnership Coordinator | Best Role | Notes |
+|---|---:|---:|---:|---:|---:|---:|---|---|
+|  |  |  |  |  |  |  |  |  |
+|  |  |  |  |  |  |  |  |  |
+|  |  |  |  |  |  |  |  |  |
+|  |  |  |  |  |  |  |  |  |
+|  |  |  |  |  |  |  |  |  |
+
+---
+
+## Daily Ownership Rules
+
+| Rule | Owner | Why It Matters |
+|---|---|---|
+| Every college must have one assigned owner | Campaign Owner | Prevents duplicate calls and missed follow-ups |
+| Every interaction must be updated in tracker the same day | CRM / Tracker Owner | Keeps daily status accurate |
+| Every positive call must trigger same-day post-call email | College Outreach Lead | Keeps momentum alive |
+| Every student application must be reviewed within 24 hours | Student Acquisition Coordinator | Prevents loss of interested students |
+| Every asset must have one final version only | Content & Collateral Owner | Avoids sending outdated links or PDFs |
+| Every visit must have a written next step | Visit / Partnership Coordinator | Prevents vague meetings with no closure |
+
+---
+
 ## Immediate Open Decisions
 
 | Decision | Owner | Status |
