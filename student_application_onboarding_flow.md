@@ -278,6 +278,371 @@ Recommended duration: 30 to 45 minutes
 
 ---
 
+## Orientation Session Script / Slide Outline
+
+This section can be used to create a slide deck or run the orientation directly.
+
+Recommended session duration: 35 to 45 minutes
+
+---
+
+### Slide 1 - Welcome
+
+**Slide title:**
+Tarcin MBA Internship Orientation 2026
+
+**Slide content:**
+- Welcome to the Tarcin MBA Internship Program
+- Practical exposure through live product, business, and operations workflows
+- Please keep your full name visible during the session
+
+**Speaker notes:**
+```text
+Good morning / afternoon everyone.
+
+Welcome to the Tarcin MBA Internship Orientation.
+
+Thank you for applying and joining this session. Today, we will explain who Tarcin is, what internship pathways are available, what roles students can choose from, how selection will happen, and what the first week will look like for selected students.
+
+Please attend with your full name as submitted in the application form, so we can track participation correctly.
+```
+
+---
+
+### Slide 2 - About Tarcin
+
+**Slide title:**
+About Tarcin
+
+**Slide content:**
+- Product development company
+- Building technology platforms across robotics, EdTech, automation, and digital learning systems
+- Internship exposure connected to real product and business workflows
+
+**Speaker notes:**
+```text
+Tarcin is a product development company building technology platforms across robotics, EdTech, automation, and digital learning systems.
+
+This internship is not designed as a classroom assignment or report-only activity. Students will be exposed to real product, business, outreach, customer engagement, analytics, and operations workflows.
+
+The goal is to help students understand how work happens inside a growing technology company.
+```
+
+---
+
+### Slide 3 - Internship Pathways
+
+**Slide title:**
+Internship Pathways
+
+**Slide content:**
+1. Short-term internship aligned with college requirements
+2. Six-month structured internship pathway listed on the AICTE Internship Portal
+
+**Speaker notes:**
+```text
+There are two internship pathways.
+
+The first is the short-term internship pathway. This is for students who need to complete an internship as part of their college requirement. The duration can be aligned with the academic requirement of the college.
+
+The second is the 6-month structured internship pathway listed on the AICTE Internship Portal. This is more suitable for students who want deeper project involvement and can commit for a longer duration.
+
+Students should choose the pathway based on their college requirement, availability, and level of interest.
+```
+
+---
+
+### Slide 4 - Available Internship Areas
+
+**Slide title:**
+Internship Areas
+
+**Slide content:**
+- Marketing & Outreach
+- Digital Marketing
+- Business Analytics
+- Customer Engagement
+- Operations & Program Coordination
+
+**Speaker notes:**
+```text
+We currently have five internship areas.
+
+Each area is connected to real work within Tarcin's product, student engagement, outreach, and operations activities.
+
+You do not need to be an expert before joining, but you must be willing to learn, communicate, and complete assigned tasks responsibly.
+```
+
+---
+
+### Slide 5 - Role: Marketing & Outreach
+
+**Slide title:**
+Marketing & Outreach Intern
+
+**Slide content:**
+- Campus and student outreach
+- College/community contact research
+- Partnership support
+- Outreach message drafting
+- Campaign follow-up support
+
+**Speaker notes:**
+```text
+The Marketing & Outreach role is suitable for students who are interested in communication, partnerships, campus outreach, and growth activities.
+
+Students in this role may work on identifying colleges, student communities, contacts, and outreach channels. They may also help draft messages and support follow-up activities.
+```
+
+---
+
+### Slide 6 - Role: Digital Marketing
+
+**Slide title:**
+Digital Marketing Intern
+
+**Slide content:**
+- Social media content ideas
+- Campaign planning
+- WhatsApp/email campaign support
+- Engagement tracking
+- Product and internship awareness
+
+**Speaker notes:**
+```text
+The Digital Marketing role is suitable for students who are interested in content, social media, online campaigns, and digital communication.
+
+Students may work on content ideas, post drafts, campaign calendars, engagement tracking, and awareness activities for Tarcin's platforms and internship initiatives.
+```
+
+---
+
+### Slide 7 - Role: Business Analytics
+
+**Slide title:**
+Business Analytics Intern
+
+**Slide content:**
+- Data tracking
+- Campaign dashboard support
+- Student application insights
+- Outreach performance reporting
+- Basic analysis and recommendations
+
+**Speaker notes:**
+```text
+The Business Analytics role is suitable for students who enjoy working with data, Excel, dashboards, and structured reporting.
+
+Students may help track outreach performance, applications, student role preferences, follow-ups, and basic insights that support decision-making.
+```
+
+---
+
+### Slide 8 - Role: Customer Engagement
+
+**Slide title:**
+Customer Engagement Intern
+
+**Slide content:**
+- Student communication support
+- Follow-up message templates
+- FAQ handling
+- Feedback collection
+- Experience improvement
+
+**Speaker notes:**
+```text
+The Customer Engagement role is suitable for students who are good at communication, empathy, and structured follow-up.
+
+Students may help create message templates, respond to common queries, prepare FAQs, collect feedback, and improve the student communication experience.
+```
+
+---
+
+### Slide 9 - Role: Operations & Program Coordination
+
+**Slide title:**
+Operations & Program Coordination Intern
+
+**Slide content:**
+- Internship batch coordination
+- Schedule and milestone tracking
+- Task follow-up
+- Documentation
+- Coordination between students and internal team
+
+**Speaker notes:**
+```text
+The Operations & Program Coordination role is suitable for students who are organized and good at follow-up.
+
+Students may help maintain trackers, coordinate schedules, follow up on tasks, document progress, and support smooth execution of internship activities.
+```
+
+---
+
+### Slide 10 - What Students Will Work On
+
+**Slide title:**
+What You Will Work On
+
+**Slide content:**
+- Live product and business workflows
+- Outreach and campaign activities
+- CRM and student engagement workflows
+- Data tracking and reporting
+- Documentation and coordination
+
+**Speaker notes:**
+```text
+The internship is designed around practical work.
+
+Depending on the role assigned, students may work on campaign support, CRM workflows, student engagement, data tracking, documentation, operations, and follow-up activities.
+
+The work will be guided, but students are expected to take ownership and complete assigned outputs.
+```
+
+---
+
+### Slide 11 - Expectations
+
+**Slide title:**
+What We Expect From Interns
+
+**Slide content:**
+- Active participation
+- Timely communication
+- Weekly task completion
+- Professional behavior
+- Willingness to learn
+- No certificate-only mindset
+
+**Speaker notes:**
+```text
+We want to be clear about expectations.
+
+This internship is best suited for students who are willing to actively participate, learn, communicate on time, and complete assigned work.
+
+If someone is only looking for a certificate without participation, this may not be the right fit.
+
+Certificate and recommendations will be based on participation, completion, and performance.
+```
+
+---
+
+### Slide 12 - Selection Process
+
+**Slide title:**
+Selection Process
+
+**Slide content:**
+1. Google Form application review
+2. WhatsApp group participation
+3. Orientation attendance
+4. Role preference confirmation
+5. Shortlisting
+6. Selection and onboarding
+
+**Speaker notes:**
+```text
+Selection will happen in a structured way.
+
+We will review the application form, check orientation attendance, collect role preferences, and shortlist students based on interest, availability, communication, and role fit.
+
+Students who are selected will receive an onboarding message with their assigned role, start date, reporting person, and first-week task.
+```
+
+---
+
+### Slide 13 - First Week Plan
+
+**Slide title:**
+First Week After Selection
+
+**Slide content:**
+- Role confirmation
+- Reporting person assigned
+- First-week task assigned
+- Daily update format shared
+- End-of-week review
+
+**Speaker notes:**
+```text
+Once selected, students will not be left waiting.
+
+Each selected student will receive a role, reporting person, communication channel, first-week task, deadline, and daily update format.
+
+At the end of the first week, work will be reviewed. Based on the review, students may continue in the same role, be reassigned, placed on hold, or dropped if inactive.
+```
+
+---
+
+### Slide 14 - Student Benefits
+
+**Slide title:**
+What Students Can Gain
+
+**Slide content:**
+- Practical project exposure
+- Mentorship
+- Certificate on successful completion
+- Letter of recommendation for high-performing students
+- Extended engagement opportunities based on performance
+
+**Speaker notes:**
+```text
+Students who participate actively can gain practical exposure, mentorship, and a certificate on successful completion.
+
+High-performing students may also be considered for a letter of recommendation and extended engagement opportunities based on project requirements and performance.
+```
+
+---
+
+### Slide 15 - Q&A
+
+**Slide title:**
+Questions
+
+**Slide content:**
+- Ask role-related questions
+- Ask pathway-related questions
+- Individual questions can be sent privately to the coordinator
+
+**Speaker notes:**
+```text
+We will now take common questions.
+
+Please keep questions relevant to the internship, roles, duration, selection, and next steps.
+
+For individual cases, you can message the internship coordinator privately after the session.
+```
+
+---
+
+### Slide 16 - Next Steps
+
+**Slide title:**
+Next Steps
+
+**Slide content:**
+1. Stay in the WhatsApp group
+2. Submit role preference after orientation
+3. Watch for shortlisting update
+4. Confirm selection if shortlisted
+5. Complete first-week task after onboarding
+
+**Speaker notes:**
+```text
+The next step after this orientation is role preference confirmation.
+
+We will share the format or form in the WhatsApp group. Please respond before the deadline.
+
+Shortlisted students will receive selection and onboarding details separately.
+
+Thank you for attending the session. We look forward to working with serious and motivated students.
+```
+
+---
+
 ## Stage 4 - Post-Orientation Role Confirmation
 
 Send this message after orientation.
